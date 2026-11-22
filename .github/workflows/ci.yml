@@ -1,0 +1,116 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+    # A version tag (v0.1.0) publishes the signed APK as a GitHub release,
+    # which the in-app update reads (decision 0003).
+    tags: ['v*.*.*']
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  FLUTTER_VERSION: '3.47.9'
+
+jobs:
+  check:
+    name: Analyse et tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Vérifications (comme tool/check.sh)
+        run: ./tool/check.sh
+
+  android:
+    name: Application Android (APK)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter pub get
+        working-directory: app
+      # The same key for every version, so that a new APK replaces the old
+      # one (decision 0003). Without these secrets: the debug key, and a tag
+      # refuses to publish.
+      - name: Clé de signature (si configurée)
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [[ -z $ANDROID_KEYSTORE_BASE64 ]]; then
+            if [[ $GITHUB_REF == refs/tags/v* ]]; then
+              echo "::error::Clé de signature absente : une version ne peut pas être publiée avec la clé de débogage."
+              exit 1
+            fi
+            echo "Pas de clé configurée : APK signé avec la clé de débogage."
+            exit 0
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > app/android/app/release.p12
+          {
+            echo "storeFile=release.p12"
+            echo "storeType=pkcs12"
+            echo "storePassword=$ANDROID_KEYSTORE_PASSWORD"
+            echo "keyAlias=$ANDROID_KEY_ALIAS"
+            echo "keyPassword=$ANDROID_KEYSTORE_PASSWORD"
+          } > app/android/key.properties
+      - name: Compilation
+        working-directory: app
+        run: flutter build apk --release
+      - name: Nom du fichier
+        run: |
+          version=$(sed -n 's/^version: \([0-9.]*\).*/\1/p' app/pubspec.yaml)
+          mkdir -p dist
+          cp app/build/app/outputs/flutter-apk/app-release.apk "dist/frigate-mobile-$version-android.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frigate-mobile-android
+          path: dist/*.apk
+          retention-days: 30
+
+  release:
+    name: Publication de la version
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [check, android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Étiquette et version identiques
+        run: |
+          version=$(sed -n 's/^version: \([0-9.]*\).*/\1/p' app/pubspec.yaml)
+          if [[ "v$version" != "$GITHUB_REF_NAME" ]]; then
+            echo "::error::Étiquette $GITHUB_REF_NAME, mais app/pubspec.yaml dit $version."
+            exit 1
+          fi
+      - name: Notes de version
+        run: ./tool/release_notes.sh "$GITHUB_REF_NAME" > notes.md
+      - uses: actions/download-artifact@v4
+        with:
+          name: frigate-mobile-android
+          path: dist
+      - name: Empreintes
+        working-directory: dist
+        run: sha256sum * > SHA256SUMS
+      - name: Version GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "Frigate Mobile ${GITHUB_REF_NAME#v}" \
+            --notes-file notes.md \
+            --verify-tag
