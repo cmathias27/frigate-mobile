@@ -8,17 +8,28 @@ import '../../l10n/app_localizations.dart';
 import 'camera_feed.dart';
 import 'camera_full_screen.dart';
 import 'feed_tile.dart';
+import 'grid_fit.dart';
 import 'live_video.dart';
 
-/// Grid layouts offered in the app bar: 1, 4 or 9 cameras per page.
-const liveLayouts = [1, 4, 9];
+/// Automatic layout: as many cameras per page as the screen shows well.
+const liveLayoutAuto = 0;
 
-/// "Direct" tab (mock-up screen 2): every camera in pages of 1, 4 or 9
-/// thumbnails, refreshed while visible; a tap opens the full screen.
+/// Grid layouts offered in the app bar: automatic, then 1, 4 or 9 cameras
+/// per page.
+const liveLayouts = [liveLayoutAuto, 1, 4, 9];
+
+/// Layout of the grid when nothing was chosen yet.
+const liveLayoutDefault = liveLayoutAuto;
+
+/// "Direct" tab (mock-up screen 2): every camera in pages of thumbnails
+/// sized to fill the screen, refreshed while visible; a tap opens the full
+/// screen.
 class LiveGridScreen extends StatefulWidget {
   final List<CameraCapabilities> cameras;
   final ImageFetcher fetch;
   final LiveVideoFactory? videoFactory;
+
+  /// [liveLayoutAuto] or a fixed number of cameras per page.
   final int layout;
   final VoidCallback? onAuthError;
 
@@ -27,7 +38,7 @@ class LiveGridScreen extends StatefulWidget {
     required this.cameras,
     required this.fetch,
     this.videoFactory,
-    this.layout = 4,
+    this.layout = liveLayoutDefault,
     this.onAuthError,
   });
 
@@ -37,37 +48,38 @@ class LiveGridScreen extends StatefulWidget {
 
 class _LiveGridScreenState extends State<LiveGridScreen>
     with WidgetsBindingObserver {
+  /// Height of the page dots under the grid.
+  static const _dotsHeight = 15.0;
+
   final _feeds = <String, CameraFeed>{};
   final _pageController = PageController();
   int _page = 0;
   bool _paused = false;
 
+  /// Cameras per page and thumbnail height of the last layout; known once
+  /// the screen size is.
+  int? _perPage;
+  int _thumbnailHeight = 360;
+
   int get _pageCount =>
-      math.max(1, (widget.cameras.length / widget.layout).ceil());
+      math.max(1, (widget.cameras.length / (_perPage ?? 1)).ceil());
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _syncFeeds();
   }
 
   @override
   void didUpdateWidget(LiveGridScreen old) {
     super.didUpdateWidget(old);
-    if (old.layout != widget.layout) {
-      // Keep the first camera of the current page in view.
-      final first = _page * old.layout;
-      _page = math.min(first ~/ widget.layout, _pageCount - 1);
-      if (_pageController.hasClients) _pageController.jumpToPage(_page);
-    }
     if (old.fetch != widget.fetch) {
       for (final feed in _feeds.values) {
         feed.dispose();
       }
       _feeds.clear();
     }
-    _syncFeeds();
+    if (_perPage != null) _syncFeeds();
   }
 
   @override
@@ -85,6 +97,7 @@ class _LiveGridScreenState extends State<LiveGridScreen>
 
   /// Creates a feed per camera and runs only those of the visible page.
   void _syncFeeds() {
+    if (_perPage == null) return;
     final names = {for (final c in widget.cameras) c.name};
     for (final name in _feeds.keys.toList()) {
       if (!names.contains(name)) {
@@ -92,7 +105,6 @@ class _LiveGridScreenState extends State<LiveGridScreen>
       }
     }
     final visible = _visibleCameras().map((c) => c.name).toSet();
-    final height = LiveDefaults.thumbnailHeight(widget.layout);
     for (final camera in widget.cameras) {
       final feed = _feeds.putIfAbsent(
         camera.name,
@@ -103,10 +115,10 @@ class _LiveGridScreenState extends State<LiveGridScreen>
           onAuthError: widget.onAuthError,
         ),
       );
-      if (feed.height != height) {
+      if (feed.height != _thumbnailHeight) {
         feed
           ..stop()
-          ..height = height;
+          ..height = _thumbnailHeight;
       }
       if (!_paused && visible.contains(camera.name)) {
         feed.start();
@@ -117,15 +129,56 @@ class _LiveGridScreenState extends State<LiveGridScreen>
   }
 
   List<CameraCapabilities> _camerasOfPage(int page) {
-    final start = page * widget.layout;
+    final perPage = _perPage ?? 1;
+    final start = page * perPage;
     if (start >= widget.cameras.length) return const [];
     return widget.cameras.sublist(
       start,
-      math.min(start + widget.layout, widget.cameras.length),
+      math.min(start + perPage, widget.cameras.length),
     );
   }
 
   List<CameraCapabilities> _visibleCameras() => _camerasOfPage(_page);
+
+  /// Layout of the grid in [size]: room is kept for the page dots only
+  /// when there are several pages.
+  GridFit _fit(Size size) {
+    final count = widget.cameras.length;
+    GridFit fitIn(double bottom) {
+      final area = Size(
+        math.max(0, size.width - 2 * GridFitDefaults.padding),
+        math.max(0, size.height - 2 * GridFitDefaults.padding - bottom),
+      );
+      return widget.layout == liveLayoutAuto
+          ? fitAuto(count, area)
+          : fitFixed(math.min(widget.layout, count), area);
+    }
+
+    final fit = fitIn(0);
+    return fit.perPage < count ? fitIn(_dotsHeight) : fit;
+  }
+
+  /// Takes a new layout (first build, other layout chosen, screen turned):
+  /// the first camera of the page stays in view, feeds follow.
+  void _apply(GridFit fit, double pixelRatio) {
+    final height = LiveDefaults.thumbnailHeightFor(
+      fit.tile.height * pixelRatio,
+    );
+    if (fit.perPage == _perPage && height == _thumbnailHeight) return;
+    final first = _page * (_perPage ?? fit.perPage);
+    _perPage = fit.perPage;
+    _thumbnailHeight = height;
+    _page = math.min(first ~/ fit.perPage, _pageCount - 1);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_pageController.hasClients &&
+          _pageController.page?.round() != _page) {
+        _pageController.jumpToPage(_page);
+      }
+      // Feeds are made outside the build; tiles show them on the next one.
+      setState(_syncFeeds);
+    });
+  }
 
   Future<void> _openFullScreen(CameraCapabilities camera) async {
     setState(() => _paused = true);
@@ -171,89 +224,105 @@ class _LiveGridScreenState extends State<LiveGridScreen>
         ),
       );
     }
-    final columns = math.sqrt(widget.layout).round();
-    return Column(
-      children: [
-        Expanded(
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: _pageCount,
-            onPageChanged: (page) {
-              setState(() => _page = page);
-              _syncFeeds();
-            },
-            itemBuilder: (context, page) => _GridPage(
-              cameras: _camerasOfPage(page),
-              columns: columns,
-              feeds: _feeds,
-              onTap: _openFullScreen,
-            ),
-          ),
-        ),
-        if (_pageCount > 1)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Semantics(
-              label: l.livePage(_page + 1, _pageCount),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 6,
-                children: [
-                  for (var i = 0; i < _pageCount; i++)
-                    Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: i == _page
-                            ? AppColors.accent
-                            : AppColors.surfaceHigh,
-                      ),
-                    ),
-                ],
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final fit = _fit(constraints.biggest);
+        _apply(fit, pixelRatio);
+        return Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _pageCount,
+                onPageChanged: (page) {
+                  setState(() => _page = page);
+                  _syncFeeds();
+                },
+                itemBuilder: (context, page) => _GridPage(
+                  cameras: _camerasOfPage(page),
+                  fit: fit,
+                  feeds: _feeds,
+                  onTap: _openFullScreen,
+                ),
               ),
             ),
-          ),
-      ],
+            if (_pageCount > 1)
+              SizedBox(
+                height: _dotsHeight,
+                child: Semantics(
+                  label: l.livePage(_page + 1, _pageCount),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 6,
+                    children: [
+                      for (var i = 0; i < _pageCount; i++)
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: i == _page
+                                ? AppColors.accent
+                                : AppColors.surfaceHigh,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
 
+/// One page of tiles, all the same size, centred; an incomplete last row
+/// is centred too.
 class _GridPage extends StatelessWidget {
   final List<CameraCapabilities> cameras;
-  final int columns;
+  final GridFit fit;
   final Map<String, CameraFeed> feeds;
   final ValueChanged<CameraCapabilities> onTap;
 
   const _GridPage({
     required this.cameras,
-    required this.columns,
+    required this.fit,
     required this.feeds,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(6),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columns,
-        mainAxisSpacing: 4,
-        crossAxisSpacing: 4,
-        childAspectRatio: 16 / 9,
+    return Padding(
+      padding: const EdgeInsets.all(GridFitDefaults.padding),
+      child: Center(
+        child: SizedBox(
+          width: fit.grid.width,
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            spacing: GridFitDefaults.spacing,
+            runSpacing: GridFitDefaults.spacing,
+            children: [
+              for (final camera in cameras)
+                SizedBox.fromSize(
+                  size: fit.tile,
+                  child: switch (feeds[camera.name]) {
+                    final feed? => FeedTile(
+                      key: ValueKey(camera.name),
+                      feed: feed,
+                      label: camera.label,
+                      onTap: () => onTap(camera),
+                    ),
+                    null => const SizedBox.shrink(),
+                  },
+                ),
+            ],
+          ),
+        ),
       ),
-      itemCount: cameras.length,
-      itemBuilder: (context, i) {
-        final camera = cameras[i];
-        final feed = feeds[camera.name];
-        if (feed == null) return const SizedBox.shrink();
-        return FeedTile(
-          key: ValueKey(camera.name),
-          feed: feed,
-          label: camera.label,
-          onTap: () => onTap(camera),
-        );
-      },
     );
   }
 }

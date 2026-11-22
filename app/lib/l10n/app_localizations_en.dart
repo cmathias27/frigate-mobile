@@ -157,6 +157,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get liveLayoutAuto =>
+      'Automatic layout: every camera, as large as possible';
+
+  @override
   String livePage(int current, int total) {
     return 'Page $current of $total';
   }

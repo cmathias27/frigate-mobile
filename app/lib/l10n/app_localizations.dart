@@ -350,6 +350,12 @@ abstract class AppLocalizations {
   /// **'{count} par page'**
   String liveLayout(int count);
 
+  /// No description provided for @liveLayoutAuto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disposition automatique : toutes les caméras, le plus grand possible'**
+  String get liveLayoutAuto;
+
   /// No description provided for @livePage.
   ///
   /// In fr, this message translates to:

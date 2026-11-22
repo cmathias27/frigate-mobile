@@ -239,13 +239,14 @@ void main() {
     ) async {
       final server = _FakeServer();
       await tester.pumpWidget(
-        _app(LiveGridScreen(cameras: cameras, fetch: server.fetch)),
+        _app(LiveGridScreen(cameras: cameras, fetch: server.fetch, layout: 4)),
       );
       await tester.pump();
 
       expect(find.byType(FeedTile), findsNWidgets(4));
       expect(server.cameras, {'cam_a', 'cam_b', 'cam_c', 'cam_d'});
-      expect(server.calls.every((c) => c.$2 == 360), isTrue);
+      // 2 × 2 tiles of an 800 × 600 screen at 3 pixels per point.
+      expect(server.calls.every((c) => c.$2 == 720), isTrue);
       expect(find.text('LIVE'), findsNWidgets(4));
       expect(find.text('A'), findsOneWidget);
 
@@ -270,8 +271,41 @@ void main() {
 
       expect(find.byType(FeedTile), findsNWidgets(6));
       expect(server.cameras.length, 6);
-      expect(server.calls.every((c) => c.$2 == 240), isTrue);
       expect(find.bySemanticsLabel(RegExp('Page')), findsNothing);
+
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('automatic layout fills a phone, upright or turned', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 1860);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      final server = _FakeServer();
+      await tester.pumpWidget(
+        _app(LiveGridScreen(cameras: cameras, fetch: server.fetch)),
+      );
+      await tester.pump();
+
+      // Upright: every camera on one page, two columns of 4:3 tiles.
+      expect(find.byType(FeedTile), findsNWidgets(6));
+      expect(find.bySemanticsLabel(RegExp('Page')), findsNothing);
+      final upright = tester.getSize(find.byType(FeedTile).first);
+      expect(upright.width, closeTo((360 - 12 - 4) / 2, 0.01));
+      expect(upright.width / upright.height, closeTo(4 / 3, 0.01));
+      expect(server.calls.every((c) => c.$2 == 360), isTrue);
+
+      // Turned: three columns, the feeds keep running.
+      tester.view.physicalSize = const Size(1860, 1080);
+      await tester.pump();
+      await tester.pump();
+      final turned = tester.getRect(find.byType(FeedTile).at(2));
+      final first = tester.getRect(find.byType(FeedTile).first);
+      expect(turned.top, first.top);
+      server.calls.clear();
+      await tester.pump(LiveDefaults.gridInterval);
+      expect(server.cameras.length, 6);
 
       await tester.pumpWidget(const SizedBox());
     });
@@ -326,7 +360,7 @@ void main() {
       await tester.pumpAndSettle();
       server.calls.clear();
       await tester.pump(LiveDefaults.gridInterval);
-      expect(server.cameras, {'cam_a', 'cam_b', 'cam_c', 'cam_d'});
+      expect(server.cameras.length, 6);
 
       await tester.pumpWidget(const SizedBox());
     });

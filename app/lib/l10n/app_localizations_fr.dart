@@ -160,6 +160,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get liveLayoutAuto =>
+      'Disposition automatique : toutes les caméras, le plus grand possible';
+
+  @override
   String livePage(int current, int total) {
     return 'Page $current sur $total';
   }

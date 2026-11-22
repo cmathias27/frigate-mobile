@@ -67,6 +67,7 @@
       "count": {"type": "int"}
     }
   },
+  "liveLayoutAuto": "Disposition automatique : toutes les caméras, le plus grand possible",
   "livePage": "Page {current} sur {total}",
   "@livePage": {
     "placeholders": {
