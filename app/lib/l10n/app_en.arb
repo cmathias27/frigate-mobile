@@ -44,5 +44,14 @@
   "liveLayout": "{count} per page",
   "livePage": "Page {current} of {total}",
   "liveModeSnapshots": "Images · every {seconds} s",
-  "liveFullScreen": "Full screen"
+  "liveFullScreen": "Full screen",
+  "liveModeVideo": "Live video",
+  "liveVideoConnecting": "Connecting video…",
+  "liveVideoUnavailable": "Video unavailable",
+  "liveVideoRetry": "Retry video",
+  "liveSoundOn": "Turn sound on",
+  "liveSoundOff": "Mute",
+  "liveQuality": "Quality",
+  "liveStream": "Stream {number}",
+  "liveStreamMain": "Stream {number} (main)"
 }

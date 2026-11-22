@@ -15,7 +15,8 @@ Application Android libre pour [Frigate NVR](https://frigate.video), inspirée d
 
 - Frigate 0.14 ou plus récent (testé avec 0.18).
 - Port 8971 accessible depuis le téléphone, et un compte Frigate.
-- Pour le direct WebRTC : `go2rtc.webrtc.candidates` avec l'adresse locale du serveur et le port 8555.
+- Pour le direct WebRTC : `go2rtc.webrtc.candidates` avec l'adresse locale du serveur et le port 8555, publié en TCP et UDP. Sans cela, le plein écran reste en images.
+- Pour le son en direct : WebRTC n'accepte que l'audio Opus, PCMA ou PCMU. Une caméra en AAC n'a pas de son tant que go2rtc ne le convertit pas, par exemple avec une seconde source `ffmpeg:<flux>#audio=opus` dans `go2rtc.streams`. Le bouton Son n'apparaît que sur les flux qui en ont.
 
 ## Développement
 

@@ -1,0 +1,70 @@
+import 'package:flutter/widgets.dart';
+
+/// Exchanges a WebRTC offer for the server's answer (see
+/// `FrigateClient.negotiateWebRtc`).
+typedef WebRtcNegotiator = Future<String> Function(String stream, String offer);
+
+/// Opens a live video of a go2rtc stream. Screens take it as optional:
+/// without one, or when the video fails, they show images.
+typedef LiveVideoFactory = LiveVideo Function(String stream);
+
+enum LiveVideoStatus { connecting, playing, failed }
+
+/// A live video stream shown in full screen.
+///
+/// The screen only talks to this interface, so WebRTC can be swapped for
+/// another transport (or a fake in tests) without touching it.
+abstract class LiveVideo extends ChangeNotifier {
+  /// go2rtc stream name.
+  String get stream;
+
+  LiveVideoStatus get status;
+
+  /// The server sends a sound track the phone can play (go2rtc only offers
+  /// it when the camera's audio is Opus, PCMA or PCMU, or transcoded so).
+  bool get hasAudio;
+
+  bool get muted;
+  set muted(bool value);
+
+  /// Starts connecting; [status] then moves to playing or failed.
+  Future<void> start();
+
+  /// The video, letterboxed or cropped as [fit] asks.
+  Widget buildView(BoxFit fit);
+}
+
+/// Default live video settings (decision 0002: a default value now, an
+/// optional setting later).
+abstract final class LiveVideoDefaults {
+  /// Give up on video and keep images after this long without a frame.
+  static const connectTimeout = Duration(seconds: 10);
+
+  /// Longest wait for the phone's own ICE candidates before sending the
+  /// offer; go2rtc does not take candidates trickled later.
+  static const iceGatheringTimeout = Duration(seconds: 3);
+
+  /// Sound starts muted, like DS cam: no surprise noise when opening a
+  /// camera.
+  static const startMuted = true;
+}
+
+/// True when the SDP [answer] carries a sound track: an `m=audio` section
+/// with a non-zero port whose direction is not `inactive` (go2rtc marks it
+/// inactive when no codec matches).
+bool sdpHasAudio(String answer) {
+  var inAudio = false;
+  var audioActive = false;
+  for (final raw in answer.split('\n')) {
+    final line = raw.trim();
+    if (line.startsWith('m=')) {
+      if (inAudio && audioActive) return true;
+      final parts = line.substring(2).split(' ');
+      inAudio = parts.first == 'audio';
+      audioActive = inAudio && parts.length > 1 && parts[1] != '0';
+    } else if (inAudio && line == 'a=inactive') {
+      audioActive = false;
+    }
+  }
+  return inAudio && audioActive;
+}

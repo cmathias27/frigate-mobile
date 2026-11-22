@@ -211,4 +211,39 @@ void main() {
       throwsA(isA<FrigateNetworkException>()),
     );
   });
+
+  test('negotiateWebRtc posts the offer and returns the answer', () async {
+    late http.Request sent;
+    var raw = false;
+    final mockClient = MockClient((request) async {
+      sent = request;
+      if (raw) return http.Response('v=0\r\nraw-answer', 201);
+      return http.Response(
+        jsonEncode({'type': 'answer', 'sdp': 'v=0\r\nanswer'}),
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+    });
+    final client = FrigateClient(
+      config: config,
+      token: 'jwt-rtc',
+      client: mockClient,
+    );
+
+    final answer = await client.negotiateWebRtc('cam_garage_2', 'v=0\r\noffer');
+
+    expect(answer, 'v=0\r\nanswer');
+    expect(sent.method, 'POST');
+    expect(sent.url.path, '/api/go2rtc/webrtc');
+    expect(sent.url.queryParameters, {'src': 'cam_garage_2'});
+    expect(sent.headers['Authorization'], 'Bearer jwt-rtc');
+    expect(sent.headers['Content-Type'], startsWith('application/json'));
+    expect(jsonDecode(sent.body), {'type': 'offer', 'sdp': 'v=0\r\noffer'});
+
+    raw = true;
+    expect(
+      await client.negotiateWebRtc('cam_garage_2', 'v=0'),
+      'v=0\r\nraw-answer',
+    );
+  });
 }

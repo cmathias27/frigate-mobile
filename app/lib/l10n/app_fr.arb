@@ -80,5 +80,24 @@
       "seconds": {"type": "int"}
     }
   },
-  "liveFullScreen": "Plein écran"
+  "liveFullScreen": "Plein écran",
+  "liveModeVideo": "Vidéo en direct",
+  "liveVideoConnecting": "Connexion vidéo…",
+  "liveVideoUnavailable": "Vidéo indisponible",
+  "liveVideoRetry": "Réessayer la vidéo",
+  "liveSoundOn": "Activer le son",
+  "liveSoundOff": "Couper le son",
+  "liveQuality": "Qualité",
+  "liveStream": "Flux {number}",
+  "@liveStream": {
+    "placeholders": {
+      "number": {"type": "int"}
+    }
+  },
+  "liveStreamMain": "Flux {number} (principal)",
+  "@liveStreamMain": {
+    "placeholders": {
+      "number": {"type": "int"}
+    }
+  }
 }

@@ -171,4 +171,35 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get liveFullScreen => 'Plein écran';
+
+  @override
+  String get liveModeVideo => 'Vidéo en direct';
+
+  @override
+  String get liveVideoConnecting => 'Connexion vidéo…';
+
+  @override
+  String get liveVideoUnavailable => 'Vidéo indisponible';
+
+  @override
+  String get liveVideoRetry => 'Réessayer la vidéo';
+
+  @override
+  String get liveSoundOn => 'Activer le son';
+
+  @override
+  String get liveSoundOff => 'Couper le son';
+
+  @override
+  String get liveQuality => 'Qualité';
+
+  @override
+  String liveStream(int number) {
+    return 'Flux $number';
+  }
+
+  @override
+  String liveStreamMain(int number) {
+    return 'Flux $number (principal)';
+  }
 }

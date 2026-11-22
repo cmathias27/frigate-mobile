@@ -168,4 +168,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get liveFullScreen => 'Full screen';
+
+  @override
+  String get liveModeVideo => 'Live video';
+
+  @override
+  String get liveVideoConnecting => 'Connecting video…';
+
+  @override
+  String get liveVideoUnavailable => 'Video unavailable';
+
+  @override
+  String get liveVideoRetry => 'Retry video';
+
+  @override
+  String get liveSoundOn => 'Turn sound on';
+
+  @override
+  String get liveSoundOff => 'Mute';
+
+  @override
+  String get liveQuality => 'Quality';
+
+  @override
+  String liveStream(int number) {
+    return 'Stream $number';
+  }
+
+  @override
+  String liveStreamMain(int number) {
+    return 'Stream $number (main)';
+  }
 }

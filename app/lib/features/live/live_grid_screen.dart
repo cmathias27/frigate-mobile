@@ -8,6 +8,7 @@ import '../../l10n/app_localizations.dart';
 import 'camera_feed.dart';
 import 'camera_full_screen.dart';
 import 'feed_tile.dart';
+import 'live_video.dart';
 
 /// Grid layouts offered in the app bar: 1, 4 or 9 cameras per page.
 const liveLayouts = [1, 4, 9];
@@ -17,6 +18,7 @@ const liveLayouts = [1, 4, 9];
 class LiveGridScreen extends StatefulWidget {
   final List<CameraCapabilities> cameras;
   final ImageFetcher fetch;
+  final LiveVideoFactory? videoFactory;
   final int layout;
   final VoidCallback? onAuthError;
 
@@ -24,6 +26,7 @@ class LiveGridScreen extends StatefulWidget {
     super.key,
     required this.cameras,
     required this.fetch,
+    this.videoFactory,
     this.layout = 4,
     this.onAuthError,
   });
@@ -133,6 +136,7 @@ class _LiveGridScreenState extends State<LiveGridScreen>
           cameras: widget.cameras,
           initialCamera: camera.name,
           fetch: widget.fetch,
+          videoFactory: widget.videoFactory,
           onAuthError: widget.onAuthError,
         ),
       ),
