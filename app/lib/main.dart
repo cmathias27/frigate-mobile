@@ -4,19 +4,28 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'app/home_shell.dart';
 import 'app/theme.dart';
 import 'core/session/session_controller.dart';
+import 'core/storage/preferences.dart';
 import 'features/login/login_screen.dart';
+import 'features/update/update_controller.dart';
+import 'features/update/update_service.dart';
 import 'l10n/app_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   final session = SessionController()..init();
-  runApp(FrigateMobileApp(session: session));
+  final update = UpdateController(
+    service: UpdateService(),
+    platform: AndroidUpdatePlatform(),
+    preferences: Preferences(),
+  )..init();
+  runApp(FrigateMobileApp(session: session, update: update));
 }
 
 class FrigateMobileApp extends StatelessWidget {
   final SessionController session;
+  final UpdateController? update;
 
-  const FrigateMobileApp({super.key, required this.session});
+  const FrigateMobileApp({super.key, required this.session, this.update});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +48,7 @@ class FrigateMobileApp extends StatelessWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             case SessionStatus.authenticated:
-              return HomeShell(controller: session);
+              return HomeShell(controller: session, update: update);
             case SessionStatus.unauthenticated:
             case SessionStatus.loading:
             case SessionStatus.connectionError:

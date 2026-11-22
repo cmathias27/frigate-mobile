@@ -20,7 +20,7 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 - [x] Chronologie : bande « toutes les caméras » et bande « caméra en lecture », tête de lecture commune, zoom 1 h / 6 h / 24 h / tout, lecture des enregistrements (HLS par relais local)
 - [x] Passages de mouvement : seuil automatique par caméra, durée minimale, fusion ; boutons précédent / suivant
 - [x] Calendrier de tout l'historique, saut à une date et une heure
-- [ ] Mise à jour depuis l'application, note de version, « Nouveautés »
+- [x] Mise à jour depuis l'application, note de version, « Nouveautés »
 
 ## 0.2 — Liste et réglages fins
 

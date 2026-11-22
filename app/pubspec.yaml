@@ -13,11 +13,13 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  crypto: ^3.0.6
   flutter_secure_storage: ^11.2.0
   flutter_webrtc: ^1.6.3
   gal: ^3.0.1
   http: ^1.6.0
   intl: any
+  path_provider: ^2.1.5
   share_plus: ^13.3.1
   video_player: ^2.14.1
 
@@ -29,3 +31,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  # Release notes of every version, shown in the app (decision 0003).
+  assets:
+    - assets/CHANGELOG.md

@@ -332,4 +332,93 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendarLoadFailed => 'Couldn\'t read the recording history';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String updateAvailableTitle(String version) {
+    return 'Version $version available';
+  }
+
+  @override
+  String updateInstalledVersion(String version) {
+    return 'Installed version: $version';
+  }
+
+  @override
+  String get updateNoNotes => 'No notes for this version.';
+
+  @override
+  String get updateInstall => 'Install';
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
+  String get updateDownloading => 'Downloading and checking…';
+
+  @override
+  String get updatePermissionTitle => 'Allow installation';
+
+  @override
+  String get updatePermissionMessage =>
+      'Android asks you to allow Frigate Mobile to install its own updates. Turn on “Allow from this source” in the settings about to open, then come back and tap Install.';
+
+  @override
+  String get updatePermissionOpen => 'Open settings';
+
+  @override
+  String get updateErrorNetwork => 'Couldn\'t reach GitHub. Try again later.';
+
+  @override
+  String get updateErrorChecksum =>
+      'The downloaded file doesn\'t match its checksum: installation cancelled.';
+
+  @override
+  String get updateErrorTooLarge =>
+      'The update file is unusually large: download stopped.';
+
+  @override
+  String get updateErrorFolder => 'Couldn\'t save the update on the phone.';
+
+  @override
+  String get updateErrorUnsupported => 'This version has no APK to install.';
+
+  @override
+  String get updateErrorPackage =>
+      'The downloaded file isn\'t the expected version of Frigate Mobile.';
+
+  @override
+  String get updateErrorSignature =>
+      'This version is signed with another key: uninstall the app to install it.';
+
+  @override
+  String get updateErrorInstall => 'Android\'s installer couldn\'t open.';
+
+  @override
+  String get updateAutoCheck => 'Check for updates';
+
+  @override
+  String get updateAutoCheckHint => 'Once a day at start-up, from GitHub';
+
+  @override
+  String get updateCheckNow => 'Look for an update';
+
+  @override
+  String get updateChecking => 'Checking…';
+
+  @override
+  String get updateUpToDate => 'The app is up to date';
+
+  @override
+  String get updateCheckHint => 'Latest version published on GitHub';
+
+  @override
+  String get releaseNotesTitle => 'Release notes';
+
+  @override
+  String whatsNewTitle(String version) {
+    return 'What\'s new in version $version';
+  }
 }

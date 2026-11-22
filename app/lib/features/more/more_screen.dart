@@ -8,7 +8,18 @@ import '../../l10n/app_localizations.dart';
 class MoreScreen extends StatelessWidget {
   final SessionController controller;
 
-  const MoreScreen({super.key, required this.controller});
+  /// Version installed, when known.
+  final String? appVersion;
+
+  /// Update settings, built by the app shell (features stay independent).
+  final Widget? updates;
+
+  const MoreScreen({
+    super.key,
+    required this.controller,
+    this.appVersion,
+    this.updates,
+  });
 
   Future<void> _confirmDisconnect(BuildContext context) async {
     final l = AppLocalizations.of(context);
@@ -198,9 +209,13 @@ class MoreScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
+            if (updates case final updates?) ...[
+              updates,
+              const SizedBox(height: 8),
+            ],
             ListTile(
               leading: const Icon(Icons.info_outline_rounded),
-              title: Text(l.aboutVersion('0.0.1')),
+              title: Text(l.aboutVersion(appVersion ?? '—')),
               subtitle: Text(l.moreDescription),
               tileColor: AppColors.surface,
               shape: RoundedRectangleBorder(

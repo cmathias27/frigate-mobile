@@ -13,6 +13,8 @@ import '../features/timeline/recording_history.dart';
 import '../features/timeline/recording_player.dart';
 import '../features/timeline/timeline_data.dart';
 import '../features/timeline/timeline_screen.dart';
+import '../features/update/update_controller.dart';
+import '../features/update/update_widgets.dart';
 import '../l10n/app_localizations.dart';
 import 'theme.dart';
 
@@ -20,7 +22,10 @@ import 'theme.dart';
 class HomeShell extends StatefulWidget {
   final SessionController controller;
 
-  const HomeShell({super.key, required this.controller});
+  /// In-app update; none in tests.
+  final UpdateController? update;
+
+  const HomeShell({super.key, required this.controller, this.update});
 
   @override
   State<HomeShell> createState() => _HomeShellState();
@@ -34,6 +39,17 @@ class _HomeShellState extends State<HomeShell> {
   FrigateClient? _timelineClient;
   TimelineData? _timelineData;
   VodProxy? _vodProxy;
+
+  @override
+  void initState() {
+    super.initState();
+    final update = widget.update;
+    if (update != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(runStartupUpdate(context, update));
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -155,7 +171,13 @@ class _HomeShellState extends State<HomeShell> {
           onAuthError: widget.controller.sessionExpired,
         ),
         1 when client != null => _timeline(client, cameras),
-        3 => MoreScreen(controller: widget.controller),
+        3 => MoreScreen(
+          controller: widget.controller,
+          appVersion: widget.update?.currentVersion,
+          updates: widget.update == null
+              ? null
+              : UpdateSettings(update: widget.update!),
+        ),
         _ => _Placeholder(
           icon: icon,
           description: description,

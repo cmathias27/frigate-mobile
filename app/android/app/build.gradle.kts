@@ -63,3 +63,9 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // FileProvider, to hand the downloaded update to Android's installer
+    // (decision 0003). Apache-2.0.
+    implementation("androidx.core:core-ktx:1.16.0")
+}
