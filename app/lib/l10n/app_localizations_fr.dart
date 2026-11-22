@@ -431,4 +431,68 @@ class AppLocalizationsFr extends AppLocalizations {
   String whatsNewTitle(String version) {
     return 'Nouveautés de la version $version';
   }
+
+  @override
+  String get eventsAllCameras => 'Toutes caméras';
+
+  @override
+  String eventsNewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nouveaux passages',
+      one: '1 nouveau passage',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String eventsSince(String time) {
+    return 'Passages de mouvement depuis $time';
+  }
+
+  @override
+  String eventsEmpty(String time) {
+    return 'Aucun passage de mouvement depuis $time.';
+  }
+
+  @override
+  String get eventsNew => 'Nouveau';
+
+  @override
+  String get eventsToday => 'Aujourd\'hui';
+
+  @override
+  String get eventsYesterday => 'Hier';
+
+  @override
+  String eventsPassageTitle(String camera) {
+    return 'Mouvement · $camera';
+  }
+
+  @override
+  String eventsLoadMore(int hours) {
+    return 'Voir les $hours heures précédentes';
+  }
+
+  @override
+  String get eventsLoadFailed => 'Les enregistrements n\'ont pas pu être lus.';
+
+  @override
+  String get eventsHistoryStart => 'Début de l\'historique enregistré.';
+
+  @override
+  String durationSeconds(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String durationMinutes(int minutes, String seconds) {
+    return '$minutes min $seconds';
+  }
+
+  @override
+  String durationHours(int hours, String minutes) {
+    return '$hours h $minutes';
+  }
 }

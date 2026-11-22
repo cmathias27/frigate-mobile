@@ -811,6 +811,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Nouveautés de la version {version}'**
   String whatsNewTitle(String version);
+
+  /// No description provided for @eventsAllCameras.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes caméras'**
+  String get eventsAllCameras;
+
+  /// No description provided for @eventsNewCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 nouveau passage} other{{count} nouveaux passages}}'**
+  String eventsNewCount(int count);
+
+  /// No description provided for @eventsSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passages de mouvement depuis {time}'**
+  String eventsSince(String time);
+
+  /// No description provided for @eventsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun passage de mouvement depuis {time}.'**
+  String eventsEmpty(String time);
+
+  /// No description provided for @eventsNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau'**
+  String get eventsNew;
+
+  /// No description provided for @eventsToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd\'hui'**
+  String get eventsToday;
+
+  /// No description provided for @eventsYesterday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hier'**
+  String get eventsYesterday;
+
+  /// No description provided for @eventsPassageTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mouvement · {camera}'**
+  String eventsPassageTitle(String camera);
+
+  /// No description provided for @eventsLoadMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir les {hours} heures précédentes'**
+  String eventsLoadMore(int hours);
+
+  /// No description provided for @eventsLoadFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les enregistrements n\'ont pas pu être lus.'**
+  String get eventsLoadFailed;
+
+  /// No description provided for @eventsHistoryStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Début de l\'historique enregistré.'**
+  String get eventsHistoryStart;
+
+  /// No description provided for @durationSeconds.
+  ///
+  /// In fr, this message translates to:
+  /// **'{seconds} s'**
+  String durationSeconds(int seconds);
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{minutes} min {seconds}'**
+  String durationMinutes(int minutes, String seconds);
+
+  /// No description provided for @durationHours.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hours} h {minutes}'**
+  String durationHours(int hours, String minutes);
 }
 
 class _AppLocalizationsDelegate
