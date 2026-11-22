@@ -5,6 +5,31 @@ l'application affiche avant d'installer une mise à jour et dans
 « Nouveautés » après l'installation (décision 0003). Écrire pour
 l'utilisateur : ce qui change pour lui, pas comment c'est codé.
 
+## 0.1.1
+
+Corrections après les premiers essais, et premières fonctions de la
+version 0.2.
+
+- La chronologie s'affiche de nouveau : ses bandes étaient invisibles
+  sur toutes les caméras.
+- Une caméra dont la vidéo ne passe pas ou reste figée bascule seule sur
+  un autre flux, souvent plus léger, que le téléphone sait lire ; en
+  dernier recours elle montre des images.
+- Direct : nouvelle disposition automatique, choisie par défaut. Toutes
+  les caméras tiennent sur un écran, aussi grandes que possible,
+  téléphone debout ou couché ; au-delà, elles se répartissent sur
+  plusieurs pages. Les dispositions 1, 4 et 9 restent proposées, et le
+  choix est gardé.
+- Connexion : l'application passe seule de l'adresse locale à l'adresse
+  distante quand l'une ne répond pas.
+- Onglet Alertes : les passages de mouvement jour par jour, les nouveaux
+  depuis votre dernière visite mis en évidence ; un toucher ouvre le
+  passage dans la chronologie.
+- Chronologie : export d'un extrait de 2 s à 10 min ou d'une photo de
+  l'image enregistrée, rangés dans l'album « Frigate » ou partagés.
+- Boutons « précédent » et « suivant » : sur la caméra en lecture, ou
+  sur toutes les caméras au choix (choix gardé).
+
 ## 0.1.0
 
 Première version utilisable : regarder ses caméras en direct et revoir
