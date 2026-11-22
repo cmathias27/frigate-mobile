@@ -117,7 +117,7 @@ void main() {
     // Switch to Chronologie
     await tester.tap(find.text('Chronologie'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('sans limite de jours'), findsOneWidget);
+    expect(find.text('Lecture · Portier'), findsOneWidget);
 
     // Switch to Plus (MoreScreen)
     await tester.tap(find.text('Plus'));

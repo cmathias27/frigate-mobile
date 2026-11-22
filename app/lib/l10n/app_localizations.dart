@@ -451,6 +451,132 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Son'**
   String get liveSound;
+
+  /// No description provided for @timelinePlaying.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture · {camera}'**
+  String timelinePlaying(String camera);
+
+  /// No description provided for @timelineCamera.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caméra en lecture'**
+  String get timelineCamera;
+
+  /// No description provided for @timelineAllCameras.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les caméras'**
+  String get timelineAllCameras;
+
+  /// No description provided for @timelineZoomHours.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hours} h'**
+  String timelineZoomHours(int hours);
+
+  /// No description provided for @timelineZoomAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout'**
+  String get timelineZoomAll;
+
+  /// No description provided for @timelinePreviousPassage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passage préc.'**
+  String get timelinePreviousPassage;
+
+  /// No description provided for @timelineNextPassage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passage suiv.'**
+  String get timelineNextPassage;
+
+  /// No description provided for @timelineBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reculer de {seconds} s'**
+  String timelineBack(int seconds);
+
+  /// No description provided for @timelineForward.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avancer de {seconds} s'**
+  String timelineForward(int seconds);
+
+  /// No description provided for @timelineSeconds.
+  ///
+  /// In fr, this message translates to:
+  /// **'{seconds} s'**
+  String timelineSeconds(int seconds);
+
+  /// No description provided for @timelinePlay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture'**
+  String get timelinePlay;
+
+  /// No description provided for @timelinePause.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pause'**
+  String get timelinePause;
+
+  /// No description provided for @timelinePreviousDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour précédent'**
+  String get timelinePreviousDay;
+
+  /// No description provided for @timelineNextDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour suivant'**
+  String get timelineNextDay;
+
+  /// No description provided for @timelineNoPassage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun passage de mouvement dans les {hours} h'**
+  String timelineNoPassage(int hours);
+
+  /// No description provided for @timelineNoRecording.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas d\'enregistrement à ce moment'**
+  String get timelineNoRecording;
+
+  /// No description provided for @timelinePlaybackFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture impossible'**
+  String get timelinePlaybackFailed;
+
+  /// No description provided for @timelineRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get timelineRetry;
+
+  /// No description provided for @timelineEnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin des enregistrements'**
+  String get timelineEnd;
+
+  /// No description provided for @timelineLoading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement de la chronologie…'**
+  String get timelineLoading;
+
+  /// No description provided for @timelineNoRecordingCamera.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune caméra n\'enregistre sur ce serveur'**
+  String get timelineNoRecordingCamera;
 }
 
 class _AppLocalizationsDelegate

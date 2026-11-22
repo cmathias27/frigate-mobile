@@ -216,4 +216,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get liveSound => 'Sound';
+
+  @override
+  String timelinePlaying(String camera) {
+    return 'Playing · $camera';
+  }
+
+  @override
+  String get timelineCamera => 'Camera playing';
+
+  @override
+  String get timelineAllCameras => 'All cameras';
+
+  @override
+  String timelineZoomHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String get timelineZoomAll => 'All';
+
+  @override
+  String get timelinePreviousPassage => 'Prev. motion';
+
+  @override
+  String get timelineNextPassage => 'Next motion';
+
+  @override
+  String timelineBack(int seconds) {
+    return 'Back $seconds s';
+  }
+
+  @override
+  String timelineForward(int seconds) {
+    return 'Forward $seconds s';
+  }
+
+  @override
+  String timelineSeconds(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String get timelinePlay => 'Play';
+
+  @override
+  String get timelinePause => 'Pause';
+
+  @override
+  String get timelinePreviousDay => 'Previous day';
+
+  @override
+  String get timelineNextDay => 'Next day';
+
+  @override
+  String timelineNoPassage(int hours) {
+    return 'No motion within $hours h';
+  }
+
+  @override
+  String get timelineNoRecording => 'No recording at this time';
+
+  @override
+  String get timelinePlaybackFailed => 'Playback failed';
+
+  @override
+  String get timelineRetry => 'Retry';
+
+  @override
+  String get timelineEnd => 'End of recordings';
+
+  @override
+  String get timelineLoading => 'Loading timeline…';
+
+  @override
+  String get timelineNoRecordingCamera => 'No camera records on this server';
 }

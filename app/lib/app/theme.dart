@@ -17,6 +17,9 @@ abstract final class AppColors {
   /// Timeline marks, shared by every screen that draws them.
   static const recording = Color(0xFF2B3540);
   static const motion = Color(0xFF5F7386);
+
+  /// Motion passages, on a server without object detection.
+  static const passage = Color(0xFFFFB020);
   static const person = Color(0xFFFF5A4E);
   static const vehicle = Color(0xFFFFB020);
   static const face = Color(0xFFC77DFF);

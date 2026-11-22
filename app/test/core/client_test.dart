@@ -246,4 +246,59 @@ void main() {
       'v=0\r\nraw-answer',
     );
   });
+
+  test('fetchRecordings asks for a time range and parses segments', () async {
+    late http.BaseRequest sent;
+    final mockClient = MockClient((request) async {
+      sent = request;
+      return http.Response(
+        jsonEncode([
+          {'start_time': 1000.0, 'end_time': 1010.5, 'motion': 12},
+        ]),
+        200,
+      );
+    });
+    final client = FrigateClient(
+      config: config,
+      token: 'jwt-rec',
+      client: mockClient,
+    );
+    final segments = await client.fetchRecordings(
+      'cam_a',
+      DateTime.fromMillisecondsSinceEpoch(1000000),
+      DateTime.fromMillisecondsSinceEpoch(4600000),
+    );
+    expect(sent.url.path, '/api/cam_a/recordings');
+    expect(sent.url.queryParameters, {'after': '1000', 'before': '4600'});
+    expect(sent.headers['Authorization'], 'Bearer jwt-rec');
+    expect(segments.single.motion, 12);
+    expect(segments.single.end.millisecondsSinceEpoch, 1010500);
+  });
+
+  test('openStream forwards headers and reports an expired session', () async {
+    late http.BaseRequest sent;
+    var status = 206;
+    final mockClient = MockClient((request) async {
+      sent = request;
+      return http.Response('part', status);
+    });
+    final client = FrigateClient(
+      config: config,
+      token: 'jwt-vod',
+      client: mockClient,
+    );
+    final response = await client.openStream(
+      '/vod/cam_a/start/1/end/2/master.m3u8',
+      headers: {'range': 'bytes=0-3'},
+    );
+    expect(response.statusCode, 206);
+    expect(sent.url.path, '/vod/cam_a/start/1/end/2/master.m3u8');
+    expect(sent.headers['range'], 'bytes=0-3');
+    expect(sent.headers['Authorization'], 'Bearer jwt-vod');
+    status = 401;
+    await expectLater(
+      client.openStream('/vod/x'),
+      throwsA(isA<FrigateAuthException>()),
+    );
+  });
 }

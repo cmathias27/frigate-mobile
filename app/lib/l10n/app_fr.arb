@@ -109,5 +109,56 @@
   },
   "livePhotoShare": "Partager",
   "livePhotoFailed": "Impossible d'enregistrer la photo",
-  "liveSound": "Son"
+  "liveSound": "Son",
+  "timelinePlaying": "Lecture · {camera}",
+  "@timelinePlaying": {
+    "placeholders": {
+      "camera": {"type": "String"}
+    }
+  },
+  "timelineCamera": "Caméra en lecture",
+  "timelineAllCameras": "Toutes les caméras",
+  "timelineZoomHours": "{hours} h",
+  "@timelineZoomHours": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+  "timelineZoomAll": "Tout",
+  "timelinePreviousPassage": "Passage préc.",
+  "timelineNextPassage": "Passage suiv.",
+  "timelineBack": "Reculer de {seconds} s",
+  "@timelineBack": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "timelineForward": "Avancer de {seconds} s",
+  "@timelineForward": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "timelineSeconds": "{seconds} s",
+  "@timelineSeconds": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "timelinePlay": "Lecture",
+  "timelinePause": "Pause",
+  "timelinePreviousDay": "Jour précédent",
+  "timelineNextDay": "Jour suivant",
+  "timelineNoPassage": "Aucun passage de mouvement dans les {hours} h",
+  "@timelineNoPassage": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+  "timelineNoRecording": "Pas d'enregistrement à ce moment",
+  "timelinePlaybackFailed": "Lecture impossible",
+  "timelineRetry": "Réessayer",
+  "timelineEnd": "Fin des enregistrements",
+  "timelineLoading": "Chargement de la chronologie…",
+  "timelineNoRecordingCamera": "Aucune caméra n'enregistre sur ce serveur"
 }

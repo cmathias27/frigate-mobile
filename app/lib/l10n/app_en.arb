@@ -58,5 +58,56 @@
   "livePhotoSaved": "Photo saved in the {album} album",
   "livePhotoShare": "Share",
   "livePhotoFailed": "Could not save the photo",
-  "liveSound": "Sound"
+  "liveSound": "Sound",
+  "timelinePlaying": "Playing · {camera}",
+  "@timelinePlaying": {
+    "placeholders": {
+      "camera": {"type": "String"}
+    }
+  },
+  "timelineCamera": "Camera playing",
+  "timelineAllCameras": "All cameras",
+  "timelineZoomHours": "{hours} h",
+  "@timelineZoomHours": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+  "timelineZoomAll": "All",
+  "timelinePreviousPassage": "Prev. motion",
+  "timelineNextPassage": "Next motion",
+  "timelineBack": "Back {seconds} s",
+  "@timelineBack": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "timelineForward": "Forward {seconds} s",
+  "@timelineForward": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "timelineSeconds": "{seconds} s",
+  "@timelineSeconds": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "timelinePlay": "Play",
+  "timelinePause": "Pause",
+  "timelinePreviousDay": "Previous day",
+  "timelineNextDay": "Next day",
+  "timelineNoPassage": "No motion within {hours} h",
+  "@timelineNoPassage": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+  "timelineNoRecording": "No recording at this time",
+  "timelinePlaybackFailed": "Playback failed",
+  "timelineRetry": "Retry",
+  "timelineEnd": "End of recordings",
+  "timelineLoading": "Loading timeline…",
+  "timelineNoRecordingCamera": "No camera records on this server"
 }
