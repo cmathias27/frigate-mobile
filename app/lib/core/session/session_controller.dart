@@ -70,8 +70,10 @@ class SessionController extends ChangeNotifier {
         client: httpClient,
       );
       _client = c;
+      c.onAddressChanged = _onAddressChanged;
 
       try {
+        await c.resolveAddress();
         _capabilities = await c.fetchCapabilities();
         _status = SessionStatus.authenticated;
         _errorMessage = null;
@@ -105,7 +107,9 @@ class SessionController extends ChangeNotifier {
 
     final c = FrigateClient(config: config, client: httpClient);
     try {
+      await c.resolveAddress();
       final token = await c.login(password);
+      c.onAddressChanged = _onAddressChanged;
       final caps = await c.fetchCapabilities();
 
       _config = config;
@@ -137,6 +141,17 @@ class SessionController extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  void _onAddressChanged(String url) => notifyListeners();
+
+  /// Back from the background, possibly on another network: picks the
+  /// local or the remote address again, and reloads after a failure.
+  Future<void> resumed() async {
+    final c = _client;
+    if (c == null) return;
+    await c.resolveAddress();
+    if (_status == SessionStatus.connectionError) await refreshCapabilities();
   }
 
   /// Reloads server capabilities (e.g. after camera or settings update).
