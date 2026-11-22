@@ -183,4 +183,28 @@ void main() {
     expect(await storage.loadToken(), isNull);
     expect(await storage.loadServerConfig(), isNull);
   });
+
+  test('sessionExpired returns to login and keeps the server', () async {
+    final storage = SessionStorage.inMemory();
+    await storage.saveServerConfig(testConfig);
+    await storage.saveToken('jwt-existing');
+    final controller = SessionController(
+      storage: storage,
+      httpClient: createMockServer(),
+    );
+    await controller.init();
+    expect(controller.isAuthenticated, isTrue);
+
+    await controller.sessionExpired();
+
+    expect(controller.status, SessionStatus.unauthenticated);
+    expect(controller.client, isNull);
+    expect(controller.errorMessage, contains('expirée'));
+    expect(await storage.loadToken(), isNull);
+    expect(await storage.loadServerConfig(), isNotNull);
+
+    // A second report from another camera changes nothing.
+    await controller.sessionExpired();
+    expect(controller.status, SessionStatus.unauthenticated);
+  });
 }

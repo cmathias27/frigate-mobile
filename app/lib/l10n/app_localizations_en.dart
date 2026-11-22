@@ -138,4 +138,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidUrl => 'Invalid address (start with https://)';
+
+  @override
+  String get liveBadge => 'LIVE';
+
+  @override
+  String get liveStale => 'FROZEN';
+
+  @override
+  String get liveUnavailable => 'Image unavailable';
+
+  @override
+  String get liveNoCamera => 'No active camera on this server.';
+
+  @override
+  String liveLayout(int count) {
+    return '$count per page';
+  }
+
+  @override
+  String livePage(int current, int total) {
+    return 'Page $current of $total';
+  }
+
+  @override
+  String liveModeSnapshots(int seconds) {
+    return 'Images · every $seconds s';
+  }
+
+  @override
+  String get liveFullScreen => 'Full screen';
 }

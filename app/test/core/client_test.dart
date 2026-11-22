@@ -159,4 +159,56 @@ void main() {
     expect(caps.cameras['cam_portier']!.continuousDays, 3.0);
     expect(caps.anyObjectDetection, isFalse);
   });
+
+  test('fetchLatestImage asks for a scaled JPEG with the token', () async {
+    late http.BaseRequest sent;
+    final mockClient = MockClient((request) async {
+      sent = request;
+      return http.Response.bytes([1, 2, 3], 200);
+    });
+    final client = FrigateClient(
+      config: config,
+      token: 'jwt-img',
+      client: mockClient,
+    );
+
+    final bytes = await client.fetchLatestImage('cam_portier', height: 360);
+
+    expect(bytes, [1, 2, 3]);
+    expect(sent.url.path, '/api/cam_portier/latest.jpg');
+    expect(sent.url.queryParameters, {'h': '360'});
+    expect(sent.headers['Accept'], 'image/jpeg');
+    expect(sent.headers['Authorization'], 'Bearer jwt-img');
+
+    await client.fetchLatestImage('cam_portier');
+    expect(sent.url.hasQuery, isFalse);
+  });
+
+  test('fetchLatestImage maps errors to Frigate exceptions', () async {
+    var status = 401;
+    final mockClient = MockClient((request) async {
+      if (status == 0) throw http.ClientException('reset');
+      return http.Response('', status);
+    });
+    final client = FrigateClient(
+      config: config,
+      token: 'x',
+      client: mockClient,
+    );
+
+    await expectLater(
+      client.fetchLatestImage('cam_portier'),
+      throwsA(isA<FrigateAuthException>()),
+    );
+    status = 404;
+    await expectLater(
+      client.fetchLatestImage('cam_portier'),
+      throwsA(isA<FrigateNetworkException>()),
+    );
+    status = 0;
+    await expectLater(
+      client.fetchLatestImage('cam_portier'),
+      throwsA(isA<FrigateNetworkException>()),
+    );
+  });
 }

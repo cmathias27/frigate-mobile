@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Only the Frigate server and the update check (CLAUDE.md). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="Frigate Mobile"
         android:name="${applicationName}"

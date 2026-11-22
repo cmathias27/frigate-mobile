@@ -154,6 +154,19 @@ class SessionController extends ChangeNotifier {
     }
   }
 
+  /// Called when the server refuses the token during use (expired or
+  /// revoked): back to the login screen, keeping the server settings.
+  Future<void> sessionExpired() async {
+    if (_status != SessionStatus.authenticated) return;
+    _client?.close();
+    _client = null;
+    _capabilities = null;
+    _status = SessionStatus.unauthenticated;
+    _errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+    await _storage.clearSession();
+    notifyListeners();
+  }
+
   /// Disconnects the active session and clears the saved token.
   Future<void> disconnect() async {
     _client?.close();
