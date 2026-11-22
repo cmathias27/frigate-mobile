@@ -7,12 +7,12 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 - [x] Projet Flutter Android, modules, français et anglais
 - [x] Lecture des capacités du serveur et des caméras (décision 0002)
 - [x] CI : analyse, tests, APK signé, version GitHub avec note sur étiquette
-- [ ] Clé de signature créée et secrets GitHub posés
+- [x] Clé de signature créée et secrets GitHub posés
 
 ## 0.1 — Direct, chronologie du mouvement, mises à jour
 
-- [ ] Connexion : adresse locale et distante, `POST /api/login`, jeton gardé en sécurité
-- [ ] Lecture des capacités au démarrage, fonctions affichées selon le serveur
+- [x] Connexion : adresse locale et distante, `POST /api/login`, jeton gardé en sécurité
+- [x] Lecture des capacités au démarrage, fonctions affichées selon le serveur
 - [ ] Direct en grille (1, 4, 9), vignettes `latest.jpg`
 - [ ] Plein écran : WebRTC go2rtc, repli RTSP ou images, photo
 - [ ] Chronologie : bande « toutes les caméras » et bande « caméra en lecture », tête de lecture commune, zoom 1 h / 6 h / 24 h / tout

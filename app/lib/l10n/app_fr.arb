@@ -20,5 +20,41 @@
     "placeholders": {
       "version": {"type": "String"}
     }
-  }
+  },
+  "loginTitle": "Ajouter un serveur",
+  "loginSubtitle": "Comme dans DS cam : un serveur, plusieurs caméras.",
+  "serverNameLabel": "Nom du serveur",
+  "localUrlLabel": "Adresse locale (port 8971)",
+  "localUrlHint": "https://192.168.1.53:8971",
+  "remoteUrlLabel": "Adresse à distance (optionnelle)",
+  "remoteUrlHint": "https://frigate.exemple.fr",
+  "usernameLabel": "Utilisateur",
+  "passwordLabel": "Mot de passe",
+  "selfSignedLabel": "Certificat auto-signé accepté sur le réseau local",
+  "connectButton": "Se connecter",
+  "connectingStatus": "Connexion en cours…",
+  "connectedTitle": "Serveur connecté",
+  "serverInfoCameras": "{count, plural, =1{1 caméra en ligne} other{{count} caméras en ligne}}",
+  "@serverInfoCameras": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "detectionModeMotionOnly": "Mode mouvement seul (sans détection d'objets)",
+  "detectionModeObjects": "Détection d'objets active",
+  "continuousDays": "Rétention continu : {days} jours",
+  "@continuousDays": {
+    "placeholders": {
+      "days": {"type": "String"}
+    }
+  },
+  "disconnectButton": "Se déconnecter",
+  "disconnectConfirmTitle": "Déconnexion",
+  "disconnectConfirmMessage": "Voulez-vous vous déconnecter de ce serveur Frigate ?",
+  "cancel": "Annuler",
+  "confirm": "Confirmer",
+  "refresh": "Actualiser",
+  "refreshSuccess": "Capacités actualisées",
+  "requiredField": "Ce champ est obligatoire",
+  "invalidUrl": "Adresse invalide (commencez par https://)"
 }

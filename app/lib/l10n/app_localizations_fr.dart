@@ -49,4 +49,96 @@ class AppLocalizationsFr extends AppLocalizations {
   String aboutVersion(String version) {
     return 'Version $version';
   }
+
+  @override
+  String get loginTitle => 'Ajouter un serveur';
+
+  @override
+  String get loginSubtitle =>
+      'Comme dans DS cam : un serveur, plusieurs caméras.';
+
+  @override
+  String get serverNameLabel => 'Nom du serveur';
+
+  @override
+  String get localUrlLabel => 'Adresse locale (port 8971)';
+
+  @override
+  String get localUrlHint => 'https://192.168.1.53:8971';
+
+  @override
+  String get remoteUrlLabel => 'Adresse à distance (optionnelle)';
+
+  @override
+  String get remoteUrlHint => 'https://frigate.exemple.fr';
+
+  @override
+  String get usernameLabel => 'Utilisateur';
+
+  @override
+  String get passwordLabel => 'Mot de passe';
+
+  @override
+  String get selfSignedLabel =>
+      'Certificat auto-signé accepté sur le réseau local';
+
+  @override
+  String get connectButton => 'Se connecter';
+
+  @override
+  String get connectingStatus => 'Connexion en cours…';
+
+  @override
+  String get connectedTitle => 'Serveur connecté';
+
+  @override
+  String serverInfoCameras(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count caméras en ligne',
+      one: '1 caméra en ligne',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get detectionModeMotionOnly =>
+      'Mode mouvement seul (sans détection d\'objets)';
+
+  @override
+  String get detectionModeObjects => 'Détection d\'objets active';
+
+  @override
+  String continuousDays(String days) {
+    return 'Rétention continu : $days jours';
+  }
+
+  @override
+  String get disconnectButton => 'Se déconnecter';
+
+  @override
+  String get disconnectConfirmTitle => 'Déconnexion';
+
+  @override
+  String get disconnectConfirmMessage =>
+      'Voulez-vous vous déconnecter de ce serveur Frigate ?';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get confirm => 'Confirmer';
+
+  @override
+  String get refresh => 'Actualiser';
+
+  @override
+  String get refreshSuccess => 'Capacités actualisées';
+
+  @override
+  String get requiredField => 'Ce champ est obligatoire';
+
+  @override
+  String get invalidUrl => 'Adresse invalide (commencez par https://)';
 }

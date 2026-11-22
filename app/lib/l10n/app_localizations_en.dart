@@ -48,4 +48,94 @@ class AppLocalizationsEn extends AppLocalizations {
   String aboutVersion(String version) {
     return 'Version $version';
   }
+
+  @override
+  String get loginTitle => 'Add a server';
+
+  @override
+  String get loginSubtitle => 'Just like DS cam: one server, multiple cameras.';
+
+  @override
+  String get serverNameLabel => 'Server name';
+
+  @override
+  String get localUrlLabel => 'Local address (port 8971)';
+
+  @override
+  String get localUrlHint => 'https://192.168.1.53:8971';
+
+  @override
+  String get remoteUrlLabel => 'Remote address (optional)';
+
+  @override
+  String get remoteUrlHint => 'https://frigate.example.com';
+
+  @override
+  String get usernameLabel => 'Username';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get selfSignedLabel =>
+      'Accept self-signed certificate on local network';
+
+  @override
+  String get connectButton => 'Connect';
+
+  @override
+  String get connectingStatus => 'Connecting…';
+
+  @override
+  String get connectedTitle => 'Connected server';
+
+  @override
+  String serverInfoCameras(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cameras online',
+      one: '1 camera online',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get detectionModeMotionOnly => 'Motion-only mode (no object tracking)';
+
+  @override
+  String get detectionModeObjects => 'Object tracking active';
+
+  @override
+  String continuousDays(String days) {
+    return 'Continuous retention: $days days';
+  }
+
+  @override
+  String get disconnectButton => 'Disconnect';
+
+  @override
+  String get disconnectConfirmTitle => 'Disconnect';
+
+  @override
+  String get disconnectConfirmMessage =>
+      'Do you want to disconnect from this Frigate server?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get refreshSuccess => 'Capabilities refreshed';
+
+  @override
+  String get requiredField => 'This field is required';
+
+  @override
+  String get invalidUrl => 'Invalid address (start with https://)';
 }
