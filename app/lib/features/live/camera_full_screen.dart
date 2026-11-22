@@ -8,6 +8,7 @@ import '../../l10n/app_localizations.dart';
 import 'camera_feed.dart';
 import 'feed_tile.dart';
 import 'live_video.dart';
+import 'photo.dart';
 
 /// One camera in full screen (mock-up screen 3): live video when
 /// [videoFactory] is given and the server answers, otherwise full-resolution
@@ -21,6 +22,7 @@ class CameraFullScreen extends StatefulWidget {
   final String initialCamera;
   final ImageFetcher fetch;
   final LiveVideoFactory? videoFactory;
+  final PhotoActions photoActions;
   final VoidCallback? onAuthError;
 
   const CameraFullScreen({
@@ -29,6 +31,7 @@ class CameraFullScreen extends StatefulWidget {
     required this.initialCamera,
     required this.fetch,
     this.videoFactory,
+    this.photoActions = const DevicePhotoActions(),
     this.onAuthError,
   });
 
@@ -43,6 +46,7 @@ class _CameraFullScreenState extends State<CameraFullScreen>
   CameraFeed? _feed;
   LiveVideo? _video;
   bool _immersive = false;
+  bool _takingPhoto = false;
 
   /// Chosen go2rtc stream per camera, by index in its live streams.
   final _streamIndex = <String, int>{};
@@ -123,6 +127,35 @@ class _CameraFullScreenState extends State<CameraFullScreen>
       _feed?.start();
       _openVideo();
     });
+  }
+
+  /// Saves the picture on screen: the video frame at the stream's
+  /// resolution when the video plays, otherwise Frigate's latest image.
+  Future<void> _takePhoto() async {
+    if (_takingPhoto) return;
+    final l = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final camera = _camera.name;
+    setState(() => _takingPhoto = true);
+    try {
+      final jpeg = await _video?.captureFrame() ?? await widget.fetch(camera);
+      final name = photoName(camera, DateTime.now());
+      await widget.photoActions.save(jpeg, name);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l.livePhotoSaved(DevicePhotoActions.album)),
+          action: SnackBarAction(
+            label: l.livePhotoShare,
+            onPressed: () => widget.photoActions.share(jpeg, name),
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Photo $camera: $e');
+      messenger.showSnackBar(SnackBar(content: Text(l.livePhotoFailed)));
+    } finally {
+      if (mounted) setState(() => _takingPhoto = false);
+    }
   }
 
   @override
@@ -207,16 +240,6 @@ class _CameraFullScreenState extends State<CameraFullScreen>
                     icon: const Icon(Icons.refresh_rounded),
                     onPressed: _retryVideo,
                   ),
-                if (_videoPlaying && video!.hasAudio)
-                  IconButton(
-                    tooltip: video.muted ? l.liveSoundOn : l.liveSoundOff,
-                    icon: Icon(
-                      video.muted
-                          ? Icons.volume_off_rounded
-                          : Icons.volume_up_rounded,
-                    ),
-                    onPressed: () => video.muted = !video.muted,
-                  ),
                 if (video != null && streams.length > 1)
                   PopupMenuButton<int>(
                     tooltip: l.liveQuality,
@@ -285,22 +308,56 @@ class _CameraFullScreenState extends State<CameraFullScreen>
                   if (!_immersive)
                     Positioned(
                       left: 12,
-                      bottom: 16 + MediaQuery.paddingOf(context).bottom,
-                      child: Row(
-                        spacing: 8,
+                      right: 12,
+                      bottom: 12 + MediaQuery.paddingOf(context).bottom,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 10,
                         children: [
-                          LiveBadge(stale: !_videoPlaying && feed.isStale),
-                          if (!_videoPlaying && feed.updatedAt != null)
-                            Text(
-                              DateFormat.yMd(
-                                Localizations.localeOf(context).toString(),
-                              ).add_Hms().format(feed.updatedAt!),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontFeatures: [FontFeature.tabularFigures()],
+                          Row(
+                            spacing: 8,
+                            children: [
+                              LiveBadge(stale: !_videoPlaying && feed.isStale),
+                              if (!_videoPlaying && feed.updatedAt != null)
+                                Text(
+                                  DateFormat.yMd(
+                                    Localizations.localeOf(context).toString(),
+                                  ).add_Hms().format(feed.updatedAt!),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontFeatures: [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                          _Controls(
+                            children: [
+                              _ControlButton(
+                                icon: Icons.photo_camera_outlined,
+                                label: l.livePhoto,
+                                busy: _takingPhoto,
+                                onPressed: feed.image != null || _videoPlaying
+                                    ? _takePhoto
+                                    : null,
                               ),
-                            ),
+                              // Sound only when the stream carries some.
+                              if (_videoPlaying && video!.hasAudio)
+                                _ControlButton(
+                                  icon: video.muted
+                                      ? Icons.volume_off_rounded
+                                      : Icons.volume_up_rounded,
+                                  label: l.liveSound,
+                                  tooltip: video.muted
+                                      ? l.liveSoundOn
+                                      : l.liveSoundOff,
+                                  active: !video.muted,
+                                  onPressed: () => video.muted = !video.muted,
+                                ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -309,6 +366,77 @@ class _CameraFullScreenState extends State<CameraFullScreen>
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Row of buttons under the picture (mock-up screen 3).
+class _Controls extends StatelessWidget {
+  final List<Widget> children;
+
+  const _Controls({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      spacing: 6,
+      children: [for (final c in children) Expanded(child: c)],
+    );
+  }
+}
+
+class _ControlButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String? tooltip;
+  final bool active;
+  final bool busy;
+  final VoidCallback? onPressed;
+
+  const _ControlButton({
+    required this.icon,
+    required this.label,
+    this.tooltip,
+    this.active = false,
+    this.busy = false,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onPressed != null && !busy;
+    final color = active
+        ? AppColors.accent
+        : enabled
+        ? Colors.white
+        : AppColors.textDim;
+    return Tooltip(
+      message: tooltip ?? label,
+      child: Material(
+        color: Colors.black.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: enabled ? onPressed : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 4,
+              children: [
+                if (busy)
+                  const SizedBox.square(
+                    dimension: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else
+                  Icon(icon, color: color),
+                Text(label, style: TextStyle(fontSize: 11, color: color)),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -15,8 +15,10 @@ dependencies:
     sdk: flutter
   flutter_secure_storage: ^11.2.0
   flutter_webrtc: ^1.6.3
+  gal: ^3.0.1
   http: ^1.6.0
   intl: any
+  share_plus: ^13.3.1
 
 dev_dependencies:
   flutter_test:

@@ -16,7 +16,7 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 - [x] Direct en grille (1, 4, 9), pages, vignettes `latest.jpg` rafraîchies seulement à l'écran
 - [x] Plein écran en images : pleine résolution chaque seconde, zoom, glisser d'une caméra à l'autre
 - [x] Plein écran vidéo : WebRTC go2rtc, repli en images, son si le flux en a, choix du flux
-- [ ] Photo depuis le plein écran
+- [x] Photo depuis le plein écran : image vidéo à sa résolution, album « Frigate », partage
 - [ ] Chronologie : bande « toutes les caméras » et bande « caméra en lecture », tête de lecture commune, zoom 1 h / 6 h / 24 h / tout
 - [ ] Passages de mouvement : seuil automatique par caméra, durée minimale, fusion ; boutons précédent / suivant
 - [ ] Calendrier de tout l'historique, saut à une date et une heure

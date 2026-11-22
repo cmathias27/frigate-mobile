@@ -202,4 +202,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String liveStreamMain(int number) {
     return 'Flux $number (principal)';
   }
+
+  @override
+  String get livePhoto => 'Photo';
+
+  @override
+  String livePhotoSaved(String album) {
+    return 'Photo enregistrée dans l\'album $album';
+  }
+
+  @override
+  String get livePhotoShare => 'Partager';
+
+  @override
+  String get livePhotoFailed => 'Impossible d\'enregistrer la photo';
+
+  @override
+  String get liveSound => 'Son';
 }

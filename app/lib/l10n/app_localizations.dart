@@ -421,6 +421,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Flux {number} (principal)'**
   String liveStreamMain(int number);
+
+  /// No description provided for @livePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo'**
+  String get livePhoto;
+
+  /// No description provided for @livePhotoSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo enregistrée dans l\'album {album}'**
+  String livePhotoSaved(String album);
+
+  /// No description provided for @livePhotoShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager'**
+  String get livePhotoShare;
+
+  /// No description provided for @livePhotoFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'enregistrer la photo'**
+  String get livePhotoFailed;
+
+  /// No description provided for @liveSound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Son'**
+  String get liveSound;
 }
 
 class _AppLocalizationsDelegate

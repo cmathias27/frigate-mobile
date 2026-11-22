@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// Exchanges a WebRTC offer for the server's answer (see
@@ -26,6 +27,10 @@ abstract class LiveVideo extends ChangeNotifier {
 
   bool get muted;
   set muted(bool value);
+
+  /// The frame on screen as a JPEG at the stream's resolution, or null
+  /// when no frame can be captured (the caller then uses an image).
+  Future<Uint8List?> captureFrame();
 
   /// Starts connecting; [status] then moves to playing or failed.
   Future<void> start();

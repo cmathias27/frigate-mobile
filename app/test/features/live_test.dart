@@ -11,6 +11,7 @@ import 'package:frigate_mobile/features/live/camera_full_screen.dart';
 import 'package:frigate_mobile/features/live/feed_tile.dart';
 import 'package:frigate_mobile/features/live/live_grid_screen.dart';
 import 'package:frigate_mobile/features/live/live_video.dart';
+import 'package:frigate_mobile/features/live/photo.dart';
 import 'package:frigate_mobile/l10n/app_localizations.dart';
 
 /// Smallest valid PNG (1×1, transparent): decodes in widget tests.
@@ -90,6 +91,12 @@ class _FakeVideo extends LiveVideo {
     notifyListeners();
   }
 
+  /// Frame returned by [captureFrame]; null means capture unsupported.
+  Uint8List? frame;
+
+  @override
+  Future<Uint8List?> captureFrame() async => frame;
+
   @override
   Future<void> start() async => started = true;
 
@@ -101,6 +108,22 @@ class _FakeVideo extends LiveVideo {
     disposed = true;
     super.dispose();
   }
+}
+
+/// Records saved and shared photos; fails on demand.
+class _FakePhotos implements PhotoActions {
+  final saved = <(String, Uint8List)>[];
+  final shared = <String>[];
+  bool fail = false;
+
+  @override
+  Future<void> save(Uint8List jpeg, String name) async {
+    if (fail) throw Exception('gallery');
+    saved.add((name, jpeg));
+  }
+
+  @override
+  Future<void> share(Uint8List jpeg, String name) async => shared.add(name);
 }
 
 Widget _app(Widget child) => MaterialApp(
@@ -312,6 +335,7 @@ void main() {
   group('CameraFullScreen video', () {
     late _FakeServer server;
     late List<_FakeVideo> videos;
+    late _FakePhotos photos;
     var withAudio = false;
 
     LiveVideo factory(String stream) {
@@ -328,6 +352,7 @@ void main() {
               initialCamera: cams.first.name,
               fetch: server.fetch,
               videoFactory: factory,
+              photoActions: photos,
             ),
           ),
         );
@@ -335,6 +360,7 @@ void main() {
     setUp(() {
       server = _FakeServer();
       videos = [];
+      photos = _FakePhotos();
       withAudio = false;
     });
 
@@ -440,6 +466,68 @@ void main() {
       expect(videos[1].disposed, isTrue);
       expect(find.byTooltip('Qualité'), findsNothing);
 
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('photo saves the video frame and offers to share it', (
+      tester,
+    ) async {
+      await open(tester, cameras);
+      await tester.pump();
+      final frame = Uint8List.fromList([9, 9, 9]);
+      videos.single
+        ..frame = frame
+        ..play();
+      await tester.pump();
+
+      server.calls.clear();
+      await tester.tap(find.text('Photo'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(photos.saved.single.$2, same(frame));
+      expect(
+        photos.saved.single.$1,
+        matches(RegExp(r'^cam_a_\d{8}_\d{6}$')),
+      );
+      expect(server.calls, isEmpty);
+      expect(
+        find.text("Photo enregistrée dans l'album Frigate"),
+        findsOneWidget,
+      );
+
+      // Let the snack bar slide in before tapping its action.
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.text('Partager'));
+      await tester.pump();
+      expect(photos.shared, [photos.saved.single.$1]);
+
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('photo falls back to the full-size image', (tester) async {
+      await open(tester, cameras);
+      await tester.pump();
+
+      // Video still connecting: the image on screen is saved.
+      server.calls.clear();
+      await tester.tap(find.text('Photo'));
+      await tester.pump();
+      await tester.pump();
+      expect(server.calls, [('cam_a', null)]);
+      expect(photos.saved.single.$2, _pixel);
+
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a failed save says so', (tester) async {
+      photos.fail = true;
+      await open(tester, cameras);
+      await tester.pump();
+      await tester.tap(find.text('Photo'));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text("Impossible d'enregistrer la photo"), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     });
   });

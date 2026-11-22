@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -18,6 +19,7 @@ class WebRtcLiveVideo extends LiveVideo {
   final RTCVideoRenderer _renderer = RTCVideoRenderer();
   RTCPeerConnection? _pc;
   final _audioTracks = <MediaStreamTrack>[];
+  MediaStreamTrack? _videoTrack;
   Timer? _timeout;
 
   LiveVideoStatus _status = LiveVideoStatus.connecting;
@@ -124,12 +126,26 @@ class WebRtcLiveVideo extends LiveVideo {
       return;
     }
     if (track.kind != 'video') return;
+    _videoTrack = track;
     if (event.streams.isNotEmpty) {
       _renderer.srcObject = event.streams.first;
     } else {
       final media = await createLocalMediaStream('frigate-$stream');
       await media.addTrack(track);
       if (!_disposed) _renderer.srcObject = media;
+    }
+  }
+
+  @override
+  Future<Uint8List?> captureFrame() async {
+    final track = _videoTrack;
+    if (track == null || _status != LiveVideoStatus.playing) return null;
+    try {
+      // Android writes the frame as a JPEG.
+      return (await track.captureFrame()).asUint8List();
+    } catch (e) {
+      debugPrint('WebRTC $stream capture: $e');
+      return null;
     }
   }
 
