@@ -367,6 +367,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Plein écran'**
   String get liveFullScreen;
+
+  /// No description provided for @liveModeVideo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vidéo en direct'**
+  String get liveModeVideo;
+
+  /// No description provided for @liveVideoConnecting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion vidéo…'**
+  String get liveVideoConnecting;
+
+  /// No description provided for @liveVideoUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vidéo indisponible'**
+  String get liveVideoUnavailable;
+
+  /// No description provided for @liveVideoRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer la vidéo'**
+  String get liveVideoRetry;
+
+  /// No description provided for @liveSoundOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer le son'**
+  String get liveSoundOn;
+
+  /// No description provided for @liveSoundOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couper le son'**
+  String get liveSoundOff;
+
+  /// No description provided for @liveQuality.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qualité'**
+  String get liveQuality;
+
+  /// No description provided for @liveStream.
+  ///
+  /// In fr, this message translates to:
+  /// **'Flux {number}'**
+  String liveStream(int number);
+
+  /// No description provided for @liveStreamMain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Flux {number} (principal)'**
+  String liveStreamMain(int number);
 }
 
 class _AppLocalizationsDelegate

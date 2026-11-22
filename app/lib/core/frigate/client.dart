@@ -209,26 +209,61 @@ class FrigateClient {
     return response.bodyBytes;
   }
 
+  /// Exchanges a WebRTC offer for go2rtc's answer through Frigate's
+  /// authenticated proxy, `POST /api/go2rtc/webrtc?src=<stream>`.
+  ///
+  /// go2rtc answers once its own ICE candidates are gathered, so the answer
+  /// is complete and no trickle channel is needed.
+  Future<String> negotiateWebRtc(String stream, String offerSdp) async {
+    final path = Uri(
+      path: '/api/go2rtc/webrtc',
+      queryParameters: {'src': stream},
+    ).toString();
+    final response = await _send(
+      path,
+      body: jsonEncode({'type': 'offer', 'sdp': offerSdp}),
+      timeout: const Duration(seconds: 10),
+    );
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map && decoded['sdp'] is String) {
+        return decoded['sdp'] as String;
+      }
+    } on FormatException {
+      // Older go2rtc versions answer with the raw SDP.
+      if (response.body.startsWith('v=')) return response.body;
+    }
+    throw FrigateNetworkException('Réponse WebRTC invalide pour $stream');
+  }
+
   /// Performs an authenticated GET request and returns raw response body.
   Future<String> _get(String path) async => (await _send(path)).body;
 
-  /// Performs an authenticated GET request and returns the response when it
-  /// succeeded, throwing a [FrigateAuthException] or a
-  /// [FrigateNetworkException] otherwise.
+  /// Performs an authenticated request (GET, or POST of a JSON [body]) and
+  /// returns the response when it succeeded, throwing a
+  /// [FrigateAuthException] or a [FrigateNetworkException] otherwise.
   Future<http.Response> _send(
     String path, {
+    String? body,
     Duration timeout = const Duration(seconds: 15),
     String accept = 'application/json',
   }) async {
     final cleanPath = path.startsWith('/') ? path : '/$path';
     final uri = Uri.parse('$_activeBaseUrl$cleanPath');
+    final headers = _buildAuthHeaders(accept: accept);
 
     try {
-      final response = await _client
-          .get(uri, headers: _buildAuthHeaders(accept: accept))
-          .timeout(timeout);
+      final response =
+          await (body == null
+                  ? _client.get(uri, headers: headers)
+                  : _client.post(
+                      uri,
+                      headers: {...headers, 'Content-Type': 'application/json'},
+                      body: body,
+                    ))
+              .timeout(timeout);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return response;
       }
 

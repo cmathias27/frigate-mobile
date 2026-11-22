@@ -10,6 +10,7 @@ import 'package:frigate_mobile/features/live/camera_feed.dart';
 import 'package:frigate_mobile/features/live/camera_full_screen.dart';
 import 'package:frigate_mobile/features/live/feed_tile.dart';
 import 'package:frigate_mobile/features/live/live_grid_screen.dart';
+import 'package:frigate_mobile/features/live/live_video.dart';
 import 'package:frigate_mobile/l10n/app_localizations.dart';
 
 /// Smallest valid PNG (1×1, transparent): decodes in widget tests.
@@ -22,21 +23,22 @@ final _pixel = Uint8List.fromList(const [
   0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
 ]);
 
-CameraCapabilities _camera(String name) => CameraCapabilities(
-  name: name,
-  label: CameraCapabilities.defaultLabel(name),
-  objectDetection: false,
-  trackedObjects: const [],
-  recording: true,
-  continuousDays: 3,
-  motionDays: 0,
-  alertDays: 0,
-  audioDetection: false,
-  ptz: false,
-  talk: false,
-  sound: false,
-  liveStreams: [name],
-);
+CameraCapabilities _camera(String name, {List<String>? streams}) =>
+    CameraCapabilities(
+      name: name,
+      label: CameraCapabilities.defaultLabel(name),
+      objectDetection: false,
+      trackedObjects: const [],
+      recording: true,
+      continuousDays: 3,
+      motionDays: 0,
+      alertDays: 0,
+      audioDetection: false,
+      ptz: false,
+      talk: false,
+      sound: false,
+      liveStreams: streams ?? [name],
+    );
 
 /// Records every frame request; fails for cameras listed in [failing].
 class _FakeServer {
@@ -54,6 +56,51 @@ class _FakeServer {
   }
 
   Set<String> get cameras => {for (final (c, _) in calls) c};
+}
+
+/// Video whose state the test drives.
+class _FakeVideo extends LiveVideo {
+  @override
+  final String stream;
+  @override
+  LiveVideoStatus status = LiveVideoStatus.connecting;
+  @override
+  bool hasAudio;
+  bool _muted = LiveVideoDefaults.startMuted;
+  bool started = false;
+  bool disposed = false;
+
+  _FakeVideo(this.stream, {this.hasAudio = false});
+
+  @override
+  bool get muted => _muted;
+  @override
+  set muted(bool value) {
+    _muted = value;
+    notifyListeners();
+  }
+
+  void play() {
+    status = LiveVideoStatus.playing;
+    notifyListeners();
+  }
+
+  void fail() {
+    status = LiveVideoStatus.failed;
+    notifyListeners();
+  }
+
+  @override
+  Future<void> start() async => started = true;
+
+  @override
+  Widget buildView(BoxFit fit) => SizedBox(key: ValueKey('video-$stream'));
+
+  @override
+  void dispose() {
+    disposed = true;
+    super.dispose();
+  }
 }
 
 Widget _app(Widget child) => MaterialApp(
@@ -259,6 +306,177 @@ void main() {
       expect(server.cameras, {'cam_a', 'cam_b', 'cam_c', 'cam_d'});
 
       await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('CameraFullScreen video', () {
+    late _FakeServer server;
+    late List<_FakeVideo> videos;
+    var withAudio = false;
+
+    LiveVideo factory(String stream) {
+      final video = _FakeVideo(stream, hasAudio: withAudio);
+      videos.add(video);
+      return video;
+    }
+
+    Future<void> open(WidgetTester tester, List<CameraCapabilities> cams) =>
+        tester.pumpWidget(
+          _app(
+            CameraFullScreen(
+              cameras: cams,
+              initialCamera: cams.first.name,
+              fetch: server.fetch,
+              videoFactory: factory,
+            ),
+          ),
+        );
+
+    setUp(() {
+      server = _FakeServer();
+      videos = [];
+      withAudio = false;
+    });
+
+    testWidgets('images until the first video frame, then video only', (
+      tester,
+    ) async {
+      withAudio = true;
+      await open(tester, cameras);
+      await tester.pump();
+
+      expect(videos.single.stream, 'cam_a');
+      expect(videos.single.started, isTrue);
+      expect(find.text('Connexion vidéo…'), findsOneWidget);
+      expect(find.byType(FeedImage), findsOneWidget);
+      expect(server.calls, isNotEmpty);
+
+      videos.single.play();
+      await tester.pump();
+      expect(find.text('Vidéo en direct'), findsOneWidget);
+      expect(find.byType(FeedImage), findsNothing);
+      expect(find.byKey(const ValueKey('video-cam_a')), findsOneWidget);
+
+      // No more image requests while the video plays.
+      server.calls.clear();
+      await tester.pump(const Duration(seconds: 5));
+      expect(server.calls, isEmpty);
+
+      // Sound starts muted; the button turns it on.
+      expect(videos.single.muted, isTrue);
+      await tester.tap(find.byTooltip('Activer le son'));
+      await tester.pump();
+      expect(videos.single.muted, isFalse);
+      expect(find.byTooltip('Couper le son'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      expect(videos.single.disposed, isTrue);
+    });
+
+    testWidgets('no sound button when the stream has no sound', (
+      tester,
+    ) async {
+      await open(tester, cameras);
+      videos.single.play();
+      await tester.pump();
+      expect(find.byTooltip('Activer le son'), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a failed video falls back to images and can retry', (
+      tester,
+    ) async {
+      await open(tester, cameras);
+      videos.single.play();
+      await tester.pump();
+
+      videos.single.fail();
+      await tester.pump();
+      expect(find.byType(FeedImage), findsOneWidget);
+      expect(
+        find.text('Vidéo indisponible · Images · toutes les 1 s'),
+        findsOneWidget,
+      );
+      server.calls.clear();
+      await tester.pump(const Duration(seconds: 2));
+      expect(server.calls, isNotEmpty);
+
+      await tester.tap(find.byTooltip('Réessayer la vidéo'));
+      await tester.pump();
+      expect(videos, hasLength(2));
+      expect(videos.first.disposed, isTrue);
+      expect(videos.last.started, isTrue);
+
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('quality menu switches between the camera streams', (
+      tester,
+    ) async {
+      await open(tester, [
+        _camera('cam_g', streams: ['cam_g_1', 'cam_g_2']),
+        _camera('cam_h'),
+      ]);
+      videos.single.play();
+      await tester.pump();
+      expect(find.text('Vidéo en direct · Flux 1'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Qualité'));
+      await tester.pumpAndSettle();
+      expect(find.text('Flux 1 (principal)'), findsOneWidget);
+      await tester.tap(find.text('Flux 2'));
+      await tester.pumpAndSettle();
+
+      expect(videos.map((v) => v.stream), ['cam_g_1', 'cam_g_2']);
+      expect(videos.first.disposed, isTrue);
+      videos.last.play();
+      await tester.pump();
+      expect(find.text('Vidéo en direct · Flux 2'), findsOneWidget);
+
+      // A camera with one stream has no quality menu.
+      await tester.fling(find.byType(PageView), const Offset(-500, 0), 1000);
+      await tester.pumpAndSettle();
+      expect(videos.last.stream, 'cam_h');
+      expect(videos[1].disposed, isTrue);
+      expect(find.byTooltip('Qualité'), findsNothing);
+
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('sdpHasAudio', () {
+    const video = 'm=video 9 UDP/TLS/RTP/SAVPF 96\r\na=sendonly\r\n';
+    test('active audio section', () {
+      expect(
+        sdpHasAudio(
+          'v=0\r\n${video}m=audio 9 UDP/TLS/RTP/SAVPF 111\r\n'
+          'a=rtpmap:111 opus/48000/2\r\na=sendonly\r\n',
+        ),
+        isTrue,
+      );
+    });
+    test('inactive, rejected or missing audio', () {
+      expect(
+        sdpHasAudio(
+          'v=0\r\n${video}m=audio 9 UDP/TLS/RTP/SAVPF 0\r\n'
+          'a=inactive\r\n',
+        ),
+        isFalse,
+      );
+      expect(
+        sdpHasAudio('v=0\r\n${video}m=audio 0 UDP/TLS/RTP/SAVPF 0\r\n'),
+        isFalse,
+      );
+      expect(sdpHasAudio('v=0\r\n$video'), isFalse);
+    });
+    test('audio before video', () {
+      expect(
+        sdpHasAudio(
+          'v=0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 8\r\n'
+          'a=sendonly\r\n$video',
+        ),
+        isTrue,
+      );
     });
   });
 }

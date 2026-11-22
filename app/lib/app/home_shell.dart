@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/session/session_controller.dart';
 import '../features/live/live_grid_screen.dart';
+import '../features/live/webrtc_live_video.dart';
 import '../features/more/more_screen.dart';
 import '../l10n/app_localizations.dart';
 import 'theme.dart';
@@ -72,6 +73,10 @@ class _HomeShellState extends State<HomeShell> {
         0 when client != null => LiveGridScreen(
           cameras: cameras,
           fetch: client.fetchLatestImage,
+          videoFactory: (stream) => WebRtcLiveVideo(
+            stream: stream,
+            negotiate: client.negotiateWebRtc,
+          ),
           layout: _liveLayout,
           onAuthError: widget.controller.sessionExpired,
         ),
