@@ -895,6 +895,102 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{hours} h {minutes}'**
   String durationHours(int hours, String minutes);
+
+  /// No description provided for @timelineClip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Extrait'**
+  String get timelineClip;
+
+  /// No description provided for @timelinePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo'**
+  String get timelinePhoto;
+
+  /// No description provided for @clipTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Extrait · {camera}'**
+  String clipTitle(String camera);
+
+  /// No description provided for @clipStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Début'**
+  String get clipStart;
+
+  /// No description provided for @clipEnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin'**
+  String get clipEnd;
+
+  /// No description provided for @clipEarlier.
+  ///
+  /// In fr, this message translates to:
+  /// **'{seconds} s plus tôt'**
+  String clipEarlier(int seconds);
+
+  /// No description provided for @clipLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'{seconds} s plus tard'**
+  String clipLater(int seconds);
+
+  /// No description provided for @clipLength.
+  ///
+  /// In fr, this message translates to:
+  /// **'Durée : {length}'**
+  String clipLength(String length);
+
+  /// No description provided for @clipLengthMax.
+  ///
+  /// In fr, this message translates to:
+  /// **'Durée : {length}, le maximum'**
+  String clipLengthMax(String length);
+
+  /// No description provided for @clipPassage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passage'**
+  String get clipPassage;
+
+  /// No description provided for @clipSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get clipSave;
+
+  /// No description provided for @clipShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager'**
+  String get clipShare;
+
+  /// No description provided for @clipDownloading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargement… {size} Mo'**
+  String clipDownloading(String size);
+
+  /// No description provided for @clipCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get clipCancel;
+
+  /// No description provided for @clipSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Extrait enregistré dans l\'album {album}'**
+  String clipSaved(String album);
+
+  /// No description provided for @clipFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'extrait n\'a pas pu être téléchargé.'**
+  String get clipFailed;
 }
 
 class _AppLocalizationsDelegate

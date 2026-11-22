@@ -4,23 +4,13 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../app/formatting.dart';
 import '../../app/theme.dart';
 import '../../core/frigate/capabilities.dart';
 import '../../l10n/app_localizations.dart';
 import '../timeline/motion_passages.dart';
 import 'motion_list.dart';
 import 'thumbnails.dart';
-
-/// "42 s", "1 min 05", "2 h 10".
-String formatPassageDuration(Duration d, AppLocalizations l) {
-  final seconds = d.inSeconds < 1 ? 1 : d.inSeconds;
-  if (seconds < 60) return l.durationSeconds(seconds);
-  String two(int v) => v.toString().padLeft(2, '0');
-  if (seconds < 3600) {
-    return l.durationMinutes(seconds ~/ 60, two(seconds % 60));
-  }
-  return l.durationHours(seconds ~/ 3600, two(seconds % 3600 ~/ 60));
-}
 
 /// Alerts tab (mock-up screen 5): the motion passages of every camera,
 /// newest first, by day. Opening one plays it in the timeline.
@@ -277,7 +267,7 @@ class _PassageRow extends StatelessWidget {
                       ),
                       Text(
                         '${DateFormat.Hms(locale).format(passage.start)}'
-                        ' · ${formatPassageDuration(passage.duration, l)}',
+                        ' · ${formatDuration(passage.duration, l)}',
                         style: text.bodySmall?.copyWith(
                           color: AppColors.textDim,
                         ),

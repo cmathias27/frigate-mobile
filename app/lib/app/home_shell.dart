@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../core/frigate/capabilities.dart';
 import '../core/frigate/client.dart';
@@ -13,6 +14,7 @@ import '../features/events/thumbnails.dart';
 import '../features/live/live_grid_screen.dart';
 import '../features/live/webrtc_live_video.dart';
 import '../features/more/more_screen.dart';
+import '../features/timeline/clip_sheet.dart';
 import '../features/timeline/motion_passages.dart';
 import '../features/timeline/recording_history.dart';
 import '../features/timeline/recording_player.dart';
@@ -139,6 +141,12 @@ class _HomeShellState extends State<HomeShell> {
       playerFactory: () => HlsRecordingPlayer(proxy),
       loadHistory: () => _loadHistory(client, recorded),
       openAt: openAt,
+      export: RecordingExport(
+        open: client.openStream,
+        frame: client.fetchRecordingImage,
+        cacheDirectory: getTemporaryDirectory,
+        onAuthError: widget.controller.sessionExpired,
+      ),
     );
   }
 
