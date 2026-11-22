@@ -6,6 +6,7 @@ import 'package:frigate_mobile/core/frigate/capabilities.dart';
 import 'package:frigate_mobile/core/frigate/client.dart';
 import 'package:frigate_mobile/core/frigate/recordings.dart';
 import 'package:frigate_mobile/features/timeline/motion_passages.dart';
+import 'package:frigate_mobile/features/timeline/recording_history.dart';
 import 'package:frigate_mobile/features/timeline/recording_player.dart';
 import 'package:frigate_mobile/features/timeline/timeline_data.dart';
 import 'package:frigate_mobile/features/timeline/timeline_screen.dart';
@@ -161,6 +162,103 @@ void main() {
       expect(segments.last.motion, 4);
       expect(parseRecordings({'not': 'a list'}), isEmpty);
     });
+  });
+
+  group('recording history', () {
+    test('summary hours asked in UTC land on local days', () {
+      final hours = parseRecordingHours([
+        {
+          'day': '2026-01-09',
+          'hours': [
+            {'hour': '23', 'duration': 3600, 'motion': 12},
+            {'hour': 'x', 'duration': 10},
+            {'hour': '22', 'duration': 1800.5},
+          ],
+        },
+        {'day': 'nope', 'hours': []},
+        'nope',
+      ]);
+      expect(hours, hasLength(2));
+      expect(hours.first.start, DateTime.utc(2026, 1, 9, 22).toLocal());
+      expect(hours.first.recorded, const Duration(milliseconds: 1800500));
+      expect(hours.last.start, DateTime.utc(2026, 1, 9, 23).toLocal());
+      expect(hours.last.motion, 12);
+      expect(parseRecordingHours({'not': 'a list'}), isEmpty);
+    });
+
+    RecordingHour hour(DateTime start, int minutes) => RecordingHour(
+      start: start,
+      recorded: Duration(minutes: minutes),
+      motion: 0,
+    );
+
+    test('a day is full when one camera recorded most of it', () {
+      final history = buildHistory(
+        {
+          'cam_a': [
+            // Oldest recording at 18:00: the evening is all that counts.
+            for (var h = 18; h < 24; h++) hour(DateTime(2026, 1, 8, h), 60),
+            for (var h = 0; h < 24; h++) hour(DateTime(2026, 1, 9, h), 20),
+            for (var h = 0; h < 12; h++) hour(DateTime(2026, 1, 10, h), 55),
+          ],
+          'cam_b': [
+            for (var h = 0; h < 24; h++) hour(DateTime(2026, 1, 9, h), 50),
+            hour(DateTime(2026, 1, 7, 3), 0),
+          ],
+        },
+        now: _now,
+      );
+      expect(history.oldest, DateTime(2026, 1, 8, 18));
+      expect(history.at(DateTime(2026, 1, 8, 20)), DayRecording.full);
+      expect(history.at(DateTime(2026, 1, 9)), DayRecording.full);
+      // Up to now only.
+      expect(history.at(DateTime(2026, 1, 10)), DayRecording.full);
+      expect(history.at(DateTime(2026, 1, 7)), isNull);
+      expect(history.newestDay, DateTime(2026, 1, 10));
+
+      final strict = buildHistory(
+        {
+          'cam_a': [
+            for (var h = 0; h < 24; h++) hour(DateTime(2026, 1, 9, h), 20),
+          ],
+        },
+        now: _now,
+        oldest: DateTime(2026, 1, 1),
+      );
+      expect(strict.at(DateTime(2026, 1, 9)), DayRecording.partial);
+    });
+
+    test(
+      'loading skips a camera in error and finds the exact oldest',
+      () async {
+        final asked = <(String, DateTime)>[];
+        final history = await loadRecordingHistory(
+          cameras: ['cam_a', 'cam_b'],
+          clock: () => _now,
+          fetchHours: (camera) async {
+            if (camera == 'cam_b') throw const FrigateNetworkException('down');
+            return [hour(DateTime(2026, 1, 9, 6), 46)];
+          },
+          fetchSegments: (camera, after, before) async {
+            asked.add((camera, after));
+            return [_seg(DateTime(2026, 1, 9, 6, 14), 0)];
+          },
+        );
+        expect(asked, [('cam_a', DateTime(2026, 1, 9, 6))]);
+        expect(history.oldest, DateTime(2026, 1, 9, 6, 14));
+        expect(history.at(DateTime(2026, 1, 9)), DayRecording.partial);
+
+        expect(
+          loadRecordingHistory(
+            cameras: ['cam_a'],
+            fetchHours: (_) async =>
+                throw const FrigateAuthException('expired'),
+            fetchSegments: (_, _, _) async => const [],
+          ),
+          throwsA(isA<FrigateAuthException>()),
+        );
+      },
+    );
   });
 
   group('motion passages', () {
@@ -341,6 +439,7 @@ void main() {
     late _FakeRecordings server;
     late TimelineData data;
     late _FakePlayer player;
+    RecordingHistory? history;
     final passageAt = _now.subtract(const Duration(minutes: 30));
 
     setUp(() {
@@ -355,6 +454,7 @@ void main() {
         clock: () => _now,
       );
       player = _FakePlayer();
+      history = null;
     });
 
     tearDown(() => data.dispose());
@@ -371,6 +471,7 @@ void main() {
             data: data,
             playerFactory: () => player,
             clock: () => _now,
+            loadHistory: history == null ? null : () async => history!,
           ),
         ),
       );
@@ -445,6 +546,51 @@ void main() {
             .selected,
         isTrue,
       );
+    });
+
+    testWidgets('no calendar without a history to read', (tester) async {
+      await pumpScreen(tester);
+      expect(find.byTooltip('Calendrier'), findsNothing);
+    });
+
+    testWidgets('calendar jumps to a chosen day and to the oldest', (
+      tester,
+    ) async {
+      final oldest = DateTime(2026, 1, 8, 6, 14);
+      history = RecordingHistory(
+        days: {
+          DateTime(2026, 1, 8): DayRecording.partial,
+          DateTime(2026, 1, 9): DayRecording.full,
+          DateTime(2026, 1, 10): DayRecording.full,
+        },
+        oldest: oldest,
+      );
+      await pumpScreen(tester);
+      await tester.tap(find.byTooltip('Calendrier'));
+      await tester.pumpAndSettle();
+      expect(find.text('Janvier 2026'), findsOneWidget);
+      expect(
+        tester
+            .widget<IconButton>(
+              find.widgetWithIcon(IconButton, Icons.chevron_left_rounded).last,
+            )
+            .onPressed,
+        isNull,
+      );
+      // A day without recording cannot be chosen.
+      await tester.tap(find.text('5'));
+      await tester.tap(find.text('9'));
+      await tester.pump();
+      await tester.tap(find.text('Aller'));
+      await tester.pumpAndSettle();
+      expect(player.opened.last.$2, DateTime(2026, 1, 9, 11, 59));
+
+      await tester.tap(find.byTooltip('Calendrier'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Plus ancien enregistrement'), findsOneWidget);
+      await tester.tap(find.text('Le plus ancien'));
+      await tester.pumpAndSettle();
+      expect(player.opened.last.$2, oldest);
     });
 
     testWidgets('releases the player when closed', (tester) async {

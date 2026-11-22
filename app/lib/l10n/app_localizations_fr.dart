@@ -295,4 +295,46 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get timelineNoRecordingCamera =>
       'Aucune caméra n\'enregistre sur ce serveur';
+
+  @override
+  String get timelineCalendar => 'Calendrier';
+
+  @override
+  String get calendarPreviousMonth => 'Mois précédent';
+
+  @override
+  String get calendarNextMonth => 'Mois suivant';
+
+  @override
+  String get calendarFull => 'Enregistrement complet';
+
+  @override
+  String get calendarPartial => 'Enregistrement partiel (alertes, mouvement)';
+
+  @override
+  String get calendarGoTo => 'Aller à une date et une heure';
+
+  @override
+  String get calendarGo => 'Aller';
+
+  @override
+  String get calendarHourAgo => 'Il y a 1 h';
+
+  @override
+  String get calendarThisMorning => 'Ce matin';
+
+  @override
+  String get calendarLastEvening => 'Hier soir';
+
+  @override
+  String get calendarOldest => 'Le plus ancien';
+
+  @override
+  String calendarOldestAt(String date) {
+    return 'Plus ancien enregistrement : $date';
+  }
+
+  @override
+  String get calendarLoadFailed =>
+      'Impossible de lire l\'historique des enregistrements';
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../core/frigate/capabilities.dart';
@@ -7,6 +9,7 @@ import '../core/session/session_controller.dart';
 import '../features/live/live_grid_screen.dart';
 import '../features/live/webrtc_live_video.dart';
 import '../features/more/more_screen.dart';
+import '../features/timeline/recording_history.dart';
 import '../features/timeline/recording_player.dart';
 import '../features/timeline/timeline_data.dart';
 import '../features/timeline/timeline_screen.dart';
@@ -72,7 +75,24 @@ class _HomeShellState extends State<HomeShell> {
       cameras: recorded,
       data: _timelineData!,
       playerFactory: () => HlsRecordingPlayer(proxy),
+      loadHistory: () => _loadHistory(client, recorded),
     );
+  }
+
+  Future<RecordingHistory> _loadHistory(
+    FrigateClient client,
+    List<CameraCapabilities> cameras,
+  ) async {
+    try {
+      return await loadRecordingHistory(
+        cameras: [for (final c in cameras) c.name],
+        fetchHours: client.fetchRecordingHours,
+        fetchSegments: client.fetchRecordings,
+      );
+    } on FrigateAuthException {
+      unawaited(widget.controller.sessionExpired());
+      rethrow;
+    }
   }
 
   @override

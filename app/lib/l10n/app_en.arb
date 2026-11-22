@@ -109,5 +109,19 @@
   "timelineRetry": "Retry",
   "timelineEnd": "End of recordings",
   "timelineLoading": "Loading timeline…",
-  "timelineNoRecordingCamera": "No camera records on this server"
+  "timelineNoRecordingCamera": "No camera records on this server",
+  "timelineCalendar": "Calendar",
+  "calendarPreviousMonth": "Previous month",
+  "calendarNextMonth": "Next month",
+  "calendarFull": "Full recording",
+  "calendarPartial": "Partial recording (alerts, motion)",
+  "calendarGoTo": "Go to a date and time",
+  "calendarGo": "Go",
+  "calendarHourAgo": "1 h ago",
+  "calendarThisMorning": "This morning",
+  "calendarLastEvening": "Last evening",
+  "calendarOldest": "Oldest",
+  "calendarOldestAt": "Oldest recording: {date}",
+  "@calendarOldestAt": {"placeholders": {"date": {"type": "String"}}},
+  "calendarLoadFailed": "Couldn't read the recording history"
 }

@@ -577,6 +577,84 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aucune caméra n\'enregistre sur ce serveur'**
   String get timelineNoRecordingCamera;
+
+  /// No description provided for @timelineCalendar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calendrier'**
+  String get timelineCalendar;
+
+  /// No description provided for @calendarPreviousMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois précédent'**
+  String get calendarPreviousMonth;
+
+  /// No description provided for @calendarNextMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois suivant'**
+  String get calendarNextMonth;
+
+  /// No description provided for @calendarFull.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrement complet'**
+  String get calendarFull;
+
+  /// No description provided for @calendarPartial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrement partiel (alertes, mouvement)'**
+  String get calendarPartial;
+
+  /// No description provided for @calendarGoTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aller à une date et une heure'**
+  String get calendarGoTo;
+
+  /// No description provided for @calendarGo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aller'**
+  String get calendarGo;
+
+  /// No description provided for @calendarHourAgo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il y a 1 h'**
+  String get calendarHourAgo;
+
+  /// No description provided for @calendarThisMorning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce matin'**
+  String get calendarThisMorning;
+
+  /// No description provided for @calendarLastEvening.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hier soir'**
+  String get calendarLastEvening;
+
+  /// No description provided for @calendarOldest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le plus ancien'**
+  String get calendarOldest;
+
+  /// No description provided for @calendarOldestAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus ancien enregistrement : {date}'**
+  String calendarOldestAt(String date);
+
+  /// No description provided for @calendarLoadFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de lire l\'historique des enregistrements'**
+  String get calendarLoadFailed;
 }
 
 class _AppLocalizationsDelegate

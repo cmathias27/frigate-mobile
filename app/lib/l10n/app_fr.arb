@@ -160,5 +160,19 @@
   "timelineRetry": "Réessayer",
   "timelineEnd": "Fin des enregistrements",
   "timelineLoading": "Chargement de la chronologie…",
-  "timelineNoRecordingCamera": "Aucune caméra n'enregistre sur ce serveur"
+  "timelineNoRecordingCamera": "Aucune caméra n'enregistre sur ce serveur",
+  "timelineCalendar": "Calendrier",
+  "calendarPreviousMonth": "Mois précédent",
+  "calendarNextMonth": "Mois suivant",
+  "calendarFull": "Enregistrement complet",
+  "calendarPartial": "Enregistrement partiel (alertes, mouvement)",
+  "calendarGoTo": "Aller à une date et une heure",
+  "calendarGo": "Aller",
+  "calendarHourAgo": "Il y a 1 h",
+  "calendarThisMorning": "Ce matin",
+  "calendarLastEvening": "Hier soir",
+  "calendarOldest": "Le plus ancien",
+  "calendarOldestAt": "Plus ancien enregistrement : {date}",
+  "@calendarOldestAt": {"placeholders": {"date": {"type": "String"}}},
+  "calendarLoadFailed": "Impossible de lire l'historique des enregistrements"
 }

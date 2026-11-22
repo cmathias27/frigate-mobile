@@ -6,7 +6,9 @@ import 'package:intl/intl.dart';
 import '../../app/theme.dart';
 import '../../core/frigate/capabilities.dart';
 import '../../l10n/app_localizations.dart';
+import 'calendar_sheet.dart';
 import 'motion_passages.dart';
+import 'recording_history.dart';
 import 'recording_player.dart';
 import 'timeline_bands.dart';
 import 'timeline_data.dart';
@@ -39,12 +41,16 @@ class TimelineScreen extends StatefulWidget {
   final RecordingPlayer Function() playerFactory;
   final DateTime Function()? clock;
 
+  /// Reads every day recorded, for the calendar; no calendar without it.
+  final Future<RecordingHistory> Function()? loadHistory;
+
   const TimelineScreen({
     super.key,
     required this.cameras,
     required this.data,
     required this.playerFactory,
     this.clock,
+    this.loadHistory,
   });
 
   @override
@@ -251,6 +257,18 @@ class _TimelineScreenState extends State<TimelineScreen>
   void _shiftDay(int days) =>
       _goTo(_playhead.add(Duration(days: days)), play: false);
 
+  Future<void> _openCalendar() async {
+    final load = widget.loadHistory;
+    if (load == null) return;
+    final time = await showRecordingCalendar(
+      context,
+      load: load,
+      selected: _playhead,
+      clock: widget.clock,
+    );
+    if (time != null && mounted) await _goTo(time, play: false);
+  }
+
   void _setZoom(int index) {
     setState(() => _zoom = index);
     _ensure();
@@ -286,22 +304,34 @@ class _TimelineScreenState extends State<TimelineScreen>
                     onPressed: () => _shiftDay(-1),
                   ),
                   Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: DateFormat.MMMEd(locale).format(_playhead),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          TextSpan(
-                            text:
-                                ' · ${DateFormat.Hms(locale).format(_playhead)}',
-                          ),
-                        ],
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: widget.loadHistory == null ? null : _openCalendar,
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: DateFormat.MMMEd(locale).format(_playhead),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  ' · ${DateFormat.Hms(locale).format(_playhead)}',
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
+                  if (widget.loadHistory != null)
+                    IconButton(
+                      tooltip: l.timelineCalendar,
+                      icon: const Icon(Icons.calendar_month_rounded),
+                      onPressed: _openCalendar,
+                    ),
                   IconButton(
                     tooltip: l.timelineNextDay,
                     icon: const Icon(Icons.chevron_right_rounded),
