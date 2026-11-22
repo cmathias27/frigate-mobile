@@ -43,6 +43,6 @@ class DevicePhotoActions implements PhotoActions {
   }
 }
 
-/// `cam_portier_20261122_143208`: sorts by camera then time in a gallery.
+/// `cam_door_20260110_143208`: sorts by camera then time in a gallery.
 String photoName(String camera, DateTime at) =>
     '${camera}_${DateFormat('yyyyMMdd_HHmmss').format(at)}';

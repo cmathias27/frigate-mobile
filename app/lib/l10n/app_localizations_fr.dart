@@ -568,4 +568,22 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get timelineSeekAllHint =>
       'Passage préc. et suiv. sur toutes les caméras, sinon sur la caméra lue';
+
+  @override
+  String get timelineImagePlayback => 'Images';
+
+  @override
+  String get timelineImagePlaybackTitle => 'Lecture en images';
+
+  @override
+  String get timelineImagePlaybackBody =>
+      'La vidéo de cette caméra ne passe pas sur ce téléphone, souvent parce que son image est trop grande pour le décodeur. Les images enregistrées sont montrées à la place, quelques-unes par seconde, jusqu\'à la fermeture de l\'application.';
+
+  @override
+  String timelineImagePlaybackDetail(String error) {
+    return 'Détail : $error';
+  }
+
+  @override
+  String get timelineRetryVideo => 'Réessayer la vidéo';
 }

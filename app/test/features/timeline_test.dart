@@ -80,6 +80,18 @@ class _FakePlayer extends RecordingPlayer {
   @override
   bool completed = false;
   bool disposed = false;
+  @override
+  bool imagePlayback = false;
+  @override
+  String? videoError;
+  int videoRetries = 0;
+
+  @override
+  Future<void> retryVideo() async {
+    videoRetries++;
+    imagePlayback = false;
+    notifyListeners();
+  }
 
   @override
   Future<void> open(String camera, DateTime start, DateTime end) async {
@@ -587,6 +599,26 @@ void main() {
       expect(start, passageAt);
       expect(player.playing, isTrue);
       expect(find.text('Lecture · Cour'), findsOneWidget);
+    });
+
+    testWidgets('images instead of the video are said, video can be retried', (
+      tester,
+    ) async {
+      await pumpScreen(tester);
+      expect(find.text('Images'), findsNothing);
+      player
+        ..imagePlayback = true
+        ..videoError = 'Decoder init failed'
+        ..notifyListeners();
+      await tester.pump();
+      await tester.tap(find.text('Images'));
+      await tester.pumpAndSettle();
+      expect(find.text('Lecture en images'), findsOneWidget);
+      expect(find.text('Détail : Decoder init failed'), findsOneWidget);
+      await tester.tap(find.text('Réessayer la vidéo'));
+      await tester.pumpAndSettle();
+      expect(player.videoRetries, 1);
+      expect(find.text('Images'), findsNothing);
     });
 
     testWidgets('opens the first camera just behind now', (tester) async {

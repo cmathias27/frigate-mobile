@@ -1009,6 +1009,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Passage préc. et suiv. sur toutes les caméras, sinon sur la caméra lue'**
   String get timelineSeekAllHint;
+
+  /// No description provided for @timelineImagePlayback.
+  ///
+  /// In fr, this message translates to:
+  /// **'Images'**
+  String get timelineImagePlayback;
+
+  /// No description provided for @timelineImagePlaybackTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture en images'**
+  String get timelineImagePlaybackTitle;
+
+  /// No description provided for @timelineImagePlaybackBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'La vidéo de cette caméra ne passe pas sur ce téléphone, souvent parce que son image est trop grande pour le décodeur. Les images enregistrées sont montrées à la place, quelques-unes par seconde, jusqu\'à la fermeture de l\'application.'**
+  String get timelineImagePlaybackBody;
+
+  /// No description provided for @timelineImagePlaybackDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détail : {error}'**
+  String timelineImagePlaybackDetail(String error);
+
+  /// No description provided for @timelineRetryVideo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer la vidéo'**
+  String get timelineRetryVideo;
 }
 
 class _AppLocalizationsDelegate

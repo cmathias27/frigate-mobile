@@ -200,5 +200,11 @@
   "@clipSaved": {"placeholders": {"album": {"type": "String"}}},
   "clipFailed": "The clip could not be downloaded.",
   "timelineSeekAll": "All",
-  "timelineSeekAllHint": "Previous and next passage on every camera, otherwise on the camera played"
+  "timelineSeekAllHint": "Previous and next passage on every camera, otherwise on the camera played",
+  "timelineImagePlayback": "Images",
+  "timelineImagePlaybackTitle": "Playing images",
+  "timelineImagePlaybackBody": "This camera's video does not play on this phone, often because its picture is too large for the decoder. The recorded images are shown instead, a few per second, until the app is closed.",
+  "timelineImagePlaybackDetail": "Detail: {error}",
+  "@timelineImagePlaybackDetail": {"placeholders": {"error": {"type": "String"}}},
+  "timelineRetryVideo": "Retry the video"
 }
