@@ -25,7 +25,7 @@
   "loginSubtitle": "Comme dans DS cam : un serveur, plusieurs caméras.",
   "serverNameLabel": "Nom du serveur",
   "localUrlLabel": "Adresse locale (port 8971)",
-  "localUrlHint": "https://192.168.1.53:8971",
+  "localUrlHint": "https://192.168.1.10:8971",
   "remoteUrlLabel": "Adresse à distance (optionnelle)",
   "remoteUrlHint": "https://frigate.exemple.fr",
   "usernameLabel": "Utilisateur",

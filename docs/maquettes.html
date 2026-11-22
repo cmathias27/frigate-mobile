@@ -58,10 +58,10 @@ header.top p{margin:0;color:var(--muted)}
 .bb span{position:absolute;top:-13px;left:-1.5px;background:var(--c,var(--person));color:#111;font-size:8.5px;font-weight:600;padding:0 4px;white-space:nowrap;border-radius:2px 2px 0 0}
 .g-arr{--g:linear-gradient(180deg,#2a3a48 0 38%,#33452f 38% 70%,#4a4a44 70%)}
 .g-av{--g:linear-gradient(180deg,#3c4c5e 0 30%,#6b6458 30% 34%,#55524c 34% 75%,#3a3833 75%)}
-.g-portier{--g:linear-gradient(90deg,#3d3a35 0 22%,#5a5248 22% 60%,#2f2c28 60%)}
+.g-entree{--g:linear-gradient(90deg,#3d3a35 0 22%,#5a5248 22% 60%,#2f2c28 60%)}
 .g-couloir{--g:linear-gradient(90deg,#2b2d33 0 25%,#4a4a52 25% 75%,#2b2d33 75%)}
-.g-garage{--g:linear-gradient(180deg,#30343a 0 55%,#45484c 55%)}
-.g-sous{--g:linear-gradient(160deg,#1e2226 0 50%,#2a2e33 50%)}
+.g-cour{--g:linear-gradient(180deg,#30343a 0 55%,#45484c 55%)}
+.g-arriere-cour{--g:linear-gradient(160deg,#1e2226 0 50%,#2a2e33 50%)}
 .night{filter:grayscale(1) brightness(.9)}
 
 .chips{display:flex;gap:6px;overflow:hidden;flex-wrap:nowrap}
@@ -188,7 +188,7 @@ header.top p{margin:0;color:var(--muted)}
 <header class="top">
   <div class="eyebrow">Frigate 0.18 · 6 caméras · maquettes v0.1</div>
   <h1>Une application Frigate qui se tient comme DS cam</h1>
-  <p>Sept écrans pour valider l'interface avant d'écrire du code. Les images sont simulées ; les noms de caméras, les zones et les types d'objets reprennent ta configuration Frigate. Sous chaque écran, la liste des fonctions et les appels d'API qui les servent.</p>
+  <p>Sept écrans pour valider l'interface avant d'écrire du code. Les images sont simulées ; les noms de caméras et de zones sont fictifs. Sous chaque écran, la liste des fonctions et les appels d'API qui les servent.</p>
   <div class="legend">
     <span><i style="background:#ff5a4e"></i>Personne (alerte)</span>
     <span><i style="background:#ffb020"></i>Véhicule</span>
@@ -251,12 +251,12 @@ GET /api/config → caméras, zones</code>
     <div class="body">
       <div class="chips"><span class="chip on">Toutes</span><span class="chip">Extérieur</span><span class="chip">Intérieur</span><span class="chip">★ Favoris</span></div>
       <div class="grid2">
-        <div class="feed g-portier"><span class="live">LIVE</span><span class="ts">14:32:08</span><div class="bb" style="left:42%;top:22%;width:20%;height:68%"><span>personne 91%</span></div><span class="nm">Portier</span></div>
-        <div class="feed g-av"><span class="live">LIVE</span><span class="ts">14:32:08</span><div class="bb" style="--c:var(--car);left:18%;top:46%;width:46%;height:32%"><span>voiture 88%</span></div><span class="nm">Avant</span></div>
+        <div class="feed g-entree"><span class="live">LIVE</span><span class="ts">14:32:08</span><div class="bb" style="left:42%;top:22%;width:20%;height:68%"><span>personne 91%</span></div><span class="nm">Entrée</span></div>
+        <div class="feed g-av"><span class="live">LIVE</span><span class="ts">14:32:08</span><div class="bb" style="--c:var(--car);left:18%;top:46%;width:46%;height:32%"><span>voiture 88%</span></div><span class="nm">Allée</span></div>
         <div class="feed g-arr"><span class="ts">14:32:08</span><span class="nm">Arrière</span></div>
-        <div class="feed g-garage"><span class="ts">14:32:07</span><span class="nm">Garage</span></div>
+        <div class="feed g-cour"><span class="ts">14:32:07</span><span class="nm">Cour</span></div>
         <div class="feed g-couloir"><span class="ts">14:32:08</span><span class="nm">Couloir</span></div>
-        <div class="feed g-sous night"><span class="ts">14:32:06</span><span class="nm">Sous-sol</span></div>
+        <div class="feed g-arriere-cour night"><span class="ts">14:32:06</span><span class="nm">Arrière-cour</span></div>
       </div>
       <div class="home"><div><b>Mode maison</b><div style="font-size:11px;color:var(--p-dim)">Intérieur muet · alertes extérieures actives</div></div><span class="sw"></span></div>
     </div>
@@ -281,10 +281,10 @@ WS /ws → objets actifs par caméra</code>
     <div class="sb"><span>9:41</span><span>Wi-Fi ▮▮▮ 82%</span></div>
     <div class="bar">
       <span class="ic">‹</span>
-      <div style="text-align:center"><h3 style="font-size:18px">Portier</h3><div class="sub">WebRTC · 1080p · 0,4 s</div></div>
+      <div style="text-align:center"><h3 style="font-size:18px">Entrée</h3><div class="sub">WebRTC · 1080p · 0,4 s</div></div>
       <span class="ic">⤢</span>
     </div>
-    <div class="feed g-portier" style="border-radius:0;margin:0 -10px"><span class="live">LIVE</span><span class="ts">18/11/2026 14:32:08</span><div class="bb" style="left:40%;top:18%;width:22%;height:74%"><span>personne 91% · zone entrée</span></div></div>
+    <div class="feed g-entree" style="border-radius:0;margin:0 -10px"><span class="live">LIVE</span><span class="ts">18/11/2026 14:32:08</span><div class="bb" style="left:40%;top:18%;width:22%;height:74%"><span>personne 91% · zone entrée</span></div></div>
     <div class="body" style="padding-top:10px">
       <div class="ctrls">
         <span class="ctrl"><b>◎</b>Photo</span>
@@ -302,9 +302,9 @@ WS /ws → objets actifs par caméra</code>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Aujourd'hui sur cette caméra</span><span style="font-size:11px;color:var(--p-acc)">Tout voir</span></div>
       <div class="thumbs">
-        <div><div class="feed g-portier"></div><div class="t"><span class="pip" style="--c:var(--person)"></span> 14:31</div></div>
-        <div><div class="feed g-portier"></div><div class="t"><span class="pip" style="--c:var(--face)"></span> 12:07</div></div>
-        <div><div class="feed g-portier night"></div><div class="t"><span class="pip" style="--c:var(--person)"></span> 07:45</div></div>
+        <div><div class="feed g-entree"></div><div class="t"><span class="pip" style="--c:var(--person)"></span> 14:31</div></div>
+        <div><div class="feed g-entree"></div><div class="t"><span class="pip" style="--c:var(--face)"></span> 12:07</div></div>
+        <div><div class="feed g-entree night"></div><div class="t"><span class="pip" style="--c:var(--person)"></span> 07:45</div></div>
       </div>
     </div>
   </div>
@@ -317,9 +317,9 @@ WS /ws → objets actifs par caméra</code>
       <li>PTZ et préréglages si la caméra les gère (ONVIF)</li>
       <li>Dernières alertes de la caméra en bas</li>
     </ul>
-    <code>go2rtc WebRTC /api/go2rtc/webrtc?src=cam_portier
-POST /api/cam_portier/ptz/move/up
-GET /api/cam_portier/latest.jpg (photo)</code>
+    <code>go2rtc WebRTC /api/go2rtc/webrtc?src=cam_entree
+POST /api/cam_entree/ptz/move/up
+GET /api/cam_entree/latest.jpg (photo)</code>
   </div>
 </section>
 
@@ -327,8 +327,8 @@ GET /api/cam_portier/latest.jpg (photo)</code>
 <section class="screen">
   <div class="phone">
     <div class="sb"><span>9:41</span><span>Wi-Fi ▮▮▮ 82%</span></div>
-    <div class="bar"><div><h3>Chronologie</h3><div class="sub">Lecture · Portier</div></div><span class="ic">⇄</span></div>
-    <div class="feed g-portier" style="border-radius:0"><span class="ts">18/11 11:42:18</span><div class="bb" style="left:34%;top:18%;width:22%;height:74%"><span>personne 91%</span></div><span class="nm">Portier · enregistré</span></div>
+    <div class="bar"><div><h3>Chronologie</h3><div class="sub">Lecture · Entrée</div></div><span class="ic">⇄</span></div>
+    <div class="feed g-entree" style="border-radius:0"><span class="ts">18/11 11:42:18</span><div class="bb" style="left:34%;top:18%;width:22%;height:74%"><span>personne 91%</span></div><span class="nm">Entrée · enregistré</span></div>
     <div class="body" style="padding-top:10px;gap:9px">
       <div class="dnav"><span class="ic">‹</span><span><b>mer. 18 nov.</b> · 11:42:18</span><span class="ic">▤</span><span class="ic">›</span></div>
       <div class="trans">
@@ -357,7 +357,7 @@ GET /api/cam_portier/latest.jpg (photo)</code>
           <span class="det" style="--c:var(--person);left:49.4%;width:1.2%;opacity:.9"></span>
           <span class="gap" style="left:27.2%;width:4.2%"></span>
           <span class="fut" style="left:97.2%"></span>
-          <em class="sl">Portier</em>
+          <em class="sl">Entrée</em>
         </div>
         <div class="ticks"><span style="left:5%">09h</span><span style="left:21.7%">10h</span><span style="left:38.3%">11h</span><span style="left:55%">12h</span><span style="left:71.7%">13h</span><span style="left:88.3%">14h</span></div>
       </div>
@@ -380,7 +380,7 @@ GET /api/cam_portier/latest.jpg (photo)</code>
     <code>GET /api/&lt;cam&gt;/recordings?after=…&amp;before=…
 GET /api/review/activity/motion?cameras=…&amp;scale=…
 GET /api/review?cameras=all&amp;after=…&amp;before=…
-GET /vod/cam_portier/start/…/end/…/index.m3u8</code>
+GET /vod/cam_entree/start/…/end/…/index.m3u8</code>
   </div>
 </section>
 
@@ -388,8 +388,8 @@ GET /vod/cam_portier/start/…/end/…/index.m3u8</code>
 <section class="screen">
   <div class="phone">
     <div class="sb"><span>9:41</span><span>Wi-Fi ▮▮▮ 82%</span></div>
-    <div class="bar"><div><h3>Chronologie</h3><div class="sub">Lecture · Portier</div></div><span class="ic">⇄</span></div>
-    <div class="feed g-portier" style="border-radius:0"><span class="ts">18/11 11:42:18</span><span class="nm">Portier · enregistré</span></div>
+    <div class="bar"><div><h3>Chronologie</h3><div class="sub">Lecture · Entrée</div></div><span class="ic">⇄</span></div>
+    <div class="feed g-entree" style="border-radius:0"><span class="ts">18/11 11:42:18</span><span class="nm">Entrée · enregistré</span></div>
     <div class="dim"></div>
     <div class="sheet">
       <span class="grab"></span>
@@ -433,9 +433,9 @@ GET /api/review/summary</code>
       <div class="chips"><span class="chip on">Toutes caméras</span><span class="chip">Personne</span><span class="chip">Voiture</span><span class="chip">Visages</span></div>
       <div class="alist">
         <div class="daysep">Aujourd'hui</div>
-        <div class="al" style="--c:var(--person)"><div class="feed g-portier"><div class="bb" style="left:38%;top:16%;width:24%;height:76%"></div></div><div><div class="t1">Personne au portier</div><div class="t2">14:31 · 42 s · zone entrée</div><span class="tag">inconnu</span></div></div>
+        <div class="al" style="--c:var(--person)"><div class="feed g-entree"><div class="bb" style="left:38%;top:16%;width:24%;height:76%"></div></div><div><div class="t1">Personne au portier</div><div class="t2">14:31 · 42 s · zone entrée</div><span class="tag">inconnu</span></div></div>
         <div class="al" style="--c:var(--car)"><div class="feed g-av"><div class="bb" style="--c:var(--car);left:16%;top:44%;width:50%;height:34%"></div></div><div><div class="t1">Voiture devant</div><div class="t2">14:58 · 1 min 10 · allée</div><span class="tag">AB-123-CD</span></div></div>
-        <div class="al" style="--c:var(--face)"><div class="feed g-portier"><div class="bb" style="--c:var(--face);left:44%;top:20%;width:14%;height:26%"></div></div><div><div class="t1">Camille reconnue</div><div class="t2">12:07 · 18 s · portier</div><span class="tag">visage 94%</span></div></div>
+        <div class="al" style="--c:var(--face)"><div class="feed g-entree"><div class="bb" style="--c:var(--face);left:44%;top:20%;width:14%;height:26%"></div></div><div><div class="t1">Camille reconnue</div><div class="t2">12:07 · 18 s · portier</div><span class="tag">visage 94%</span></div></div>
         <div class="daysep">Hier</div>
         <div class="al seen" style="--c:var(--person)"><div class="feed g-arr night"></div><div><div class="t1">Personne à l'arrière</div><div class="t2">22:14 · 1 min 32 · jardin</div></div></div>
       </div>
@@ -463,13 +463,13 @@ POST /api/reviews/viewed</code>
       <div class="clock">14:31</div>
       <div class="date">mercredi 18 novembre</div>
       <div class="notif">
-        <div class="h"><i>F</i><span>Frigate · Portier</span><span>maintenant</span></div>
+        <div class="h"><i>F</i><span>Frigate · Entrée</span><span>maintenant</span></div>
         <div style="font-weight:600;font-size:13px">Personne détectée à l'entrée</div>
-        <div class="feed g-portier"><div class="bb" style="left:38%;top:16%;width:24%;height:76%"><span>personne 91%</span></div></div>
+        <div class="feed g-entree"><div class="bb" style="left:38%;top:16%;width:24%;height:76%"><span>personne 91%</span></div></div>
         <div class="nacts"><span>Voir en direct</span><span>Parler</span><span>Muet 1 h</span></div>
       </div>
       <div class="notif small" style="margin-top:8px">
-        <div><div class="h"><i>F</i><span>Frigate · Avant</span></div><div style="font-size:12px;margin-top:3px">Voiture AB-123-CD dans l'allée</div></div>
+        <div><div class="h"><i>F</i><span>Frigate · Allée</span></div><div style="font-size:12px;margin-top:3px">Voiture AB-123-CD dans l'allée</div></div>
         <div class="feed g-av"></div>
       </div>
     </div>
@@ -492,7 +492,7 @@ GET /api/events/&lt;id&gt;/snapshot.jpg?bbox=1</code>
   <div class="phone">
     <div class="sb"><span>9:41</span><span>Wi-Fi ▮▮▮ 82%</span></div>
     <div class="bar"><span class="ic">‹</span><div style="text-align:center"><h3 style="font-size:18px">Personne au portier</h3><div class="sub">Aujourd'hui 14:31:02 · 42 s</div></div><span class="ic">⋯</span></div>
-    <div class="feed g-portier" style="border-radius:0;margin:0 -0px"><span class="ts">14:31:18</span><div class="bb" style="left:36%;top:16%;width:24%;height:76%"><span>personne 91%</span></div></div>
+    <div class="feed g-entree" style="border-radius:0;margin:0 -0px"><span class="ts">14:31:18</span><div class="bb" style="left:36%;top:16%;width:24%;height:76%"><span>personne 91%</span></div></div>
     <div class="body" style="padding-top:10px">
       <div class="scrub"><span class="ev" style="--c:var(--person);left:20%;width:46%"></span><span class="ev" style="--c:var(--face);left:30%;width:8%"></span><span class="hd"></span></div>
       <div class="play"><span class="sp">−10 s</span><span class="big">▶</span><span class="sp">+10 s</span></div>

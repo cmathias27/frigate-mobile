@@ -9,15 +9,15 @@ import 'package:http/testing.dart';
 void main() {
   const config = ServerConfig(
     name: 'Maison',
-    localUrl: 'https://192.168.1.53:8971',
-    username: 'cmathias',
+    localUrl: 'https://192.168.1.10:8971',
+    username: 'viewer',
   );
 
   test('login extracts frigate_token from Set-Cookie header', () async {
     final mockClient = MockClient((request) async {
       expect(request.url.path, '/api/login');
       final body = jsonDecode(request.body) as Map;
-      expect(body['user'], 'cmathias');
+      expect(body['user'], 'viewer');
       expect(body['password'], 'secret');
 
       return http.Response(
@@ -70,9 +70,9 @@ void main() {
       if (request.url.path == '/api/profile') {
         return http.Response(
           jsonEncode({
-            'username': 'cmathias',
+            'username': 'viewer',
             'role': 'admin',
-            'allowed_cameras': ['cam_portier'],
+            'allowed_cameras': ['cam_entree'],
           }),
           200,
           headers: {'content-type': 'application/json'},
@@ -88,7 +88,7 @@ void main() {
     );
 
     final profile = await client.fetchProfile();
-    expect(profile['username'], 'cmathias');
+    expect(profile['username'], 'viewer');
     expect(profile['role'], 'admin');
 
     expect(sentRequest.headers['Authorization'], 'Bearer jwt-12345');
@@ -104,7 +104,7 @@ void main() {
         return http.Response(
           jsonEncode({
             'cameras': {
-              'cam_portier': {
+              'cam_entree': {
                 'enabled': true,
                 'detect': {'enabled': false},
                 'record': {
@@ -112,7 +112,7 @@ void main() {
                   'continuous': {'days': 3.0},
                 },
                 'live': {
-                  'streams': {'Stream 1': 'cam_portier'},
+                  'streams': {'Stream 1': 'cam_entree'},
                 },
               },
             },
@@ -127,7 +127,7 @@ void main() {
       if (request.url.path == '/api/go2rtc/streams') {
         return http.Response(
           jsonEncode({
-            'cam_portier': {
+            'cam_entree': {
               'producers': [
                 {
                   'medias': [
@@ -155,8 +155,8 @@ void main() {
     final caps = await client.fetchCapabilities();
     expect(caps.version, '0.18.3-a19e23a');
     expect(caps.cameras.length, 1);
-    expect(caps.cameras['cam_portier']!.talk, isTrue);
-    expect(caps.cameras['cam_portier']!.continuousDays, 3.0);
+    expect(caps.cameras['cam_entree']!.talk, isTrue);
+    expect(caps.cameras['cam_entree']!.continuousDays, 3.0);
     expect(caps.anyObjectDetection, isFalse);
   });
 
@@ -172,15 +172,15 @@ void main() {
       client: mockClient,
     );
 
-    final bytes = await client.fetchLatestImage('cam_portier', height: 360);
+    final bytes = await client.fetchLatestImage('cam_entree', height: 360);
 
     expect(bytes, [1, 2, 3]);
-    expect(sent.url.path, '/api/cam_portier/latest.jpg');
+    expect(sent.url.path, '/api/cam_entree/latest.jpg');
     expect(sent.url.queryParameters, {'h': '360'});
     expect(sent.headers['Accept'], 'image/jpeg');
     expect(sent.headers['Authorization'], 'Bearer jwt-img');
 
-    await client.fetchLatestImage('cam_portier');
+    await client.fetchLatestImage('cam_entree');
     expect(sent.url.hasQuery, isFalse);
   });
 
@@ -197,17 +197,17 @@ void main() {
     );
 
     await expectLater(
-      client.fetchLatestImage('cam_portier'),
+      client.fetchLatestImage('cam_entree'),
       throwsA(isA<FrigateAuthException>()),
     );
     status = 404;
     await expectLater(
-      client.fetchLatestImage('cam_portier'),
+      client.fetchLatestImage('cam_entree'),
       throwsA(isA<FrigateNetworkException>()),
     );
     status = 0;
     await expectLater(
-      client.fetchLatestImage('cam_portier'),
+      client.fetchLatestImage('cam_entree'),
       throwsA(isA<FrigateNetworkException>()),
     );
   });
@@ -230,19 +230,19 @@ void main() {
       client: mockClient,
     );
 
-    final answer = await client.negotiateWebRtc('cam_garage_2', 'v=0\r\noffer');
+    final answer = await client.negotiateWebRtc('cam_cour_2', 'v=0\r\noffer');
 
     expect(answer, 'v=0\r\nanswer');
     expect(sent.method, 'POST');
     expect(sent.url.path, '/api/go2rtc/webrtc');
-    expect(sent.url.queryParameters, {'src': 'cam_garage_2'});
+    expect(sent.url.queryParameters, {'src': 'cam_cour_2'});
     expect(sent.headers['Authorization'], 'Bearer jwt-rtc');
     expect(sent.headers['Content-Type'], startsWith('application/json'));
     expect(jsonDecode(sent.body), {'type': 'offer', 'sdp': 'v=0\r\noffer'});
 
     raw = true;
     expect(
-      await client.negotiateWebRtc('cam_garage_2', 'v=0'),
+      await client.negotiateWebRtc('cam_cour_2', 'v=0'),
       'v=0\r\nraw-answer',
     );
   });

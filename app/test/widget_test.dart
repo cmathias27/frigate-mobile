@@ -26,7 +26,7 @@ http.Client _createFakeServer() {
       return http.Response(
         jsonEncode({
           'cameras': {
-            'cam_portier': {
+            'cam_entree': {
               'enabled': true,
               'detect': {'enabled': false},
               'record': {
@@ -34,10 +34,10 @@ http.Client _createFakeServer() {
                 'continuous': {'days': 3.0},
               },
               'live': {
-                'streams': {'Stream 1': 'cam_portier'},
+                'streams': {'Stream 1': 'cam_entree'},
               },
             },
-            'cam_av': {
+            'cam_allee': {
               'enabled': true,
               'detect': {'enabled': false},
               'record': {
@@ -117,7 +117,7 @@ void main() {
     // Switch to Chronologie
     await tester.tap(find.text('Chronologie'));
     await tester.pumpAndSettle();
-    expect(find.text('Lecture · Portier'), findsOneWidget);
+    expect(find.text('Lecture · Entree'), findsOneWidget);
 
     // Switch to Plus (MoreScreen)
     await tester.tap(find.text('Plus'));
@@ -153,7 +153,7 @@ void main() {
     await storage.saveServerConfig(
       const ServerConfig(
         name: 'Home',
-        localUrl: 'https://192.168.1.53:8971',
+        localUrl: 'https://192.168.1.10:8971',
         username: 'admin',
       ),
     );

@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// No description provided for @localUrlHint.
   ///
   /// In fr, this message translates to:
-  /// **'https://192.168.1.53:8971'**
+  /// **'https://192.168.1.10:8971'**
   String get localUrlHint;
 
   /// No description provided for @remoteUrlLabel.

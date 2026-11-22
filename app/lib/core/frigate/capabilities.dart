@@ -60,7 +60,7 @@ class ServerCapabilities {
 
 /// Features of one camera.
 class CameraCapabilities {
-  /// Frigate's camera name (`cam_portier`).
+  /// Frigate's camera name (`cam_entree`).
   final String name;
 
   /// Label shown to the user: Frigate's `friendly_name` when set, otherwise
@@ -155,7 +155,7 @@ class CameraCapabilities {
     );
   }
 
-  /// `cam_sous_sol` → `Sous sol`.
+  /// `cam_arriere_cour` → `Arriere cour`.
   static String defaultLabel(String name) {
     var s = name.startsWith('cam_') ? name.substring(4) : name;
     s = s.replaceAll('_', ' ').trim();
