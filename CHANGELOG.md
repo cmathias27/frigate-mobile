@@ -5,6 +5,14 @@ l'application affiche avant d'installer une mise à jour et dans
 « Nouveautés » après l'installation (décision 0003). Écrire pour
 l'utilisateur : ce qui change pour lui, pas comment c'est codé.
 
+## 0.1.2
+
+- Chronologie : une caméra dont le téléphone ne sait pas lire la vidéo
+  (image trop grande pour son décodeur) ou dont la vidéo reste figée est
+  lue en images enregistrées, quelques-unes par seconde, au même
+  instant. La pastille « Images » sur la vidéo explique pourquoi, donne
+  le détail de l'erreur et permet de réessayer la vidéo.
+
 ## 0.1.1
 
 Corrections après les premiers essais, et premières fonctions de la
