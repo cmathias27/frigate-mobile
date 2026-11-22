@@ -52,6 +52,47 @@ abstract final class LiveVideoDefaults {
   /// Sound starts muted, like DS cam: no surprise noise when opening a
   /// camera.
   static const startMuted = true;
+
+  /// How often the frames decoded are counted once the video plays.
+  static const frameCheck = Duration(seconds: 2);
+
+  /// A video that decodes fewer than [minFrameRate] frames per second over
+  /// this period is frozen: the phone cannot decode it (too large) or
+  /// frames are lost.
+  static const frozenAfter = Duration(seconds: 6);
+  static const minFrameRate = 1.0;
+
+  /// When a stream fails, the full screen tries the camera's next stream
+  /// (often a lighter sub-stream) before falling back to images.
+  static const tryOtherStreams = true;
+}
+
+/// Tells a frozen video from a playing one, from the count of frames
+/// decoded read at regular times.
+class FrameWatch {
+  final Duration window;
+  final double minFrameRate;
+  final _samples = <(DateTime, int)>[];
+
+  FrameWatch({
+    this.window = LiveVideoDefaults.frozenAfter,
+    this.minFrameRate = LiveVideoDefaults.minFrameRate,
+  });
+
+  /// Records [frames] decoded so far at [time]; true when fewer than
+  /// [minFrameRate] frames per second were decoded over the last [window].
+  bool frozen(DateTime time, int frames) {
+    _samples.add((time, frames));
+    // Keep the newest sample at least [window] old as the reference.
+    while (_samples.length > 2 && time.difference(_samples[1].$1) >= window) {
+      _samples.removeAt(0);
+    }
+    final (since, first) = _samples.first;
+    final elapsed = time.difference(since);
+    if (elapsed < window) return false;
+    final rate = (frames - first) / (elapsed.inMilliseconds / 1000);
+    return rate < minFrameRate;
+  }
 }
 
 /// True when the SDP [answer] carries a sound track: an `m=audio` section

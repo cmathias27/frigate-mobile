@@ -21,6 +21,8 @@ class WebRtcLiveVideo extends LiveVideo {
   final _audioTracks = <MediaStreamTrack>[];
   MediaStreamTrack? _videoTrack;
   Timer? _timeout;
+  Timer? _frameCheck;
+  final _frames = FrameWatch();
 
   LiveVideoStatus _status = LiveVideoStatus.connecting;
   bool _hasAudio = false;
@@ -59,8 +61,10 @@ class WebRtcLiveVideo extends LiveVideo {
         AndroidAudioConfiguration.media,
       ).catchError((Object _) {});
       await _renderer.initialize();
-      _renderer.onFirstFrameRendered = () =>
-          _setStatus(LiveVideoStatus.playing);
+      _renderer.onFirstFrameRendered = () {
+        _setStatus(LiveVideoStatus.playing);
+        _watchFrames();
+      };
 
       final pc = await createPeerConnection({
         'iceServers': <Map<String, dynamic>>[],
@@ -149,6 +153,24 @@ class WebRtcLiveVideo extends LiveVideo {
     }
   }
 
+  /// A first frame is not enough: a stream too large for the phone's
+  /// decoder shows one frame, then freezes.
+  void _watchFrames() {
+    _frameCheck?.cancel();
+    _frameCheck = Timer.periodic(LiveVideoDefaults.frameCheck, (_) async {
+      final pc = _pc;
+      if (pc == null || _status != LiveVideoStatus.playing) return;
+      try {
+        final frames = framesDecoded(await pc.getStats());
+        if (frames != null && _frames.frozen(DateTime.now(), frames)) {
+          _fail('frozen at $frames frames');
+        }
+      } catch (e) {
+        debugPrint('WebRTC $stream stats: $e');
+      }
+    });
+  }
+
   void _setStatus(LiveVideoStatus status) {
     if (_disposed || _status == status) return;
     if (_status == LiveVideoStatus.failed) return;
@@ -159,6 +181,7 @@ class WebRtcLiveVideo extends LiveVideo {
 
   void _fail(Object reason) {
     debugPrint('WebRTC $stream: $reason');
+    _frameCheck?.cancel();
     _setStatus(LiveVideoStatus.failed);
   }
 
@@ -174,6 +197,7 @@ class WebRtcLiveVideo extends LiveVideo {
   void dispose() {
     _disposed = true;
     _timeout?.cancel();
+    _frameCheck?.cancel();
     final pc = _pc;
     _pc = null;
     unawaited(_release(pc));
@@ -188,4 +212,17 @@ class WebRtcLiveVideo extends LiveVideo {
       debugPrint('WebRTC $stream release: $e');
     }
   }
+}
+
+/// Frames decoded by the received video, from WebRTC statistics.
+int? framesDecoded(List<StatsReport> reports) {
+  for (final report in reports) {
+    final values = report.values;
+    final kind = values['kind'] ?? values['mediaType'];
+    if (report.type == 'inbound-rtp' && kind == 'video') {
+      final frames = values['framesDecoded'];
+      if (frames is num) return frames.toInt();
+    }
+  }
+  return null;
 }

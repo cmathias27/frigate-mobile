@@ -51,6 +51,10 @@ class _CameraFullScreenState extends State<CameraFullScreen>
   /// Chosen go2rtc stream per camera, by index in its live streams.
   final _streamIndex = <String, int>{};
 
+  /// Streams of the current camera that failed since it was opened, so the
+  /// automatic switch tries each one once.
+  final _failedStreams = <int>{};
+
   CameraCapabilities get _camera => widget.cameras[_index];
 
   int get _currentStream => _streamIndex[_camera.name] ?? 0;
@@ -70,6 +74,7 @@ class _CameraFullScreenState extends State<CameraFullScreen>
   /// (Re)opens images and video for the current camera.
   void _open() {
     _close();
+    _failedStreams.clear();
     _feed = CameraFeed(
       camera: _camera.name,
       fetch: widget.fetch,
@@ -105,6 +110,17 @@ class _CameraFullScreenState extends State<CameraFullScreen>
   /// Images are only needed while the video is not playing.
   void _onVideoChanged() {
     if (!mounted) return;
+    final video = _video;
+    if (video?.status == LiveVideoStatus.failed) {
+      _failedStreams.add(_currentStream);
+      final next = _nextStream();
+      if (next != null) {
+        // Not from inside the failed video's own notification.
+        Future.microtask(() {
+          if (mounted && identical(_video, video)) _switchStream(next);
+        });
+      }
+    }
     if (_videoPlaying) {
       _feed?.stop();
     } else {
@@ -113,20 +129,38 @@ class _CameraFullScreenState extends State<CameraFullScreen>
     setState(() {});
   }
 
-  void _retryVideo() {
-    setState(() {
-      _closeVideo();
-      _openVideo();
-    });
+  /// The next stream of the camera not failed yet, when the automatic
+  /// switch is on.
+  int? _nextStream() {
+    if (!LiveVideoDefaults.tryOtherStreams) return null;
+    final count = _camera.liveStreams.length;
+    for (var step = 1; step < count; step++) {
+      final index = (_currentStream + step) % count;
+      if (!_failedStreams.contains(index)) return index;
+    }
+    return null;
   }
 
-  void _selectStream(int index) {
+  void _switchStream(int index) {
     setState(() {
       _streamIndex[_camera.name] = index;
       _closeVideo();
       _feed?.start();
       _openVideo();
     });
+  }
+
+  void _retryVideo() {
+    setState(() {
+      _failedStreams.clear();
+      _closeVideo();
+      _openVideo();
+    });
+  }
+
+  void _selectStream(int index) {
+    _failedStreams.clear();
+    _switchStream(index);
   }
 
   /// Saves the picture on screen: the video frame at the stream's
