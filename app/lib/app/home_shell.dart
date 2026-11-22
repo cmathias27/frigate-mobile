@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../core/frigate/capabilities.dart';
+import '../core/frigate/client.dart';
+import '../core/frigate/vod_proxy.dart';
 import '../core/session/session_controller.dart';
 import '../features/live/live_grid_screen.dart';
 import '../features/live/webrtc_live_video.dart';
 import '../features/more/more_screen.dart';
+import '../features/timeline/recording_player.dart';
+import '../features/timeline/timeline_data.dart';
+import '../features/timeline/timeline_screen.dart';
 import '../l10n/app_localizations.dart';
 import 'theme.dart';
 
@@ -20,6 +26,54 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
   int _liveLayout = 4;
+
+  // Kept across tab changes so the hours fetched stay cached.
+  FrigateClient? _timelineClient;
+  TimelineData? _timelineData;
+  VodProxy? _vodProxy;
+
+  @override
+  void dispose() {
+    _releaseTimeline();
+    super.dispose();
+  }
+
+  void _releaseTimeline() {
+    _timelineData?.dispose();
+    _vodProxy?.close();
+    _timelineData = null;
+    _vodProxy = null;
+    _timelineClient = null;
+  }
+
+  Widget _timeline(FrigateClient client, List<CameraCapabilities> cameras) {
+    final recorded = cameras.where((c) => c.recording).toList();
+    if (recorded.isEmpty) {
+      return _Placeholder(
+        icon: Icons.videocam_off_outlined,
+        description: AppLocalizations.of(context).timelineNoRecordingCamera,
+      );
+    }
+    if (!identical(client, _timelineClient)) {
+      _releaseTimeline();
+      _timelineClient = client;
+      _timelineData = TimelineData(
+        cameras: [for (final c in recorded) c.name],
+        fetch: client.fetchRecordings,
+        onAuthError: widget.controller.sessionExpired,
+      );
+      _vodProxy = VodProxy(
+        client.openStream,
+        onAuthError: widget.controller.sessionExpired,
+      );
+    }
+    final proxy = _vodProxy!;
+    return TimelineScreen(
+      cameras: recorded,
+      data: _timelineData!,
+      playerFactory: () => HlsRecordingPlayer(proxy),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +134,7 @@ class _HomeShellState extends State<HomeShell> {
           layout: _liveLayout,
           onAuthError: widget.controller.sessionExpired,
         ),
+        1 when client != null => _timeline(client, cameras),
         3 => MoreScreen(controller: widget.controller),
         _ => _Placeholder(
           icon: icon,
@@ -146,12 +201,12 @@ class _LayoutButton extends StatelessWidget {
 class _Placeholder extends StatelessWidget {
   final IconData icon;
   final String description;
-  final String version;
+  final String? version;
 
   const _Placeholder({
     required this.icon,
     required this.description,
-    required this.version,
+    this.version,
   });
 
   @override
@@ -171,10 +226,11 @@ class _Placeholder extends StatelessWidget {
               textAlign: TextAlign.center,
               style: text.bodyLarge,
             ),
-            Text(
-              l.comingInVersion(version),
-              style: text.bodySmall?.copyWith(color: AppColors.textDim),
-            ),
+            if (version case final version?)
+              Text(
+                l.comingInVersion(version),
+                style: text.bodySmall?.copyWith(color: AppColors.textDim),
+              ),
           ],
         ),
       ),

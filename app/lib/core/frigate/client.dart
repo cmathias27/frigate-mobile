@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
 import 'capabilities.dart';
+import 'recordings.dart';
 import 'server_config.dart';
 
 /// Thrown when authentication with Frigate fails.
@@ -234,6 +235,59 @@ class FrigateClient {
       if (response.body.startsWith('v=')) return response.body;
     }
     throw FrigateNetworkException('Réponse WebRTC invalide pour $stream');
+  }
+
+  /// Reads the recorded segments of [camera] between [after] and [before]
+  /// from `GET /api/<camera>/recordings`, sorted by start time.
+  Future<List<RecordingSegment>> fetchRecordings(
+    String camera,
+    DateTime after,
+    DateTime before,
+  ) async {
+    final path = Uri(
+      path: '/api/${Uri.encodeComponent(camera)}/recordings',
+      queryParameters: {
+        'after': epochSeconds(after),
+        'before': epochSeconds(before),
+      },
+    ).toString();
+    final body = await _get(path);
+    try {
+      return parseRecordings(jsonDecode(body));
+    } on FormatException catch (e) {
+      throw FrigateNetworkException('Réponse invalide reçue de $path', e);
+    }
+  }
+
+  /// Opens an authenticated GET of [path] and returns the response as it
+  /// arrives, whatever its status, for the VOD relay of the player.
+  ///
+  /// [headers] are forwarded (for instance `Range`); authentication is added.
+  Future<http.StreamedResponse> openStream(
+    String path, {
+    Map<String, String> headers = const {},
+  }) async {
+    final cleanPath = path.startsWith('/') ? path : '/$path';
+    final request = http.Request('GET', Uri.parse('$_activeBaseUrl$cleanPath'))
+      ..headers.addAll(headers)
+      ..headers.addAll(_buildAuthHeaders(accept: headers['Accept'] ?? '*/*'));
+    try {
+      final response = await _client
+          .send(request)
+          .timeout(const Duration(seconds: 15));
+      if (response.statusCode == 401) {
+        throw const FrigateAuthException('Session expirée ou non autorisée.');
+      }
+      return response;
+    } on SocketException catch (e) {
+      throw FrigateNetworkException('Connexion interrompue.', e);
+    } on HandshakeException catch (e) {
+      throw FrigateNetworkException('Certificat refusé.', e);
+    } on http.ClientException catch (e) {
+      throw FrigateNetworkException('Connexion interrompue.', e);
+    } on TimeoutException catch (e) {
+      throw FrigateNetworkException('Délai dépassé pour $path', e);
+    }
   }
 
   /// Performs an authenticated GET request and returns raw response body.

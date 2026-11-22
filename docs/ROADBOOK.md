@@ -17,8 +17,8 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 - [x] Plein écran en images : pleine résolution chaque seconde, zoom, glisser d'une caméra à l'autre
 - [x] Plein écran vidéo : WebRTC go2rtc, repli en images, son si le flux en a, choix du flux
 - [x] Photo depuis le plein écran : image vidéo à sa résolution, album « Frigate », partage
-- [ ] Chronologie : bande « toutes les caméras » et bande « caméra en lecture », tête de lecture commune, zoom 1 h / 6 h / 24 h / tout
-- [ ] Passages de mouvement : seuil automatique par caméra, durée minimale, fusion ; boutons précédent / suivant
+- [x] Chronologie : bande « toutes les caméras » et bande « caméra en lecture », tête de lecture commune, zoom 1 h / 6 h / 24 h / tout, lecture des enregistrements (HLS par relais local)
+- [x] Passages de mouvement : seuil automatique par caméra, durée minimale, fusion ; boutons précédent / suivant
 - [ ] Calendrier de tout l'historique, saut à une date et une heure
 - [ ] Mise à jour depuis l'application, note de version, « Nouveautés »
 

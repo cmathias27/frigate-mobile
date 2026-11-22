@@ -219,4 +219,80 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get liveSound => 'Son';
+
+  @override
+  String timelinePlaying(String camera) {
+    return 'Lecture · $camera';
+  }
+
+  @override
+  String get timelineCamera => 'Caméra en lecture';
+
+  @override
+  String get timelineAllCameras => 'Toutes les caméras';
+
+  @override
+  String timelineZoomHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String get timelineZoomAll => 'Tout';
+
+  @override
+  String get timelinePreviousPassage => 'Passage préc.';
+
+  @override
+  String get timelineNextPassage => 'Passage suiv.';
+
+  @override
+  String timelineBack(int seconds) {
+    return 'Reculer de $seconds s';
+  }
+
+  @override
+  String timelineForward(int seconds) {
+    return 'Avancer de $seconds s';
+  }
+
+  @override
+  String timelineSeconds(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String get timelinePlay => 'Lecture';
+
+  @override
+  String get timelinePause => 'Pause';
+
+  @override
+  String get timelinePreviousDay => 'Jour précédent';
+
+  @override
+  String get timelineNextDay => 'Jour suivant';
+
+  @override
+  String timelineNoPassage(int hours) {
+    return 'Aucun passage de mouvement dans les $hours h';
+  }
+
+  @override
+  String get timelineNoRecording => 'Pas d\'enregistrement à ce moment';
+
+  @override
+  String get timelinePlaybackFailed => 'Lecture impossible';
+
+  @override
+  String get timelineRetry => 'Réessayer';
+
+  @override
+  String get timelineEnd => 'Fin des enregistrements';
+
+  @override
+  String get timelineLoading => 'Chargement de la chronologie…';
+
+  @override
+  String get timelineNoRecordingCamera =>
+      'Aucune caméra n\'enregistre sur ce serveur';
 }
