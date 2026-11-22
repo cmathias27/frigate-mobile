@@ -1,0 +1,11 @@
+# Signing key and its passwords never go in the repository (decision 0003).
+*.jks
+*.p12
+*.keystore
+key.properties
+
+/build/
+.dart_tool/
+.idea/
+*.iml
+.DS_Store
