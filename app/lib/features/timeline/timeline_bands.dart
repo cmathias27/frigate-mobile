@@ -76,7 +76,10 @@ class TimelineBands extends StatelessWidget {
             }
             if (y <= allHeight + gap + cameraHeight) onTime(timeAt(x));
           },
+          // Full width: a Stack lays its children out loosely, and a band
+          // without width is neither painted nor draggable.
           child: SizedBox(
+            width: width,
             height: height,
             child: CustomPaint(
               painter: _BandsPainter(
