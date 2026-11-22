@@ -436,6 +436,45 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
 
+    testWidgets('a failed stream switches to the next one, then images', (
+      tester,
+    ) async {
+      await open(tester, [
+        _camera('cam_g', streams: ['cam_g_1', 'cam_g_2', 'cam_g_3']),
+      ]);
+      videos.single.play();
+      await tester.pump();
+
+      // The main stream freezes: the next stream is tried.
+      videos.single.fail();
+      await tester.pump();
+      expect(videos.map((v) => v.stream), ['cam_g_1', 'cam_g_2']);
+      expect(videos.first.disposed, isTrue);
+      expect(find.byType(FeedImage), findsOneWidget);
+      videos.last.play();
+      await tester.pump();
+      expect(find.text('Vidéo en direct · Flux 2'), findsOneWidget);
+
+      // Every stream fails in turn: images, no endless loop.
+      videos.last.fail();
+      await tester.pump();
+      videos.last.fail();
+      await tester.pump();
+      expect(videos.map((v) => v.stream), ['cam_g_1', 'cam_g_2', 'cam_g_3']);
+      expect(
+        find.text('Vidéo indisponible · Images · toutes les 1 s'),
+        findsOneWidget,
+      );
+
+      // Retry starts again from the stream last used.
+      await tester.tap(find.byTooltip('Réessayer la vidéo'));
+      await tester.pump();
+      expect(videos.last.stream, 'cam_g_3');
+      expect(videos.last.started, isTrue);
+
+      await tester.pumpWidget(const SizedBox());
+    });
+
     testWidgets('quality menu switches between the camera streams', (
       tester,
     ) async {
@@ -529,6 +568,47 @@ void main() {
       await tester.pump();
       expect(find.text("Impossible d'enregistrer la photo"), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('FrameWatch', () {
+    final t0 = DateTime(2026, 1, 10, 12);
+    DateTime at(int seconds) => t0.add(Duration(seconds: seconds));
+
+    test('a video decoding at its rate is not frozen', () {
+      final watch = FrameWatch();
+      for (var s = 0; s <= 20; s += 2) {
+        expect(watch.frozen(at(s), s * 12), isFalse);
+      }
+    });
+
+    test('no judgement before the window has passed', () {
+      final watch = FrameWatch();
+      expect(watch.frozen(at(0), 1), isFalse);
+      expect(watch.frozen(at(4), 1), isFalse);
+      expect(watch.frozen(at(6), 1), isTrue);
+    });
+
+    test('a video that stops decoding is frozen after the window', () {
+      final watch = FrameWatch();
+      for (var s = 0; s <= 10; s += 2) {
+        expect(watch.frozen(at(s), s * 12), isFalse);
+      }
+      // No new frame from 10 s.
+      expect(watch.frozen(at(12), 120), isFalse);
+      expect(watch.frozen(at(14), 120), isFalse);
+      expect(watch.frozen(at(16), 120), isTrue);
+    });
+
+    test('a few frames now and then is still frozen', () {
+      final watch = FrameWatch();
+      var frames = 0;
+      var frozen = false;
+      for (var s = 0; s <= 12; s += 2) {
+        frames += s % 4 == 0 ? 1 : 0;
+        frozen = watch.frozen(at(s), frames);
+      }
+      expect(frozen, isTrue);
     });
   });
 

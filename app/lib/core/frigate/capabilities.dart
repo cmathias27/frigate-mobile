@@ -93,8 +93,9 @@ class CameraCapabilities {
   /// The camera has a sound track that can be listened to.
   final bool sound;
 
-  /// go2rtc stream names for live view, in Frigate's order (the first is the
-  /// main quality).
+  /// go2rtc stream names for live view: Frigate's live streams in their
+  /// order (the first is the main quality), then the other go2rtc streams the
+  /// camera reads, often a lighter sub-stream the phone can always decode.
   final List<String> liveStreams;
 
   const CameraCapabilities({
@@ -131,6 +132,9 @@ class CameraCapabilities {
     final medias = [
       for (final stream in liveStreams) ..._medias(streams[stream]),
     ];
+    for (final stream in _restreams(cam, streams)) {
+      if (!liveStreams.contains(stream)) liveStreams.add(stream);
+    }
     final friendly = cam['friendly_name'];
     return CameraCapabilities(
       name: name,
@@ -162,6 +166,32 @@ class CameraCapabilities {
     if (s.isEmpty) return name;
     return s[0].toUpperCase() + s.substring(1);
   }
+}
+
+/// go2rtc streams read by the camera's ffmpeg inputs, in their order:
+/// `rtsp://127.0.0.1:8554/<stream>` (go2rtc's restream on the same machine),
+/// kept only when go2rtc lists the stream.
+List<String> _restreams(
+  Map<String, dynamic> cam,
+  Map<String, dynamic> streams,
+) {
+  final inputs = _map(cam['ffmpeg'])['inputs'];
+  if (inputs is! List) return const [];
+  return [
+    for (final input in inputs)
+      if (_restreamName(_map(input)['path']) case final name?
+          when streams.containsKey(name))
+        name,
+  ];
+}
+
+String? _restreamName(Object? path) {
+  if (path is! String) return null;
+  final uri = Uri.tryParse(path.trim());
+  if (uri == null || uri.scheme != 'rtsp') return null;
+  if (uri.host != '127.0.0.1' && uri.host != 'localhost') return null;
+  final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+  return segments.length == 1 ? segments.single : null;
 }
 
 /// go2rtc describes each media as `"audio, sendonly, L16/16000"`, seen from

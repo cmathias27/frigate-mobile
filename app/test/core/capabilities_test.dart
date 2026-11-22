@@ -9,6 +9,7 @@ Map<String, dynamic> _camera({
   String? onvifHost,
   String? friendlyName,
   bool enabled = true,
+  List<String>? inputs,
 }) => {
   'enabled': enabled,
   'friendly_name': ?friendlyName,
@@ -27,6 +28,16 @@ Map<String, dynamic> _camera({
   'audio': {'enabled': false},
   'onvif': {'host': onvifHost ?? '', 'port': 8000},
   'live': ?live,
+  if (inputs != null)
+    'ffmpeg': {
+      'inputs': [
+        for (final path in inputs)
+          {
+            'path': path,
+            'roles': ['detect'],
+          },
+      ],
+    },
 };
 
 void main() {
@@ -106,6 +117,39 @@ void main() {
     final caps = read({'cam_door': _camera()});
     expect(caps.cameras['cam_door']!.liveStreams, ['cam_door']);
     expect(caps.cameras['cam_door']!.talk, isTrue);
+  });
+
+  test('the go2rtc streams read by the camera come after its live ones', () {
+    final caps = read({
+      'cam_cour': _camera(
+        live: {
+          'streams': {'Stream 1': 'cam_door'},
+        },
+        inputs: [
+          'rtsp://127.0.0.1:8554/cam_cour_1?video=copy',
+          'rtsp://127.0.0.1:8554/cam_door',
+          'rtsp://localhost:8554/cam_garden',
+          'rtsp://127.0.0.1:8554/cam_unknown',
+          'rtsp://192.168.1.10:554/cam_garden',
+          'rtsp://127.0.0.1:8554/a/b',
+        ],
+      ),
+    });
+    final cour = caps.cameras['cam_cour']!;
+    expect(cour.liveStreams, ['cam_door', 'cam_cour_1', 'cam_garden']);
+    // Talk and sound come from Frigate's own live streams only.
+    expect(cour.talk, isTrue);
+  });
+
+  test('no go2rtc answer: only the live streams', () {
+    final caps = ServerCapabilities.fromJson(
+      config: {
+        'cameras': {
+          'cam_cour': _camera(inputs: ['rtsp://127.0.0.1:8554/cam_cour_1']),
+        },
+      },
+    );
+    expect(caps.cameras['cam_cour']!.liveStreams, ['cam_cour']);
   });
 
   test('motion-only server: no object detection anywhere', () {
