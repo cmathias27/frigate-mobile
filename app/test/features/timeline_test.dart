@@ -14,6 +14,7 @@ import 'package:frigate_mobile/features/timeline/clip_sheet.dart';
 import 'package:frigate_mobile/features/timeline/motion_passages.dart';
 import 'package:frigate_mobile/features/timeline/recording_history.dart';
 import 'package:frigate_mobile/features/timeline/recording_player.dart';
+import 'package:frigate_mobile/features/timeline/timeline_bands.dart';
 import 'package:frigate_mobile/features/timeline/timeline_data.dart';
 import 'package:frigate_mobile/features/timeline/timeline_screen.dart';
 import 'package:frigate_mobile/l10n/app_localizations.dart';
@@ -600,6 +601,26 @@ void main() {
       expect(server.calls, isNotEmpty);
       expect(find.text('6 h'), findsOneWidget);
       expect(find.text('Tout'), findsOneWidget);
+    });
+
+    testWidgets('the bands span the screen and can be dragged', (
+      tester,
+    ) async {
+      await pumpScreen(tester);
+      final bands = find.byType(TimelineBands);
+      final paint = find.descendant(
+        of: bands,
+        matching: find.byType(CustomPaint),
+      );
+      // 360 logical pixels wide, less the 16 px margins.
+      expect(tester.getSize(paint).width, 360 - 32);
+      expect(tester.getSize(paint).height, TimelineBands.height);
+
+      final before = player.opened.length;
+      await tester.drag(bands, const Offset(120, 0));
+      await tester.pump(TimelineScreenDefaults.settle);
+      await tester.pump();
+      expect(player.opened.length + player.seeks.length, greaterThan(before));
     });
 
     testWidgets('previous passage switches to its camera and plays', (
