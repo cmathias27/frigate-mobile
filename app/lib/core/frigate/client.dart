@@ -259,6 +259,21 @@ class FrigateClient {
     }
   }
 
+  /// Reads the hours recorded by [camera] over its whole history from
+  /// `GET /api/<camera>/recordings/summary`, asked in UTC.
+  Future<List<RecordingHour>> fetchRecordingHours(String camera) async {
+    final path = Uri(
+      path: '/api/${Uri.encodeComponent(camera)}/recordings/summary',
+      queryParameters: {'timezone': 'utc'},
+    ).toString();
+    final body = await _get(path);
+    try {
+      return parseRecordingHours(jsonDecode(body));
+    } on FormatException catch (e) {
+      throw FrigateNetworkException('Réponse invalide reçue de $path', e);
+    }
+  }
+
   /// Opens an authenticated GET of [path] and returns the response as it
   /// arrives, whatever its status, for the VOD relay of the player.
   ///
