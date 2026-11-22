@@ -13,6 +13,8 @@ import 'l10n/app_localizations.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   final session = SessionController()..init();
+  // Back from the background, possibly on another network.
+  AppLifecycleListener(onResume: session.resumed);
   final update = UpdateController(
     service: UpdateService(),
     platform: AndroidUpdatePlatform(),

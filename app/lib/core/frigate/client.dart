@@ -33,6 +33,17 @@ class FrigateNetworkException implements Exception {
       'FrigateNetworkException: $message${cause != null ? " ($cause)" : ""}';
 }
 
+/// The address used could not be reached at all (no route, timeout,
+/// refused certificate): the other address of the server may work.
+class FrigateUnreachableException extends FrigateNetworkException {
+  const FrigateUnreachableException(super.message, [super.cause]);
+}
+
+abstract final class AddressDefaults {
+  /// Time given to the local address before the remote one is used.
+  static const probe = Duration(seconds: 3);
+}
+
 /// HTTP client for interacting with a Frigate NVR server on port 8971
 /// (decision 0004).
 ///
@@ -55,7 +66,71 @@ class FrigateClient {
        _ownsClient = client == null,
        _activeBaseUrl = activeBaseUrl ?? config.localUrl;
 
+  /// Called when requests move to the other address of the server.
+  void Function(String url)? onAddressChanged;
+
   String get activeBaseUrl => _activeBaseUrl;
+
+  /// Whether requests go to the remote address.
+  bool get usingRemote =>
+      config.remoteUrl != null && _activeBaseUrl == config.remoteUrl;
+
+  /// The address other than [url], when the server has two.
+  String? _alternate(String url) {
+    final remote = config.remoteUrl;
+    if (remote == null || remote.isEmpty || remote == config.localUrl) {
+      return null;
+    }
+    return url == remote ? config.localUrl : remote;
+  }
+
+  void _use(String url) {
+    if (_activeBaseUrl == url) return;
+    _activeBaseUrl = url;
+    onAddressChanged?.call(url);
+  }
+
+  /// Picks the local address when it answers within
+  /// [AddressDefaults.probe], the remote one otherwise. Any HTTP answer
+  /// counts: only reaching the server matters here.
+  Future<String> resolveAddress({
+    Duration probe = AddressDefaults.probe,
+  }) async {
+    final remote = _alternate(config.localUrl);
+    if (remote == null) {
+      _use(config.localUrl);
+      return _activeBaseUrl;
+    }
+    try {
+      await _client
+          .get(
+            Uri.parse('${config.localUrl}/api/version'),
+            headers: _buildAuthHeaders(accept: 'text/plain'),
+          )
+          .timeout(probe);
+      _use(config.localUrl);
+    } catch (_) {
+      _use(remote);
+    }
+    return _activeBaseUrl;
+  }
+
+  /// Runs [attempt] on the address in use and, when it cannot be reached,
+  /// once more on the other address, which is then kept.
+  Future<T> _withFallback<T>(Future<T> Function(String base) attempt) async {
+    final tried = _activeBaseUrl;
+    try {
+      return await attempt(tried);
+    } on FrigateUnreachableException {
+      // Another request may have moved already; otherwise try the other one.
+      final next = _activeBaseUrl != tried ? _activeBaseUrl : _alternate(tried);
+      if (next == null) rethrow;
+      final result = await attempt(next);
+      _use(next);
+      return result;
+    }
+  }
+
   String? get token => _token;
   bool get isAuthenticated => _token != null && _token!.isNotEmpty;
 
@@ -91,8 +166,13 @@ class FrigateClient {
   /// Authenticates with the server via `POST /api/login`.
   ///
   /// Extracts the session JWT from the Set-Cookie header and stores it.
-  Future<String> login(String password) async {
-    final uri = Uri.parse('$_activeBaseUrl/api/login');
+  /// Tries the other address when the one in use cannot be reached.
+  Future<String> login(String password) => _withFallback(
+    (base) => _login(base, password),
+  );
+
+  Future<String> _login(String base, String password) async {
+    final uri = Uri.parse('$base/api/login');
     final body = jsonEncode({
       'user': config.username,
       'password': password,
@@ -142,17 +222,25 @@ class FrigateClient {
         statusCode: response.statusCode,
       );
     } on SocketException catch (e) {
-      throw FrigateNetworkException(
-        'Impossible de joindre le serveur à $_activeBaseUrl. Vérifiez l\'adresse et le réseau.',
+      throw FrigateUnreachableException(
+        'Impossible de joindre le serveur à $base. Vérifiez l\'adresse et le réseau.',
         e,
       );
     } on HandshakeException catch (e) {
-      throw FrigateNetworkException(
-        'Erreur TLS/certificat. Si le certificat est auto-signé, activez l\'option.',
+      throw FrigateUnreachableException(
+        'Erreur TLS/certificat à $base. Un certificat auto-signé n\'est accepté que sur l\'adresse locale.',
+        e,
+      );
+    } on http.ClientException catch (e) {
+      throw FrigateUnreachableException(
+        'Impossible de joindre le serveur à $base.',
         e,
       );
     } on TimeoutException catch (e) {
-      throw FrigateNetworkException('Délai de connexion dépassé.', e);
+      throw FrigateUnreachableException(
+        'Délai de connexion dépassé à $base.',
+        e,
+      );
     }
   }
 
@@ -303,9 +391,15 @@ class FrigateClient {
   Future<http.StreamedResponse> openStream(
     String path, {
     Map<String, String> headers = const {},
-  }) async {
+  }) => _withFallback((base) => _openStream(base, path, headers));
+
+  Future<http.StreamedResponse> _openStream(
+    String base,
+    String path,
+    Map<String, String> headers,
+  ) async {
     final cleanPath = path.startsWith('/') ? path : '/$path';
-    final request = http.Request('GET', Uri.parse('$_activeBaseUrl$cleanPath'))
+    final request = http.Request('GET', Uri.parse('$base$cleanPath'))
       ..headers.addAll(headers)
       ..headers.addAll(_buildAuthHeaders(accept: headers['Accept'] ?? '*/*'));
     try {
@@ -317,13 +411,13 @@ class FrigateClient {
       }
       return response;
     } on SocketException catch (e) {
-      throw FrigateNetworkException('Connexion interrompue.', e);
+      throw FrigateUnreachableException('Connexion interrompue.', e);
     } on HandshakeException catch (e) {
-      throw FrigateNetworkException('Certificat refusé.', e);
+      throw FrigateUnreachableException('Certificat refusé.', e);
     } on http.ClientException catch (e) {
-      throw FrigateNetworkException('Connexion interrompue.', e);
+      throw FrigateUnreachableException('Connexion interrompue.', e);
     } on TimeoutException catch (e) {
-      throw FrigateNetworkException('Délai dépassé pour $path', e);
+      throw FrigateUnreachableException('Délai dépassé pour $path', e);
     }
   }
 
@@ -338,9 +432,19 @@ class FrigateClient {
     String? body,
     Duration timeout = const Duration(seconds: 15),
     String accept = 'application/json',
+  }) => _withFallback(
+    (base) => _sendTo(base, path, body: body, timeout: timeout, accept: accept),
+  );
+
+  Future<http.Response> _sendTo(
+    String base,
+    String path, {
+    String? body,
+    required Duration timeout,
+    required String accept,
   }) async {
     final cleanPath = path.startsWith('/') ? path : '/$path';
-    final uri = Uri.parse('$_activeBaseUrl$cleanPath');
+    final uri = Uri.parse('$base$cleanPath');
     final headers = _buildAuthHeaders(accept: accept);
 
     try {
@@ -366,13 +470,13 @@ class FrigateClient {
         'Erreur HTTP ${response.statusCode} sur $path',
       );
     } on SocketException catch (e) {
-      throw FrigateNetworkException('Connexion interrompue.', e);
+      throw FrigateUnreachableException('Connexion interrompue.', e);
     } on HandshakeException catch (e) {
-      throw FrigateNetworkException('Certificat refusé.', e);
+      throw FrigateUnreachableException('Certificat refusé.', e);
     } on http.ClientException catch (e) {
-      throw FrigateNetworkException('Connexion interrompue.', e);
+      throw FrigateUnreachableException('Connexion interrompue.', e);
     } on TimeoutException catch (e) {
-      throw FrigateNetworkException('Délai dépassé pour $path', e);
+      throw FrigateUnreachableException('Délai dépassé pour $path', e);
     }
   }
 

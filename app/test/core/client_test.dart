@@ -301,4 +301,111 @@ void main() {
       throwsA(isA<FrigateAuthException>()),
     );
   });
+
+  group('local and remote addresses', () {
+    const both = ServerConfig(
+      name: 'Maison',
+      localUrl: 'https://192.168.1.10:8971',
+      remoteUrl: 'https://frigate.example.com',
+      username: 'viewer',
+    );
+
+    /// Server reachable only on the hosts in [reachable].
+    MockClient network(Set<String> reachable, List<Uri> asked) =>
+        MockClient((request) async {
+          asked.add(request.url);
+          if (!reachable.contains(request.url.host)) {
+            throw http.ClientException('unreachable', request.url);
+          }
+          if (request.url.path == '/api/login') {
+            return http.Response(
+              '',
+              200,
+              headers: {'set-cookie': 'frigate_token=jwt; Path=/'},
+            );
+          }
+          return http.Response('{}', 200);
+        });
+
+    test('login falls back on the remote address and keeps it', () async {
+      final asked = <Uri>[];
+      final client = FrigateClient(
+        config: both,
+        client: network({'frigate.example.com'}, asked),
+      );
+      final moves = <String>[];
+      client.onAddressChanged = moves.add;
+      expect(await client.login('secret'), 'jwt');
+      expect(client.activeBaseUrl, 'https://frigate.example.com');
+      expect(client.usingRemote, isTrue);
+      expect(moves, ['https://frigate.example.com']);
+      expect(asked.map((u) => u.host), ['192.168.1.10', 'frigate.example.com']);
+
+      asked.clear();
+      await client.fetchProfile();
+      expect(asked.single.host, 'frigate.example.com');
+    });
+
+    test('back on the local network, requests return to it', () async {
+      final asked = <Uri>[];
+      final client = FrigateClient(
+        config: both,
+        token: 'jwt',
+        client: network({'192.168.1.10'}, asked),
+        activeBaseUrl: 'https://frigate.example.com',
+      );
+      await client.fetchProfile();
+      expect(client.activeBaseUrl, 'https://192.168.1.10:8971');
+      expect(asked.last.host, '192.168.1.10');
+    });
+
+    test('resolveAddress prefers the local address when it answers', () async {
+      final asked = <Uri>[];
+      final reachable = {'192.168.1.10', 'frigate.example.com'};
+      final client = FrigateClient(
+        config: both,
+        token: 'jwt',
+        client: network(reachable, asked),
+        activeBaseUrl: 'https://frigate.example.com',
+      );
+      expect(await client.resolveAddress(), 'https://192.168.1.10:8971');
+      reachable.remove('192.168.1.10');
+      expect(await client.resolveAddress(), 'https://frigate.example.com');
+    });
+
+    test('an HTTP error does not change address', () async {
+      final asked = <Uri>[];
+      final client = FrigateClient(
+        config: both,
+        token: 'jwt',
+        client: MockClient((request) async {
+          asked.add(request.url);
+          return http.Response('nope', 500);
+        }),
+      );
+      await expectLater(
+        client.fetchProfile(),
+        throwsA(
+          isA<FrigateNetworkException>().having(
+            (e) => e is FrigateUnreachableException,
+            'unreachable',
+            isFalse,
+          ),
+        ),
+      );
+      expect(asked, hasLength(1));
+      expect(client.usingRemote, isFalse);
+    });
+
+    test('without a remote address the error is reported', () async {
+      final client = FrigateClient(
+        config: config,
+        client: network({}, []),
+      );
+      await expectLater(
+        client.login('secret'),
+        throwsA(isA<FrigateUnreachableException>()),
+      );
+    });
+  });
 }
