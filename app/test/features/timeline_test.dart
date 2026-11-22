@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +8,8 @@ import 'package:frigate_mobile/app/theme.dart';
 import 'package:frigate_mobile/core/frigate/capabilities.dart';
 import 'package:frigate_mobile/core/frigate/client.dart';
 import 'package:frigate_mobile/core/frigate/recordings.dart';
+import 'package:frigate_mobile/features/live/photo.dart';
+import 'package:frigate_mobile/features/timeline/clip_sheet.dart';
 import 'package:frigate_mobile/features/timeline/motion_passages.dart';
 import 'package:frigate_mobile/features/timeline/recording_history.dart';
 import 'package:frigate_mobile/features/timeline/recording_player.dart';
@@ -130,6 +135,16 @@ CameraCapabilities _camera(String name, String label) => CameraCapabilities(
   sound: false,
   liveStreams: [name],
 );
+
+class _FakePhotos implements PhotoActions {
+  final saved = <String>[];
+
+  @override
+  Future<void> save(Uint8List jpeg, String name) async => saved.add(name);
+
+  @override
+  Future<void> share(Uint8List jpeg, String name) async {}
+}
 
 Widget _app(Widget child) => MaterialApp(
   theme: buildDarkTheme(),
@@ -462,6 +477,7 @@ void main() {
     Future<void> pumpScreen(
       WidgetTester tester, {
       MotionPassage? openAt,
+      RecordingExport? export,
     }) async {
       // Phone-sized screen, so every control is laid out.
       tester.view.physicalSize = const Size(1080, 2340);
@@ -476,11 +492,62 @@ void main() {
             clock: () => _now,
             loadHistory: history == null ? null : () async => history!,
             openAt: openAt,
+            export: export,
           ),
         ),
       );
       await tester.pump();
     }
+
+    testWidgets('no clip nor photo without export', (tester) async {
+      await pumpScreen(tester);
+      expect(find.text('Extrait'), findsNothing);
+      expect(find.text('Photo'), findsNothing);
+    });
+
+    testWidgets('saves the recorded frame under the playhead', (tester) async {
+      final photos = _FakePhotos();
+      final asked = <(String, DateTime)>[];
+      await pumpScreen(
+        tester,
+        export: RecordingExport(
+          open: (path, {headers = const {}}) => throw UnimplementedError(),
+          frame: (camera, time) async {
+            asked.add((camera, time));
+            return Uint8List.fromList([1, 2, 3]);
+          },
+          cacheDirectory: () async => Directory.systemTemp,
+          photos: photos,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Photo'));
+      await tester.tap(find.text('Photo'));
+      await tester.pumpAndSettle();
+      final (camera, time) = asked.single;
+      expect(camera, 'cam_a');
+      expect(time, _now.subtract(TimelineScreenDefaults.startBehindNow));
+      expect(photos.saved, ['cam_a_20260110_115900']);
+      expect(find.textContaining('album Frigate'), findsOneWidget);
+    });
+
+    testWidgets('opens the clip sheet on the playhead', (tester) async {
+      await pumpScreen(
+        tester,
+        export: RecordingExport(
+          open: (path, {headers = const {}}) => throw UnimplementedError(),
+          frame: (camera, time) async => Uint8List(0),
+          cacheDirectory: () async => Directory.systemTemp,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Extrait'));
+      await tester.tap(find.text('Extrait'));
+      await tester.pumpAndSettle();
+      expect(find.text('Extrait · Entrée'), findsOneWidget);
+      expect(find.text('11:58:45'), findsOneWidget);
+      expect(find.text('11:59:15'), findsOneWidget);
+    });
 
     testWidgets('plays a passage opened from the Alerts tab', (tester) async {
       await pumpScreen(

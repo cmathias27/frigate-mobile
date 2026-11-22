@@ -6,7 +6,9 @@ import 'package:intl/intl.dart';
 import '../../app/theme.dart';
 import '../../core/frigate/capabilities.dart';
 import '../../l10n/app_localizations.dart';
+import '../live/photo.dart';
 import 'calendar_sheet.dart';
+import 'clip_sheet.dart';
 import 'motion_passages.dart';
 import 'recording_history.dart';
 import 'recording_player.dart';
@@ -48,6 +50,9 @@ class TimelineScreen extends StatefulWidget {
   /// otherwise the first camera, just behind the live edge.
   final MotionPassage? openAt;
 
+  /// Clip and photo of the recording; neither is offered without it.
+  final RecordingExport? export;
+
   const TimelineScreen({
     super.key,
     required this.cameras,
@@ -56,6 +61,7 @@ class TimelineScreen extends StatefulWidget {
     this.clock,
     this.loadHistory,
     this.openAt,
+    this.export,
   });
 
   @override
@@ -73,6 +79,7 @@ class _TimelineScreenState extends State<TimelineScreen>
   bool _seeking = false;
   bool _atEnd = false;
   bool _wasPlaying = false;
+  bool _takingPhoto = false;
   Timer? _settle;
 
   DateTime _now() => (widget.clock ?? DateTime.now)();
@@ -283,6 +290,71 @@ class _TimelineScreenState extends State<TimelineScreen>
     _ensure();
   }
 
+  /// The passage of the camera played holding [time], if any.
+  MotionPassage? _passageAt(DateTime time) {
+    for (final p in widget.data.passages(_camera)) {
+      if (!time.isBefore(p.start) && time.isBefore(p.end)) return p;
+    }
+    return null;
+  }
+
+  Future<void> _exportClip(RecordingExport export) async {
+    final l = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    await _player.pause();
+    if (!mounted) return;
+    final outcome = await showClipSheet(
+      context,
+      export: export,
+      camera: _camera,
+      label: _label(_camera),
+      playhead: _playhead,
+      liveEdge: _liveEdge,
+      passage: _passageAt(_playhead),
+    );
+    if (outcome == ClipOutcome.saved) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l.clipSaved(DevicePhotoActions.album))),
+      );
+    }
+  }
+
+  /// Saves the recorded frame under the playhead, at full resolution.
+  Future<void> _takePhoto(RecordingExport export) async {
+    if (_takingPhoto) return;
+    final l = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final camera = _camera;
+    final time = _playhead;
+    setState(() => _takingPhoto = true);
+    try {
+      final jpeg = await export.frame(camera, time);
+      final name = photoName(camera, time);
+      await export.photos.save(jpeg, name);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l.livePhotoSaved(DevicePhotoActions.album)),
+          action: SnackBarAction(
+            label: l.livePhotoShare,
+            onPressed: () => export.photos.share(jpeg, name),
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Photo $camera: $e');
+      messenger.showSnackBar(SnackBar(content: Text(l.livePhotoFailed)));
+    } finally {
+      if (mounted) setState(() => _takingPhoto = false);
+    }
+  }
+
+  String _label(String camera) {
+    for (final c in widget.cameras) {
+      if (c.name == camera) return c.label;
+    }
+    return camera;
+  }
+
   bool _recordedAt(DateTime time) => widget.data
       .coverage(_camera)
       .any((c) => !time.isBefore(c.start) && time.isBefore(c.end));
@@ -295,6 +367,7 @@ class _TimelineScreenState extends State<TimelineScreen>
     final labels = {for (final c in widget.cameras) c.name: c.label};
     final now = _now();
     final playing = _player.playing;
+    final export = widget.export;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -433,6 +506,30 @@ class _TimelineScreenState extends State<TimelineScreen>
                     ),
                 ],
               ),
+              if (export != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _exportClip(export),
+                        icon: const Icon(Icons.movie_creation_outlined),
+                        label: Text(l.timelineClip),
+                      ),
+                    ),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _takingPhoto
+                            ? null
+                            : () => _takePhoto(export),
+                        icon: const Icon(Icons.photo_camera_outlined),
+                        label: Text(l.timelinePhoto),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

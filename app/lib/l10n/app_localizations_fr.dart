@@ -495,4 +495,66 @@ class AppLocalizationsFr extends AppLocalizations {
   String durationHours(int hours, String minutes) {
     return '$hours h $minutes';
   }
+
+  @override
+  String get timelineClip => 'Extrait';
+
+  @override
+  String get timelinePhoto => 'Photo';
+
+  @override
+  String clipTitle(String camera) {
+    return 'Extrait · $camera';
+  }
+
+  @override
+  String get clipStart => 'Début';
+
+  @override
+  String get clipEnd => 'Fin';
+
+  @override
+  String clipEarlier(int seconds) {
+    return '$seconds s plus tôt';
+  }
+
+  @override
+  String clipLater(int seconds) {
+    return '$seconds s plus tard';
+  }
+
+  @override
+  String clipLength(String length) {
+    return 'Durée : $length';
+  }
+
+  @override
+  String clipLengthMax(String length) {
+    return 'Durée : $length, le maximum';
+  }
+
+  @override
+  String get clipPassage => 'Passage';
+
+  @override
+  String get clipSave => 'Enregistrer';
+
+  @override
+  String get clipShare => 'Partager';
+
+  @override
+  String clipDownloading(String size) {
+    return 'Téléchargement… $size Mo';
+  }
+
+  @override
+  String get clipCancel => 'Annuler';
+
+  @override
+  String clipSaved(String album) {
+    return 'Extrait enregistré dans l\'album $album';
+  }
+
+  @override
+  String get clipFailed => 'L\'extrait n\'a pas pu être téléchargé.';
 }

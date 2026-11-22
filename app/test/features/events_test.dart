@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frigate_mobile/app/formatting.dart';
 import 'package:frigate_mobile/app/theme.dart';
 import 'package:frigate_mobile/core/frigate/capabilities.dart';
 import 'package:frigate_mobile/core/frigate/recordings.dart';
@@ -201,10 +202,10 @@ void main() {
 
   test('passage lengths', () {
     final l = lookupAppLocalizations(const Locale('fr'));
-    expect(formatPassageDuration(const Duration(seconds: 42), l), '42 s');
-    expect(formatPassageDuration(const Duration(seconds: 65), l), '1 min 05');
+    expect(formatDuration(const Duration(seconds: 42), l), '42 s');
+    expect(formatDuration(const Duration(seconds: 65), l), '1 min 05');
     expect(
-      formatPassageDuration(const Duration(hours: 2, minutes: 3), l),
+      formatDuration(const Duration(hours: 2, minutes: 3), l),
       '2 h 03',
     );
   });
