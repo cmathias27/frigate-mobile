@@ -34,6 +34,15 @@ abstract class RecordingPlayer extends ChangeNotifier {
   Future<void> seek(DateTime time);
 
   Widget buildView();
+
+  /// True when recorded images are shown instead of the video.
+  bool get imagePlayback => false;
+
+  /// Why the video could not be played, as reported by the decoder.
+  String? get videoError => null;
+
+  /// Tries the video again after a fallback to images.
+  Future<void> retryVideo() async {}
 }
 
 /// [RecordingPlayer] reading Frigate's HLS recordings through [VodProxy].
@@ -45,6 +54,7 @@ class HlsRecordingPlayer extends RecordingPlayer {
   DateTime? _start;
   DateTime? _end;
   int _generation = 0;
+  String? _error;
 
   HlsRecordingPlayer(this._proxy);
 
@@ -70,6 +80,9 @@ class HlsRecordingPlayer extends RecordingPlayer {
   bool get playing => _controller?.value.isPlaying ?? false;
 
   @override
+  String? get videoError => _error;
+
+  @override
   bool get completed => _controller?.value.isCompleted ?? false;
 
   @override
@@ -79,6 +92,7 @@ class HlsRecordingPlayer extends RecordingPlayer {
     _camera = camera;
     _start = start;
     _end = end;
+    _error = null;
     _status = PlayerStatus.opening;
     notifyListeners();
     try {
@@ -92,15 +106,20 @@ class HlsRecordingPlayer extends RecordingPlayer {
       if (generation != _generation) return;
       controller.addListener(_onController);
       _status = PlayerStatus.ready;
-    } catch (_) {
+    } catch (e) {
       if (generation != _generation) return;
+      _error = '$e';
       _status = PlayerStatus.failed;
     }
     notifyListeners();
   }
 
   void _onController() {
-    if (_controller?.value.hasError ?? false) _status = PlayerStatus.failed;
+    final value = _controller?.value;
+    if (value != null && value.hasError) {
+      _status = PlayerStatus.failed;
+      _error = value.errorDescription ?? _error;
+    }
     notifyListeners();
   }
 

@@ -251,5 +251,11 @@
   "@clipSaved": {"placeholders": {"album": {"type": "String"}}},
   "clipFailed": "L'extrait n'a pas pu être téléchargé.",
   "timelineSeekAll": "Toutes",
-  "timelineSeekAllHint": "Passage préc. et suiv. sur toutes les caméras, sinon sur la caméra lue"
+  "timelineSeekAllHint": "Passage préc. et suiv. sur toutes les caméras, sinon sur la caméra lue",
+  "timelineImagePlayback": "Images",
+  "timelineImagePlaybackTitle": "Lecture en images",
+  "timelineImagePlaybackBody": "La vidéo de cette caméra ne passe pas sur ce téléphone, souvent parce que son image est trop grande pour le décodeur. Les images enregistrées sont montrées à la place, quelques-unes par seconde, jusqu'à la fermeture de l'application.",
+  "timelineImagePlaybackDetail": "Détail : {error}",
+  "@timelineImagePlaybackDetail": {"placeholders": {"error": {"type": "String"}}},
+  "timelineRetryVideo": "Réessayer la vidéo"
 }

@@ -673,9 +673,83 @@ class _TimelineScreenState extends State<TimelineScreen>
             bottom: 8,
             child: _Caption(labels[_camera] ?? _camera),
           ),
+          if (_player.imagePlayback && status == PlayerStatus.ready)
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Material(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(4),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(4),
+                  onTap: () => _explainImagePlayback(l),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 4,
+                      children: [
+                        const Icon(
+                          Icons.photo_library_outlined,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                        Text(
+                          l.timelineImagePlayback,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
+  }
+
+  /// Why the recording is shown as images, and a way to try the video again.
+  Future<void> _explainImagePlayback(AppLocalizations l) async {
+    final error = _player.videoError;
+    final retry = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l.timelineImagePlaybackTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 12,
+          children: [
+            Text(l.timelineImagePlaybackBody),
+            if (error != null && error.isNotEmpty)
+              SelectableText(
+                l.timelineImagePlaybackDetail(error),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textDim,
+                ),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l.timelineRetryVideo),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l.ok),
+          ),
+        ],
+      ),
+    );
+    if (retry == true && mounted) await _player.retryVideo();
   }
 
   Widget _bands(

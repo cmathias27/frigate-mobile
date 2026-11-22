@@ -15,6 +15,7 @@ import '../features/live/live_grid_screen.dart';
 import '../features/live/webrtc_live_video.dart';
 import '../features/more/more_screen.dart';
 import '../features/timeline/clip_sheet.dart';
+import '../features/timeline/image_playback.dart';
 import '../features/timeline/motion_passages.dart';
 import '../features/timeline/recording_history.dart';
 import '../features/timeline/recording_player.dart';
@@ -153,7 +154,10 @@ class _HomeShellState extends State<HomeShell> {
     return TimelineScreen(
       cameras: recorded,
       data: _timelineData!,
-      playerFactory: () => HlsRecordingPlayer(proxy),
+      playerFactory: () => FallbackRecordingPlayer(
+        video: HlsRecordingPlayer(proxy),
+        images: ImageRecordingPlayer(client.fetchRecordingImage),
+      ),
       loadHistory: () => _loadHistory(client, recorded),
       openAt: openAt,
       preferences: _preferences,
