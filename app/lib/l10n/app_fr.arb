@@ -1,0 +1,24 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Frigate Mobile",
+  "tabLive": "Direct",
+  "tabTimeline": "Chronologie",
+  "tabEvents": "Alertes",
+  "tabMore": "Plus",
+  "comingInVersion": "Arrive dans la version {version}.",
+  "@comingInVersion": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "liveDescription": "Toutes vos caméras en direct, en grille ou une par une.",
+  "timelineDescription": "Les enregistrements de toutes les caméras, avec le mouvement et les détections, sans limite de jours.",
+  "eventsDescription": "Les passages de mouvement, puis les alertes et détections quand Frigate les produit.",
+  "moreDescription": "Serveurs, réglages, mises à jour et notes de version.",
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  }
+}

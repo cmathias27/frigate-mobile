@@ -1,0 +1,14 @@
+{
+  "@@locale": "en",
+  "appTitle": "Frigate Mobile",
+  "tabLive": "Live",
+  "tabTimeline": "Timeline",
+  "tabEvents": "Alerts",
+  "tabMore": "More",
+  "comingInVersion": "Coming in version {version}.",
+  "liveDescription": "All your cameras live, in a grid or one at a time.",
+  "timelineDescription": "Recordings of every camera, with motion and detections, with no day limit.",
+  "eventsDescription": "Motion passages, then alerts and detections when Frigate produces them.",
+  "moreDescription": "Servers, settings, updates and release notes.",
+  "aboutVersion": "Version {version}"
+}

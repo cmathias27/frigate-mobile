@@ -1,0 +1,541 @@
+<title>Maquettes Frigate Mobile</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Mise en page : planche de six téléphones qui se replient en colonne, chaque écran légendé par ses fonctions et ses appels Frigate */
+:root{
+  --bg:#eef1f4; --fg:#16202a; --muted:#5a6878; --line:#d3dae2; --card:#ffffff; --frame:#1b2129; --accent:#1f7ae0;
+  --disp:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --ui:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0f1318;--fg:#e4e9ef;--muted:#91a0b0;--line:#27303a;--card:#161c23;--frame:#2c3540;--accent:#5aa6ff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1318;--fg:#e4e9ef;--muted:#91a0b0;--line:#27303a;--card:#161c23;--frame:#2c3540;--accent:#5aa6ff;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--ui);font-size:15px;line-height:1.5}
+.wrap{max-width:1320px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:grid;gap:10px;max-width:70ch;margin-bottom:36px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,5vw,52px);line-height:1;margin:0;text-wrap:balance}
+header.top p{margin:0;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted);margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:48px 32px}
+.screen{display:grid;gap:16px;justify-items:center;align-content:start;min-width:0}
+.cap{width:100%;max-width:316px;display:grid;gap:6px}
+.cap h2{font-family:var(--disp);font-weight:600;font-size:24px;margin:0;line-height:1.1}
+.cap .n{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.cap ul{margin:0;padding-left:18px;color:var(--fg);font-size:14px}
+.cap code{font-family:var(--mono);font-size:11.5px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:4px;padding:6px 8px;display:block;white-space:pre-wrap;word-break:break-all}
+
+/* Téléphone : l'application est volontairement sombre, comme DS cam */
+.phone{--p-bg:#0b0e12;--p-fg:#e8edf2;--p-dim:#8b98a6;--p-sur:#151a21;--p-sur2:#1d242d;--p-acc:#3d9bff;
+  --person:#ff5a4e;--car:#ffb020;--face:#c77dff;--motion:#5f7386;--rec:#2b3540;
+  width:300px;max-width:100%;height:630px;border:9px solid var(--frame);border-radius:42px;background:var(--p-bg);color:var(--p-fg);
+  overflow:hidden;display:flex;flex-direction:column;font-family:var(--ui);font-size:13px;box-shadow:0 18px 40px -22px rgba(0,0,0,.55);position:relative}
+.sb{display:flex;justify-content:space-between;padding:10px 20px 4px;font-family:var(--mono);font-size:11px;color:var(--p-fg)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 14px 10px}
+.bar h3{margin:0;font-family:var(--disp);font-weight:600;font-size:21px;letter-spacing:.01em}
+.bar .sub{font-size:11px;color:var(--p-dim)}
+.ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--p-sur);color:var(--p-fg);font-size:14px;border:0}
+.body{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:10px;padding:0 10px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--p-sur2);padding:8px 4px 14px;background:var(--p-bg)}
+.tab{display:grid;justify-items:center;gap:3px;font-size:10.5px;color:var(--p-dim)}
+.tab b{font-size:16px;font-weight:400;line-height:1}
+.tab.on{color:var(--p-acc)}
+.tab .badge{position:relative}
+.tab .badge::after{content:"3";position:absolute;top:-6px;right:-12px;background:var(--person);color:#fff;font-size:9px;border-radius:8px;padding:0 4px;font-family:var(--mono)}
+
+/* Images caméra simulées */
+.feed{position:relative;aspect-ratio:16/9;max-width:100%;border-radius:6px;overflow:hidden;background:var(--g,#222)}
+.feed::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
+.feed .nm{position:absolute;left:6px;bottom:5px;font-size:10.5px;font-weight:600;text-shadow:0 1px 2px #000}
+.feed .ts{position:absolute;right:6px;top:5px;font-family:var(--mono);font-size:9px;color:#dfe6ec;text-shadow:0 1px 2px #000}
+.feed .live{position:absolute;left:6px;top:5px;font-family:var(--mono);font-size:8.5px;background:rgba(0,0,0,.55);padding:1px 5px;border-radius:3px;display:flex;gap:4px;align-items:center}
+.feed .live::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--person)}
+.bb{position:absolute;border:1.5px solid var(--c,var(--person));border-radius:2px}
+.bb span{position:absolute;top:-13px;left:-1.5px;background:var(--c,var(--person));color:#111;font-size:8.5px;font-weight:600;padding:0 4px;white-space:nowrap;border-radius:2px 2px 0 0}
+.g-arr{--g:linear-gradient(180deg,#2a3a48 0 38%,#33452f 38% 70%,#4a4a44 70%)}
+.g-av{--g:linear-gradient(180deg,#3c4c5e 0 30%,#6b6458 30% 34%,#55524c 34% 75%,#3a3833 75%)}
+.g-portier{--g:linear-gradient(90deg,#3d3a35 0 22%,#5a5248 22% 60%,#2f2c28 60%)}
+.g-couloir{--g:linear-gradient(90deg,#2b2d33 0 25%,#4a4a52 25% 75%,#2b2d33 75%)}
+.g-garage{--g:linear-gradient(180deg,#30343a 0 55%,#45484c 55%)}
+.g-sous{--g:linear-gradient(160deg,#1e2226 0 50%,#2a2e33 50%)}
+.night{filter:grayscale(1) brightness(.9)}
+
+.chips{display:flex;gap:6px;overflow:hidden;flex-wrap:nowrap}
+.chip{flex:none;font-size:11px;padding:4px 10px;border-radius:14px;background:var(--p-sur);color:var(--p-fg);border:1px solid var(--p-sur2);white-space:nowrap}
+.chip.on{background:var(--p-acc);border-color:var(--p-acc);color:#06121f;font-weight:600}
+.lbl{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--p-dim);font-weight:600}
+
+/* Grille direct */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.layouts{display:flex;gap:4px}
+.layouts .ic{width:26px;height:26px;font-size:11px;font-family:var(--mono)}
+.layouts .ic.on{background:var(--p-acc);color:#06121f}
+.home{display:flex;align-items:center;justify-content:space-between;background:var(--p-sur);border-radius:10px;padding:8px 10px}
+.home b{font-weight:600}
+.sw{width:34px;height:20px;border-radius:10px;background:var(--p-acc);position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#fff}
+.sw.off{background:var(--p-sur2)}
+.sw.off::after{right:auto;left:2px;background:var(--p-dim)}
+
+/* Plein écran */
+.ctrls{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ctrl{display:grid;justify-items:center;gap:4px;padding:8px 0;border-radius:10px;background:var(--p-sur);font-size:10px;color:var(--p-dim)}
+.ctrl b{font-size:16px;font-weight:400;color:var(--p-fg)}
+.ctrl.hot{background:#2a1513;color:#ff9b93}
+.ctrl.hot b{color:var(--person)}
+.ptz{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;background:var(--p-sur);border-radius:12px;padding:10px}
+.pad{width:96px;height:96px;border-radius:50%;background:var(--p-sur2);position:relative;display:grid;place-items:center}
+.pad i{position:absolute;font-style:normal;color:var(--p-dim);font-size:12px}
+.pad .c{width:34px;height:34px;border-radius:50%;background:var(--p-bg);border:1px solid #2c3640}
+.zoom{display:grid;gap:6px}
+.zoom .row{display:flex;gap:6px}
+.zoom .chip{flex:1;text-align:center}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.thumbs .feed{border-radius:4px}
+.thumbs .t{font-family:var(--mono);font-size:9px;color:var(--p-dim);margin-top:2px}
+.pip{width:7px;height:7px;border-radius:50%;background:var(--c);display:inline-block}
+/* Chronologie */
+.dnav{display:flex;align-items:center;justify-content:space-between;gap:6px;background:var(--p-sur);border-radius:9px;padding:4px 6px;font-size:12px}
+.dnav .ic{width:24px;height:24px;background:var(--p-sur2);font-size:12px}
+.dnav b{font-weight:600}
+.trans{display:grid;grid-template-columns:1fr 1fr auto 1fr 1fr;align-items:center;gap:4px}
+.tb{display:grid;justify-items:center;gap:1px;font-size:9.5px;color:var(--p-dim);padding:4px 0;border-radius:8px}
+.tb b{font-size:15px;font-weight:400;color:var(--p-fg);line-height:1.1}
+.tb.nav{background:var(--p-sur)}
+.tb.nav b{color:var(--p-acc)}
+.trans .big{width:38px;height:38px;border-radius:50%;background:var(--p-acc);color:#06121f;display:grid;place-items:center;font-size:13px}
+.strips{position:relative;display:grid;gap:5px;padding-top:18px}
+.strip{position:relative;border-radius:5px;overflow:hidden;background:var(--rec)}
+.strip .mo{position:absolute;bottom:0;width:.6%;background:var(--motion);border-radius:1px 1px 0 0}
+.strip .det{position:absolute;top:0;bottom:0;min-width:4px;background:var(--c);border-radius:1px;z-index:1}
+.strip.g .det{bottom:auto;height:45%}
+.strip .gap{position:absolute;top:0;bottom:0;z-index:1;background:repeating-linear-gradient(135deg,var(--p-sur) 0 3px,var(--p-bg) 3px 6px)}
+.strip .fut{position:absolute;top:0;bottom:0;right:0;z-index:1;background:var(--p-bg);border-left:1px dashed var(--p-dim)}
+.strip .sl{position:absolute;left:4px;top:3px;z-index:2;font-style:normal;font-size:9px;font-weight:600;color:var(--p-fg);background:rgba(11,14,18,.72);padding:0 4px;border-radius:3px}
+.strip .cl{position:absolute;bottom:2px;z-index:2;font-style:normal;font-family:var(--mono);font-size:7.5px;color:var(--p-fg);transform:translateX(-25%)}
+.ph{position:absolute;left:50%;top:0;bottom:19px;width:2px;margin-left:-1px;background:var(--p-acc);z-index:3}
+.ph span{position:absolute;top:0;left:50%;transform:translateX(-50%);background:var(--p-acc);color:#06121f;font-family:var(--mono);font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px;white-space:nowrap}
+.ticks{position:relative;height:14px;font-family:var(--mono);font-size:8.5px;color:var(--p-dim)}
+.ticks span{position:absolute;transform:translateX(-50%)}
+.ticks .nowl{color:var(--person)}
+.zrow{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.zrow .chips{gap:4px}
+.zrow .chip{padding:3px 8px;font-size:10.5px}
+.mini{font-size:10px;color:var(--p-dim)}
+/* Feuille calendrier */
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:4}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:5;background:var(--p-sur);border-radius:18px 18px 0 0;padding:10px 14px 18px;display:grid;gap:10px}
+.grab{width:36px;height:4px;border-radius:2px;background:#323c47;justify-self:center}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;font-size:11.5px;font-variant-numeric:tabular-nums}
+.cal .h{font-size:9px;color:var(--p-dim);padding:0}
+.cal span{padding:5px 0 8px;border-radius:7px;position:relative}
+.cal .off{color:#3b4550}
+.cal .f{background:var(--rec)}
+.cal .a::after{content:"";position:absolute;bottom:2px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--person)}
+.cal .sel{background:var(--p-acc);color:#06121f;font-weight:600}
+.cal .sel::after{background:#06121f}
+.clg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:10px;color:var(--p-dim)}
+.clg i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.goto{display:grid;grid-template-columns:1fr auto;gap:6px}
+.goto .home{font-family:var(--mono);font-size:11.5px;padding:7px 10px}
+.goto .btn{background:var(--p-acc);color:#06121f;font-weight:600;border-radius:10px;padding:7px 14px;display:grid;place-items:center}
+.play{display:flex;justify-content:center;align-items:center;gap:14px;color:var(--p-fg)}
+.play .big{width:36px;height:36px;border-radius:50%;background:var(--p-acc);color:#06121f;display:grid;place-items:center}
+.play .sp{font-family:var(--mono);font-size:10px;color:var(--p-dim)}
+
+/* Alertes */
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--p-sur);border-radius:9px;padding:3px;font-size:11.5px;text-align:center}
+.seg span{padding:5px 0;border-radius:7px;color:var(--p-dim)}
+.seg span.on{background:var(--p-sur2);color:var(--p-fg);font-weight:600}
+.alist{display:grid;gap:8px}
+.al{display:grid;grid-template-columns:96px 1fr;gap:9px;align-items:center;background:var(--p-sur);border-radius:10px;padding:6px;border-left:3px solid var(--c)}
+.al.seen{opacity:.62}
+.al .feed{border-radius:6px}
+.al .t1{font-weight:600;font-size:12.5px}
+.al .t2{font-size:11px;color:var(--p-dim)}
+.tag{display:inline-block;font-size:9.5px;padding:0 6px;border-radius:8px;background:var(--p-sur2);color:var(--p-fg);margin-top:3px}
+.daysep{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--p-dim);font-weight:600;margin-top:2px}
+
+/* Détail */
+.scrub{position:relative;height:28px;border-radius:6px;background:var(--rec);overflow:hidden}
+.scrub .ev{position:absolute;top:0;bottom:0;background:var(--c);opacity:.9}
+.scrub .hd{position:absolute;top:-2px;bottom:-2px;width:2px;background:#fff;left:38%}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:11.5px;background:var(--p-sur);border-radius:10px;padding:10px}
+.kv dt{color:var(--p-dim)}
+.kv dd{margin:0;text-align:right;font-family:var(--mono);font-size:11px}
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+
+/* Notification sur l'écran verrouillé */
+.lock{position:absolute;inset:0;background:radial-gradient(120% 60% at 50% 0%,#24344a,#0b0e12 70%);display:flex;flex-direction:column;align-items:center;padding-top:60px}
+.clock{font-family:var(--disp);font-weight:500;font-size:64px;line-height:1}
+.date{font-size:13px;color:#b9c4cf;margin-bottom:28px}
+.notif{width:calc(100% - 20px);background:rgba(30,38,48,.92);border-radius:16px;padding:10px;display:grid;gap:8px}
+.notif .h{display:flex;align-items:center;gap:6px;font-size:10.5px;color:#b9c4cf}
+.notif .h i{width:16px;height:16px;border-radius:4px;background:var(--p-acc);display:grid;place-items:center;font-style:normal;font-size:9px;color:#06121f;font-weight:700}
+.notif .h span:last-child{margin-left:auto}
+.notif .feed{border-radius:10px}
+.nacts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.nacts span{background:rgba(255,255,255,.08);border-radius:9px;text-align:center;padding:7px 0;font-size:11px}
+.notif.small{grid-template-columns:1fr auto;align-items:center}
+.notif.small .feed{width:56px}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Frigate 0.18 · 6 caméras · maquettes v0.1</div>
+  <h1>Une application Frigate qui se tient comme DS cam</h1>
+  <p>Sept écrans pour valider l'interface avant d'écrire du code. Les images sont simulées ; les noms de caméras, les zones et les types d'objets reprennent ta configuration Frigate. Sous chaque écran, la liste des fonctions et les appels d'API qui les servent.</p>
+  <div class="legend">
+    <span><i style="background:#ff5a4e"></i>Personne (alerte)</span>
+    <span><i style="background:#ffb020"></i>Véhicule</span>
+    <span><i style="background:#c77dff"></i>Visage</span>
+    <span><i style="background:#5f7386"></i>Mouvement</span>
+    <span><i style="background:#2b3540"></i>Enregistrement continu</span>
+  </div>
+</header>
+
+<main class="board">
+
+<!-- 1. Connexion -->
+<section class="screen">
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span>5G ▮▮▮ 82%</span></div>
+    <div class="body" style="padding:24px 22px;gap:18px">
+      <div style="display:grid;gap:4px;margin-top:20px">
+        <div style="width:52px;height:52px;border-radius:14px;background:var(--p-acc);display:grid;place-items:center;font-family:var(--disp);font-weight:700;font-size:26px;color:#06121f">F</div>
+        <h3 style="font-family:var(--disp);font-size:28px;margin:12px 0 0">Ajouter un serveur</h3>
+        <div style="color:var(--p-dim);font-size:12px">Comme dans DS cam : un serveur, plusieurs caméras.</div>
+      </div>
+      <div style="display:grid;gap:10px">
+        <div><div class="lbl">Nom</div><div class="home" style="margin-top:4px">Maison</div></div>
+        <div><div class="lbl">Adresse locale</div><div class="home" style="margin-top:4px;font-family:var(--mono);font-size:11.5px">https://192.168.1.10:8971</div></div>
+        <div><div class="lbl">Adresse à distance</div><div class="home" style="margin-top:4px;font-family:var(--mono);font-size:11.5px">https://frigate.exemple.fr</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><div class="lbl">Utilisateur</div><div class="home" style="margin-top:4px">admin</div></div>
+          <div><div class="lbl">Mot de passe</div><div class="home" style="margin-top:4px;letter-spacing:.2em">••••••</div></div>
+        </div>
+        <div class="home"><span>Choisir l'adresse selon le Wi-Fi</span><span class="sw"></span></div>
+        <div class="home"><span>Déverrouiller par empreinte</span><span class="sw"></span></div>
+      </div>
+      <div style="margin-top:auto;display:grid;gap:8px">
+        <div style="background:var(--p-acc);color:#06121f;text-align:center;font-weight:600;padding:11px;border-radius:10px">Se connecter</div>
+        <div style="text-align:center;font-size:11px;color:var(--p-dim)">Connexion chiffrée vérifiée · 6 caméras trouvées</div>
+      </div>
+    </div>
+  </div>
+  <div class="cap">
+    <span class="n">Écran 1 · premier lancement</span>
+    <h2>Connexion au serveur</h2>
+    <ul>
+      <li>Adresse locale et adresse distante, bascule automatique selon le réseau</li>
+      <li>Plusieurs serveurs possibles</li>
+      <li>Jeton gardé dans le coffre du téléphone, verrou par empreinte</li>
+    </ul>
+    <code>POST /api/login → JWT (port 8971)
+GET /api/config → caméras, zones</code>
+  </div>
+</section>
+
+<!-- 2. Direct grille -->
+<section class="screen">
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span>Wi-Fi ▮▮▮ 82%</span></div>
+    <div class="bar">
+      <div><h3>Direct</h3><div class="sub">Maison · 6 caméras en ligne</div></div>
+      <div class="layouts"><span class="ic">1</span><span class="ic on">4</span><span class="ic">9</span></div>
+    </div>
+    <div class="body">
+      <div class="chips"><span class="chip on">Toutes</span><span class="chip">Extérieur</span><span class="chip">Intérieur</span><span class="chip">★ Favoris</span></div>
+      <div class="grid2">
+        <div class="feed g-portier"><span class="live">LIVE</span><span class="ts">14:32:08</span><div class="bb" style="left:42%;top:22%;width:20%;height:68%"><span>personne 91%</span></div><span class="nm">Portier</span></div>
+        <div class="feed g-av"><span class="live">LIVE</span><span class="ts">14:32:08</span><div class="bb" style="--c:var(--car);left:18%;top:46%;width:46%;height:32%"><span>voiture 88%</span></div><span class="nm">Avant</span></div>
+        <div class="feed g-arr"><span class="ts">14:32:08</span><span class="nm">Arrière</span></div>
+        <div class="feed g-garage"><span class="ts">14:32:07</span><span class="nm">Garage</span></div>
+        <div class="feed g-couloir"><span class="ts">14:32:08</span><span class="nm">Couloir</span></div>
+        <div class="feed g-sous night"><span class="ts">14:32:06</span><span class="nm">Sous-sol</span></div>
+      </div>
+      <div class="home"><div><b>Mode maison</b><div style="font-size:11px;color:var(--p-dim)">Intérieur muet · alertes extérieures actives</div></div><span class="sw"></span></div>
+    </div>
+    <div class="tabs"><span class="tab on"><b>▦</b>Direct</span><span class="tab"><b>◷</b>Chronologie</span><span class="tab"><b class="badge">◉</b>Alertes</span><span class="tab"><b>☰</b>Plus</span></div>
+  </div>
+  <div class="cap">
+    <span class="n">Écran 2 · onglet Direct</span>
+    <h2>Grille en direct</h2>
+    <ul>
+      <li>Dispositions 1, 4, 9, groupes et favoris, ordre par glisser</li>
+      <li>Cadre coloré sur une caméra qui détecte en ce moment</li>
+      <li>Toucher une vignette ouvre le plein écran, glisser change de page</li>
+    </ul>
+    <code>GET /api/&lt;cam&gt;/latest.jpg?h=180 (vignettes)
+WS /ws → objets actifs par caméra</code>
+  </div>
+</section>
+
+<!-- 3. Plein écran -->
+<section class="screen">
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span>Wi-Fi ▮▮▮ 82%</span></div>
+    <div class="bar">
+      <span class="ic">‹</span>
+      <div style="text-align:center"><h3 style="font-size:18px">Portier</h3><div class="sub">WebRTC · 1080p · 0,4 s</div></div>
+      <span class="ic">⤢</span>
+    </div>
+    <div class="feed g-portier" style="border-radius:0;margin:0 -10px"><span class="live">LIVE</span><span class="ts">18/11/2026 14:32:08</span><div class="bb" style="left:40%;top:18%;width:22%;height:74%"><span>personne 91% · zone entrée</span></div></div>
+    <div class="body" style="padding-top:10px">
+      <div class="ctrls">
+        <span class="ctrl"><b>◎</b>Photo</span>
+        <span class="ctrl"><b>●</b>Extrait</span>
+        <span class="ctrl hot"><b>🎙</b>Parler</span>
+        <span class="ctrl"><b>♪</b>Son</span>
+      </div>
+      <div class="ptz">
+        <div class="pad"><i style="top:6px">▲</i><i style="bottom:6px">▼</i><i style="left:9px">◀</i><i style="right:9px">▶</i><span class="c"></span></div>
+        <div class="zoom">
+          <span class="lbl">PTZ · préréglages</span>
+          <div class="row"><span class="chip on">Allée</span><span class="chip">Boîte</span></div>
+          <div class="row"><span class="chip">− Zoom</span><span class="chip">Zoom +</span></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Aujourd'hui sur cette caméra</span><span style="font-size:11px;color:var(--p-acc)">Tout voir</span></div>
+      <div class="thumbs">
+        <div><div class="feed g-portier"></div><div class="t"><span class="pip" style="--c:var(--person)"></span> 14:31</div></div>
+        <div><div class="feed g-portier"></div><div class="t"><span class="pip" style="--c:var(--face)"></span> 12:07</div></div>
+        <div><div class="feed g-portier night"></div><div class="t"><span class="pip" style="--c:var(--person)"></span> 07:45</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="cap">
+    <span class="n">Écran 3 · une caméra</span>
+    <h2>Plein écran direct</h2>
+    <ul>
+      <li>Faible latence, bascule HD/SD, paysage en tournant le téléphone</li>
+      <li>Photo, extrait à la demande, audio dans les deux sens</li>
+      <li>PTZ et préréglages si la caméra les gère (ONVIF)</li>
+      <li>Dernières alertes de la caméra en bas</li>
+    </ul>
+    <code>go2rtc WebRTC /api/go2rtc/webrtc?src=cam_portier
+POST /api/cam_portier/ptz/move/up
+GET /api/cam_portier/latest.jpg (photo)</code>
+  </div>
+</section>
+
+<!-- 4. Chronologie -->
+<section class="screen">
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span>Wi-Fi ▮▮▮ 82%</span></div>
+    <div class="bar"><div><h3>Chronologie</h3><div class="sub">Lecture · Portier</div></div><span class="ic">⇄</span></div>
+    <div class="feed g-portier" style="border-radius:0"><span class="ts">18/11 11:42:18</span><div class="bb" style="left:34%;top:18%;width:22%;height:74%"><span>personne 91%</span></div><span class="nm">Portier · enregistré</span></div>
+    <div class="body" style="padding-top:10px;gap:9px">
+      <div class="dnav"><span class="ic">‹</span><span><b>mer. 18 nov.</b> · 11:42:18</span><span class="ic">▤</span><span class="ic">›</span></div>
+      <div class="trans">
+        <span class="tb nav"><b>⏮</b>Détection préc.</span>
+        <span class="tb"><b>↺</b>10 s</span>
+        <span class="big">❚❚</span>
+        <span class="tb"><b>↻</b>10 s</span>
+        <span class="tb nav"><b>⏭</b>Détection suiv.</span>
+      </div>
+      <div class="strips">
+        <div class="ph"><span>11:42:18</span></div>
+        <div class="strip g" style="height:32px" data-motion="[[2,1.5,.6],[13,2,.55],[23,1.5,.45],[34,3,.35],[50,1.5,.8],[60,2,.3],[71,1.5,.65],[83,2,.75]]" data-max=".5">
+          <span class="det" style="--c:var(--person);left:2%"></span>
+          <span class="det" style="--c:var(--car);left:13%"></span>
+          <span class="det" style="--c:var(--face);left:23%"></span>
+          <span class="det" style="--c:var(--person);left:49.4%;width:1.2%"></span>
+          <span class="det" style="--c:var(--car);left:71%"></span>
+          <span class="det" style="--c:var(--person);left:82.6%"></span>
+          <em class="cl" style="left:13%">Av</em><em class="cl" style="left:71%">Av</em><em class="cl" style="left:82.6%">Ar</em>
+          <span class="fut" style="left:97.2%"></span>
+          <em class="sl">Toutes les caméras</em>
+        </div>
+        <div class="strip" style="height:50px" data-motion="[[2,1.5,.75],[23,1.2,.65],[50,1.3,.95],[64,2,.3]]" data-max=".9">
+          <span class="det" style="--c:var(--person);left:2%;width:1.2%;opacity:.9"></span>
+          <span class="det" style="--c:var(--face);left:23%;opacity:.9"></span>
+          <span class="det" style="--c:var(--person);left:49.4%;width:1.2%;opacity:.9"></span>
+          <span class="gap" style="left:27.2%;width:4.2%"></span>
+          <span class="fut" style="left:97.2%"></span>
+          <em class="sl">Portier</em>
+        </div>
+        <div class="ticks"><span style="left:5%">09h</span><span style="left:21.7%">10h</span><span style="left:38.3%">11h</span><span style="left:55%">12h</span><span style="left:71.7%">13h</span><span style="left:88.3%">14h</span></div>
+      </div>
+      <div class="zrow">
+        <div class="chips"><span class="chip">1 h</span><span class="chip on">6 h</span><span class="chip">24 h</span><span class="chip">Tout</span></div>
+        <span class="mini">1×</span>
+      </div>
+    </div>
+    <div class="tabs"><span class="tab"><b>▦</b>Direct</span><span class="tab on"><b>◷</b>Chronologie</span><span class="tab"><b class="badge">◉</b>Alertes</span><span class="tab"><b>☰</b>Plus</span></div>
+  </div>
+  <div class="cap">
+    <span class="n">Écran 4 · onglet Chronologie</span>
+    <h2>Deux chronologies, une tête de lecture</h2>
+    <ul>
+      <li><b>Toutes les caméras</b> : enregistrements, mouvement et détections fusionnés. Toucher un repère d'une autre caméra bascule la lecture sur elle</li>
+      <li><b>Caméra en lecture</b> : plus haute et plus détaillée. Fond = enregistré, barres grises = intensité du mouvement, blocs colorés = détections, hachures = pas d'enregistrement</li>
+      <li><b>Détection préc. / suiv.</b> sautent au repère voisin sur toutes les caméras (pas seulement celle en lecture)</li>
+      <li>Glisser horizontalement sans limite de jours, pincer ou zoom 1 h → Tout. Le changement de jour se fait en glissant au-delà de minuit</li>
+    </ul>
+    <code>GET /api/&lt;cam&gt;/recordings?after=…&amp;before=…
+GET /api/review/activity/motion?cameras=…&amp;scale=…
+GET /api/review?cameras=all&amp;after=…&amp;before=…
+GET /vod/cam_portier/start/…/end/…/index.m3u8</code>
+  </div>
+</section>
+
+<!-- 4b. Calendrier -->
+<section class="screen">
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span>Wi-Fi ▮▮▮ 82%</span></div>
+    <div class="bar"><div><h3>Chronologie</h3><div class="sub">Lecture · Portier</div></div><span class="ic">⇄</span></div>
+    <div class="feed g-portier" style="border-radius:0"><span class="ts">18/11 11:42:18</span><span class="nm">Portier · enregistré</span></div>
+    <div class="dim"></div>
+    <div class="sheet">
+      <span class="grab"></span>
+      <div style="display:flex;justify-content:space-between;align-items:center"><span class="ic">‹</span><b style="font-family:var(--disp);font-size:19px;font-weight:600">Novembre 2026</b><span class="ic">›</span></div>
+      <div class="cal">
+        <span class="h">L</span><span class="h">M</span><span class="h">M</span><span class="h">J</span><span class="h">V</span><span class="h">S</span><span class="h">D</span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span class="off">1</span>
+        <span class="off">2</span><span class="off">3</span><span class="off">4</span><span class="off">5</span><span class="off">6</span><span class="off">7</span><span class="a">8</span>
+        <span class="a">9</span><span class="a">10</span><span class="a">11</span><span class="a">12</span><span class="a">13</span><span class="a">14</span><span class="a">15</span>
+        <span class="a">16</span><span class="f a">17</span><span class="f a sel">18</span><span class="off">19</span><span class="off">20</span><span class="off">21</span><span class="off">22</span>
+        <span class="off">23</span><span class="off">24</span><span class="off">25</span><span class="off">26</span><span class="off">27</span><span class="off">28</span><span class="off">29</span>
+        <span class="off">30</span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="clg"><span><i style="background:var(--rec)"></i>Enregistrement complet</span><span><i style="background:var(--person);border-radius:50%;width:6px;height:6px;vertical-align:1px"></i>Alertes et détections gardées</span></div>
+      <div class="lbl">Aller à une date et une heure</div>
+      <div class="goto"><span class="home">17/11/2026 · 22:10</span><span class="btn">Aller</span></div>
+      <div class="chips"><span class="chip">Il y a 1 h</span><span class="chip">Ce matin</span><span class="chip">Hier soir</span><span class="chip">Le plus ancien</span></div>
+      <div class="mini">Plus ancien enregistrement : dim. 8 nov. 06:14</div>
+    </div>
+  </div>
+  <div class="cap">
+    <span class="n">Écran 4b · bouton calendrier de la chronologie</span>
+    <h2>Tout l'historique</h2>
+    <ul>
+      <li>Calendrier de tous les jours enregistrés, mois par mois, sans fenêtre fixe</li>
+      <li>Saut direct à une date et une heure, raccourcis courants</li>
+      <li>La seule limite est la durée de conservation réglée dans Frigate</li>
+    </ul>
+    <code>GET /api/recordings/summary?cameras=all
+GET /api/review/summary</code>
+  </div>
+</section>
+
+<!-- 5. Alertes -->
+<section class="screen">
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span>Wi-Fi ▮▮▮ 82%</span></div>
+    <div class="bar"><div><h3>Alertes</h3><div class="sub">3 non vues</div></div><span class="ic">⚙</span></div>
+    <div class="body">
+      <div class="seg"><span class="on">Alertes</span><span>Détections</span><span>Mouvement</span></div>
+      <div class="chips"><span class="chip on">Toutes caméras</span><span class="chip">Personne</span><span class="chip">Voiture</span><span class="chip">Visages</span></div>
+      <div class="alist">
+        <div class="daysep">Aujourd'hui</div>
+        <div class="al" style="--c:var(--person)"><div class="feed g-portier"><div class="bb" style="left:38%;top:16%;width:24%;height:76%"></div></div><div><div class="t1">Personne au portier</div><div class="t2">14:31 · 42 s · zone entrée</div><span class="tag">inconnu</span></div></div>
+        <div class="al" style="--c:var(--car)"><div class="feed g-av"><div class="bb" style="--c:var(--car);left:16%;top:44%;width:50%;height:34%"></div></div><div><div class="t1">Voiture devant</div><div class="t2">14:58 · 1 min 10 · allée</div><span class="tag">AB-123-CD</span></div></div>
+        <div class="al" style="--c:var(--face)"><div class="feed g-portier"><div class="bb" style="--c:var(--face);left:44%;top:20%;width:14%;height:26%"></div></div><div><div class="t1">Camille reconnue</div><div class="t2">12:07 · 18 s · portier</div><span class="tag">visage 94%</span></div></div>
+        <div class="daysep">Hier</div>
+        <div class="al seen" style="--c:var(--person)"><div class="feed g-arr night"></div><div><div class="t1">Personne à l'arrière</div><div class="t2">22:14 · 1 min 32 · jardin</div></div></div>
+      </div>
+    </div>
+    <div class="tabs"><span class="tab"><b>▦</b>Direct</span><span class="tab"><b>◷</b>Chronologie</span><span class="tab on"><b class="badge">◉</b>Alertes</span><span class="tab"><b>☰</b>Plus</span></div>
+  </div>
+  <div class="cap">
+    <span class="n">Écran 5 · onglet Alertes</span>
+    <h2>Liste des événements</h2>
+    <ul>
+      <li>Trois niveaux de Frigate : alertes, détections, mouvement</li>
+      <li>Filtres par caméra, objet, zone, visage, date</li>
+      <li>Glisser pour marquer vu, appui long pour sélection multiple</li>
+    </ul>
+    <code>GET /api/review?severity=alert&amp;reviewed=0
+GET /api/review/&lt;id&gt;/preview (aperçu animé)
+POST /api/reviews/viewed</code>
+  </div>
+</section>
+
+<!-- 6. Détail et notification -->
+<section class="screen">
+  <div class="phone">
+    <div class="lock">
+      <div class="clock">14:31</div>
+      <div class="date">mercredi 18 novembre</div>
+      <div class="notif">
+        <div class="h"><i>F</i><span>Frigate · Portier</span><span>maintenant</span></div>
+        <div style="font-weight:600;font-size:13px">Personne détectée à l'entrée</div>
+        <div class="feed g-portier"><div class="bb" style="left:38%;top:16%;width:24%;height:76%"><span>personne 91%</span></div></div>
+        <div class="nacts"><span>Voir en direct</span><span>Parler</span><span>Muet 1 h</span></div>
+      </div>
+      <div class="notif small" style="margin-top:8px">
+        <div><div class="h"><i>F</i><span>Frigate · Avant</span></div><div style="font-size:12px;margin-top:3px">Voiture AB-123-CD dans l'allée</div></div>
+        <div class="feed g-av"></div>
+      </div>
+    </div>
+  </div>
+  <div class="cap">
+    <span class="n">Écran 6 · hors de l'application</span>
+    <h2>Notification avec image</h2>
+    <ul>
+      <li>Instantané de l'objet détecté, regroupement par caméra</li>
+      <li>Actions directes : voir en direct, parler, couper 1 h</li>
+      <li>Réglage par caméra, objet, zone et plage horaire, respecte le mode maison</li>
+    </ul>
+    <code>MQTT frigate/reviews → relais → push
+GET /api/events/&lt;id&gt;/snapshot.jpg?bbox=1</code>
+  </div>
+</section>
+
+<!-- 7. Détail événement -->
+<section class="screen">
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span>Wi-Fi ▮▮▮ 82%</span></div>
+    <div class="bar"><span class="ic">‹</span><div style="text-align:center"><h3 style="font-size:18px">Personne au portier</h3><div class="sub">Aujourd'hui 14:31:02 · 42 s</div></div><span class="ic">⋯</span></div>
+    <div class="feed g-portier" style="border-radius:0;margin:0 -0px"><span class="ts">14:31:18</span><div class="bb" style="left:36%;top:16%;width:24%;height:76%"><span>personne 91%</span></div></div>
+    <div class="body" style="padding-top:10px">
+      <div class="scrub"><span class="ev" style="--c:var(--person);left:20%;width:46%"></span><span class="ev" style="--c:var(--face);left:30%;width:8%"></span><span class="hd"></span></div>
+      <div class="play"><span class="sp">−10 s</span><span class="big">▶</span><span class="sp">+10 s</span></div>
+      <dl class="kv">
+        <dt>Objet</dt><dd>personne · 91 %</dd>
+        <dt>Zone</dt><dd>entrée</dd>
+        <dt>Visage</dt><dd>inconnu</dd>
+        <dt>Description</dt><dd style="font-family:var(--ui)">Livreur avec un colis</dd>
+      </dl>
+      <div class="acts">
+        <span class="ctrl"><b>⤓</b>Extrait</span>
+        <span class="ctrl"><b>◎</b>Photo</span>
+        <span class="ctrl"><b>☺</b>Nommer</span>
+        <span class="ctrl"><b>⌕</b>Similaires</span>
+      </div>
+    </div>
+  </div>
+  <div class="cap">
+    <span class="n">Écran 7 · ouvert depuis une alerte</span>
+    <h2>Détail d'un événement</h2>
+    <ul>
+      <li>Lecture du passage avec barre colorée des objets</li>
+      <li>Extrait MP4 et photo à enregistrer ou partager</li>
+      <li>Nommer un visage, chercher des événements semblables</li>
+    </ul>
+    <code>GET /api/events/&lt;id&gt;/clip.mp4
+POST /api/faces/&lt;nom&gt;/register
+GET /api/events/search?search_type=similarity</code>
+  </div>
+</section>
+</main>
+</div>
+<script>
+(function(){
+  function rnd(s){return function(){s=(s*9301+49297)%233280;return s/233280}}
+  document.querySelectorAll('[data-motion]').forEach(function(el,k){
+    var peaks=JSON.parse(el.dataset.motion),r=rnd(11+k*7),max=parseFloat(el.dataset.max||'.9'),f=document.createDocumentFragment();
+    for(var x=0;x<97;x+=0.9){
+      var v=0.05+r()*0.08;
+      peaks.forEach(function(p){var d=(x-p[0])/p[1];v+=p[2]*Math.exp(-d*d)});
+      var b=document.createElement('i');b.className='mo';b.style.left=x+'%';b.style.height=(Math.min(v,1)*max*100)+'%';f.appendChild(b);
+    }
+    el.insertBefore(f,el.firstChild);
+  });
+})();
+</script>
