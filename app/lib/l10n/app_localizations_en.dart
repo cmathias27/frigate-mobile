@@ -576,4 +576,121 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timelineRetryVideo => 'Retry the video';
+
+  @override
+  String get alertsViewAlerts => 'Alerts';
+
+  @override
+  String get alertsViewDetections => 'Detections';
+
+  @override
+  String get alertsViewMotion => 'Motion';
+
+  @override
+  String reviewUnseen(int count) {
+    return '$count unseen';
+  }
+
+  @override
+  String reviewSince(String time) {
+    return 'Since $time';
+  }
+
+  @override
+  String reviewSelected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get reviewMarkSeen => 'Mark seen';
+
+  @override
+  String get reviewMarkUnseen => 'Mark unseen';
+
+  @override
+  String get reviewMarkAllSeen => 'Mark all seen';
+
+  @override
+  String get reviewMarkFailed => 'Frigate did not save the seen mark.';
+
+  @override
+  String reviewEmptyAlerts(String time) {
+    return 'No alert since $time.';
+  }
+
+  @override
+  String reviewEmptyDetections(String time) {
+    return 'No detection since $time.';
+  }
+
+  @override
+  String get reviewLoadMore => 'Show the previous day';
+
+  @override
+  String get reviewLoadFailed => 'The alerts could not be read.';
+
+  @override
+  String get reviewInProgress => 'ongoing';
+
+  @override
+  String get reviewUnknown => 'Event';
+
+  @override
+  String reviewTitle(String what, String camera) {
+    return '$what · $camera';
+  }
+
+  @override
+  String get objectPerson => 'Person';
+
+  @override
+  String get objectCar => 'Car';
+
+  @override
+  String get objectTruck => 'Truck';
+
+  @override
+  String get objectBus => 'Bus';
+
+  @override
+  String get objectMotorcycle => 'Motorcycle';
+
+  @override
+  String get objectBicycle => 'Bicycle';
+
+  @override
+  String get objectBoat => 'Boat';
+
+  @override
+  String get objectDog => 'Dog';
+
+  @override
+  String get objectCat => 'Cat';
+
+  @override
+  String get objectBird => 'Bird';
+
+  @override
+  String get objectHorse => 'Horse';
+
+  @override
+  String get objectPackage => 'Package';
+
+  @override
+  String get objectFace => 'Face';
+
+  @override
+  String get objectLicensePlate => 'License plate';
+
+  @override
+  String get objectBark => 'Barking';
+
+  @override
+  String get objectSpeech => 'Speech';
+
+  @override
+  String get objectScream => 'Scream';
+
+  @override
+  String get objectFireAlarm => 'Fire alarm';
 }

@@ -5,11 +5,14 @@ import 'package:path_provider/path_provider.dart';
 
 import '../core/frigate/capabilities.dart';
 import '../core/frigate/client.dart';
+import '../core/frigate/reviews.dart';
 import '../core/frigate/vod_proxy.dart';
 import '../core/session/session_controller.dart';
 import '../core/storage/preferences.dart';
+import '../features/events/alerts_screen.dart';
 import '../features/events/events_screen.dart';
 import '../features/events/motion_list.dart';
+import '../features/events/review_list.dart';
 import '../features/events/thumbnails.dart';
 import '../features/live/live_grid_screen.dart';
 import '../features/live/webrtc_live_video.dart';
@@ -58,6 +61,9 @@ class _HomeShellState extends State<HomeShell> {
   VodProxy? _vodProxy;
   MotionList? _motionList;
   RecordingThumbnails? _thumbnails;
+  FrigateClient? _reviewClient;
+  ReviewList? _reviewList;
+  ReviewThumbnails? _reviewThumbnails;
   late final Preferences _preferences = widget.preferences ?? Preferences();
 
   /// Passage opened from the Alerts tab, played once by the timeline.
@@ -91,6 +97,7 @@ class _HomeShellState extends State<HomeShell> {
   @override
   void dispose() {
     _releaseTimeline();
+    _releaseReviews();
     super.dispose();
   }
 
@@ -103,6 +110,32 @@ class _HomeShellState extends State<HomeShell> {
     _timelineData = null;
     _vodProxy = null;
     _timelineClient = null;
+  }
+
+  void _releaseReviews() {
+    _reviewList?.dispose();
+    _reviewList = null;
+    _reviewThumbnails = null;
+    _reviewClient = null;
+  }
+
+  /// Alerts and detections of the session, kept across tab changes.
+  void _prepareReviews(
+    FrigateClient client,
+    List<CameraCapabilities> reviewed,
+  ) {
+    if (identical(client, _reviewClient)) return;
+    _releaseReviews();
+    _reviewClient = client;
+    _reviewList = ReviewList(
+      fetch: client.fetchReviews,
+      mark: client.markReviewed,
+      cameras: [for (final c in reviewed) c.name],
+      history: historySpan(
+        reviewed.expand((c) => [c.alertDays, c.continuousDays, c.motionDays]),
+      ),
+    );
+    _reviewThumbnails = ReviewThumbnails(client.fetchReviewThumbnail);
   }
 
   /// Recordings of the session, shared by the timeline and the Alerts tab
@@ -172,6 +205,39 @@ class _HomeShellState extends State<HomeShell> {
 
   Widget _events(FrigateClient client, List<CameraCapabilities> cameras) {
     final recorded = cameras.where((c) => c.recording).toList();
+    // Alerts and detections only where Frigate makes them (decision 0002).
+    final reviewed = cameras
+        .where((c) => c.objectDetection || c.audioDetection)
+        .toList();
+    if (reviewed.isEmpty) return _motionEvents(client, recorded);
+    _prepareReviews(client, reviewed);
+    return AlertsScreen(
+      reviews: _reviewList!,
+      thumbnails: _reviewThumbnails!,
+      cameras: reviewed,
+      motion: (_) => _motionEvents(client, recorded),
+      onOpen: (item) {
+        if (!recorded.any((c) => c.name == item.camera)) return;
+        _openReview(item);
+      },
+    );
+  }
+
+  /// Plays an alert or a detection in the timeline, like a passage.
+  void _openReview(ReviewItem item) => setState(() {
+    _openAt = MotionPassage(
+      camera: item.camera,
+      start: item.start,
+      end: item.end ?? DateTime.now(),
+      peak: 0,
+    );
+    _index = 1;
+  });
+
+  Widget _motionEvents(
+    FrigateClient client,
+    List<CameraCapabilities> recorded,
+  ) {
     if (recorded.isEmpty) return _noRecording();
     _prepareRecordings(client, recorded);
     return EventsScreen(

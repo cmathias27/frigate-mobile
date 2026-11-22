@@ -72,7 +72,7 @@ class _EventsScreenState extends State<EventsScreen> {
           final d = DateTime(p.start.year, p.start.month, p.start.day);
           if (d != day) {
             day = d;
-            rows.add(_DaySeparator(_dayLabel(d, locale, l)));
+            rows.add(DaySeparator(_dayLabel(d, locale, l)));
           }
           rows.add(
             _PassageRow(
@@ -157,28 +157,44 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  String _dayLabel(DateTime day, String locale, AppLocalizations l) {
-    final now = _now();
-    final today = DateTime(now.year, now.month, now.day);
-    if (day == today) return l.eventsToday;
-    if (day == DateTime(today.year, today.month, today.day - 1)) {
-      return l.eventsYesterday;
-    }
-    return DateFormat.MMMMEEEEd(locale).format(day);
-  }
+  String _dayLabel(DateTime day, String locale, AppLocalizations l) =>
+      eventsDayLabel(day, _now(), locale, l);
 
-  String _dayTime(DateTime time, String locale, AppLocalizations l) {
-    final day = DateTime(time.year, time.month, time.day);
-    final hour = DateFormat.Hm(locale).format(time);
-    final now = _now();
-    if (day == DateTime(now.year, now.month, now.day)) return hour;
-    return '${_dayLabel(day, locale, l).toLowerCase()} $hour';
-  }
+  String _dayTime(DateTime time, String locale, AppLocalizations l) =>
+      eventsDayTime(time, _now(), locale, l);
 }
 
-class _DaySeparator extends StatelessWidget {
+/// "Aujourd'hui", "Hier", or the date of [day].
+String eventsDayLabel(
+  DateTime day,
+  DateTime now,
+  String locale,
+  AppLocalizations l,
+) {
+  final today = DateTime(now.year, now.month, now.day);
+  if (day == today) return l.eventsToday;
+  if (day == DateTime(today.year, today.month, today.day - 1)) {
+    return l.eventsYesterday;
+  }
+  return DateFormat.MMMMEEEEd(locale).format(day);
+}
+
+/// "14:31" today, "hier 14:31" or "samedi 10 janvier 14:31" before.
+String eventsDayTime(
+  DateTime time,
+  DateTime now,
+  String locale,
+  AppLocalizations l,
+) {
+  final day = DateTime(time.year, time.month, time.day);
+  final hour = DateFormat.Hm(locale).format(time);
+  if (day == DateTime(now.year, now.month, now.day)) return hour;
+  return '${eventsDayLabel(day, now, locale, l).toLowerCase()} $hour';
+}
+
+class DaySeparator extends StatelessWidget {
   final String label;
-  const _DaySeparator(this.label);
+  const DaySeparator(this.label, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +258,7 @@ class _PassageRow extends StatelessWidget {
                   child: SizedBox(
                     width: 96,
                     height: 54,
-                    child: _Thumbnail(
+                    child: EventThumbnail(
                       future: thumbnails.of(
                         passage.camera,
                         DateTime.fromMillisecondsSinceEpoch(
@@ -301,9 +317,9 @@ class _PassageRow extends StatelessWidget {
   }
 }
 
-class _Thumbnail extends StatelessWidget {
+class EventThumbnail extends StatelessWidget {
   final Future<Uint8List> future;
-  const _Thumbnail({required this.future});
+  const EventThumbnail({super.key, required this.future});
 
   @override
   Widget build(BuildContext context) {

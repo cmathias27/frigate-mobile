@@ -25,7 +25,7 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 ## 0.2 — Liste et réglages fins
 
 - [x] Onglet Alertes : passages de mouvement par jour, nouveaux depuis la dernière visite, ouverture dans la chronologie
-- [ ] Onglet Alertes : alertes et détections quand Frigate les produit (`/api/review`), marquer vu
+- [x] Onglet Alertes : alertes et détections quand Frigate les produit (`/api/review`), marquer vu
 - [x] Export d'un extrait, photo (chronologie : extrait de 2 s à 10 min, enregistré dans l'album Frigate ou partagé ; photo de l'image enregistrée)
 - [x] Passage préc. et suiv. sur la caméra lue, ou sur toutes les caméras (choix gardé)
 - [x] Vidéo figée ou impossible : bascule seule sur le flux suivant de la caméra (sous-flux lus par Frigate compris), puis images
