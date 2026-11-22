@@ -99,5 +99,15 @@
     "placeholders": {
       "number": {"type": "int"}
     }
-  }
+  },
+  "livePhoto": "Photo",
+  "livePhotoSaved": "Photo enregistrée dans l'album {album}",
+  "@livePhotoSaved": {
+    "placeholders": {
+      "album": {"type": "String"}
+    }
+  },
+  "livePhotoShare": "Partager",
+  "livePhotoFailed": "Impossible d'enregistrer la photo",
+  "liveSound": "Son"
 }

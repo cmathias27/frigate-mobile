@@ -53,5 +53,10 @@
   "liveSoundOff": "Mute",
   "liveQuality": "Quality",
   "liveStream": "Stream {number}",
-  "liveStreamMain": "Stream {number} (main)"
+  "liveStreamMain": "Stream {number} (main)",
+  "livePhoto": "Photo",
+  "livePhotoSaved": "Photo saved in the {album} album",
+  "livePhotoShare": "Share",
+  "livePhotoFailed": "Could not save the photo",
+  "liveSound": "Sound"
 }

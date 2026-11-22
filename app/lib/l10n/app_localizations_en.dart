@@ -199,4 +199,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String liveStreamMain(int number) {
     return 'Stream $number (main)';
   }
+
+  @override
+  String get livePhoto => 'Photo';
+
+  @override
+  String livePhotoSaved(String album) {
+    return 'Photo saved in the $album album';
+  }
+
+  @override
+  String get livePhotoShare => 'Share';
+
+  @override
+  String get livePhotoFailed => 'Could not save the photo';
+
+  @override
+  String get liveSound => 'Sound';
 }
