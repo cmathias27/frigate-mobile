@@ -248,5 +248,7 @@
   "clipCancel": "Annuler",
   "clipSaved": "Extrait enregistré dans l'album {album}",
   "@clipSaved": {"placeholders": {"album": {"type": "String"}}},
-  "clipFailed": "L'extrait n'a pas pu être téléchargé."
+  "clipFailed": "L'extrait n'a pas pu être téléchargé.",
+  "timelineSeekAll": "Toutes",
+  "timelineSeekAllHint": "Passage préc. et suiv. sur toutes les caméras, sinon sur la caméra lue"
 }

@@ -557,4 +557,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get clipFailed => 'L\'extrait n\'a pas pu être téléchargé.';
+
+  @override
+  String get timelineSeekAll => 'Toutes';
+
+  @override
+  String get timelineSeekAllHint =>
+      'Passage préc. et suiv. sur toutes les caméras, sinon sur la caméra lue';
 }

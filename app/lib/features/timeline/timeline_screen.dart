@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../app/theme.dart';
 import '../../core/frigate/capabilities.dart';
+import '../../core/storage/preferences.dart';
 import '../../l10n/app_localizations.dart';
 import '../live/photo.dart';
 import 'calendar_sheet.dart';
@@ -27,6 +28,10 @@ abstract final class TimelineScreenDefaults {
 
   /// Jump of the back and forward buttons.
   static const jump = Duration(seconds: 10);
+
+  /// Previous and next passage look at every camera rather than only the
+  /// camera played (a setting kept on the phone).
+  static const seekAllCameras = false;
 
   /// Zoom chosen when the screen opens (index in [timelineZooms]).
   static const zoom = 1;
@@ -53,6 +58,9 @@ class TimelineScreen extends StatefulWidget {
   /// Clip and photo of the recording; neither is offered without it.
   final RecordingExport? export;
 
+  /// Keeps the passage navigation mode; not kept without it.
+  final Preferences? preferences;
+
   const TimelineScreen({
     super.key,
     required this.cameras,
@@ -62,6 +70,7 @@ class TimelineScreen extends StatefulWidget {
     this.loadHistory,
     this.openAt,
     this.export,
+    this.preferences,
   });
 
   @override
@@ -80,6 +89,8 @@ class _TimelineScreenState extends State<TimelineScreen>
   bool _atEnd = false;
   bool _wasPlaying = false;
   bool _takingPhoto = false;
+  bool _seekAll = TimelineScreenDefaults.seekAllCameras;
+  static const _keySeekAll = 'fm_timeline_seek_all';
   Timer? _settle;
 
   DateTime _now() => (widget.clock ?? DateTime.now)();
@@ -108,6 +119,18 @@ class _TimelineScreenState extends State<TimelineScreen>
     widget.data.addListener(_onData);
     _ensure();
     _open(_playhead, play: known);
+    _readSeekMode();
+  }
+
+  Future<void> _readSeekMode() async {
+    final stored = await widget.preferences?.read(_keySeekAll);
+    if (stored == null || !mounted) return;
+    setState(() => _seekAll = stored == 'true');
+  }
+
+  void _setSeekAll(bool value) {
+    setState(() => _seekAll = value);
+    widget.preferences?.write(_keySeekAll, '$value');
   }
 
   @override
@@ -211,7 +234,11 @@ class _TimelineScreenState extends State<TimelineScreen>
     setState(() => _seeking = true);
     final l = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final passage = await widget.data.seekPassage(_playhead, forward: forward);
+    final passage = await widget.data.seekPassage(
+      _playhead,
+      forward: forward,
+      camera: _seekAll ? null : _camera,
+    );
     if (!mounted) return;
     setState(() => _seeking = false);
     if (passage == null) {
@@ -542,6 +569,27 @@ class _TimelineScreenState extends State<TimelineScreen>
     Map<String, String> labels,
     TextTheme text,
   ) {
+    return Row(
+      children: [
+        Expanded(child: _cameraMenu(l, labels, text)),
+        if (widget.cameras.length > 1)
+          FilterChip(
+            avatar: const Icon(Icons.grid_view_rounded, size: 18),
+            label: Text(l.timelineSeekAll),
+            tooltip: l.timelineSeekAllHint,
+            selected: _seekAll,
+            showCheckmark: false,
+            onSelected: _setSeekAll,
+          ),
+      ],
+    );
+  }
+
+  Widget _cameraMenu(
+    AppLocalizations l,
+    Map<String, String> labels,
+    TextTheme text,
+  ) {
     return Align(
       alignment: Alignment.centerLeft,
       child: PopupMenuButton<String>(
@@ -557,9 +605,13 @@ class _TimelineScreenState extends State<TimelineScreen>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                l.timelinePlaying(labels[_camera] ?? _camera),
-                style: text.titleSmall,
+              Flexible(
+                child: Text(
+                  l.timelinePlaying(labels[_camera] ?? _camera),
+                  style: text.titleSmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               const Icon(Icons.arrow_drop_down_rounded),
             ],

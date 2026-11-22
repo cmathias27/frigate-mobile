@@ -8,6 +8,7 @@ import 'package:frigate_mobile/app/theme.dart';
 import 'package:frigate_mobile/core/frigate/capabilities.dart';
 import 'package:frigate_mobile/core/frigate/client.dart';
 import 'package:frigate_mobile/core/frigate/recordings.dart';
+import 'package:frigate_mobile/core/storage/preferences.dart';
 import 'package:frigate_mobile/features/live/photo.dart';
 import 'package:frigate_mobile/features/timeline/clip_sheet.dart';
 import 'package:frigate_mobile/features/timeline/motion_passages.dart';
@@ -422,6 +423,24 @@ void main() {
 
       // Nothing after the last passage up to now.
       expect(await data.seekPassage(late, forward: true), isNull);
+
+      // Limited to one camera.
+      final ownNext = await data.seekPassage(
+        from,
+        forward: true,
+        camera: 'cam_a',
+      );
+      expect(ownNext, isNull);
+      final ownPrevious = await data.seekPassage(
+        from,
+        forward: false,
+        camera: 'cam_b',
+      );
+      expect(ownPrevious, isNull);
+      expect(
+        (await data.seekPassage(from, forward: false, camera: 'cam_a'))?.start,
+        early,
+      );
       data.dispose();
     });
 
@@ -478,6 +497,7 @@ void main() {
       WidgetTester tester, {
       MotionPassage? openAt,
       RecordingExport? export,
+      Preferences? preferences,
     }) async {
       // Phone-sized screen, so every control is laid out.
       tester.view.physicalSize = const Size(1080, 2340);
@@ -493,6 +513,7 @@ void main() {
             loadHistory: history == null ? null : () async => history!,
             openAt: openAt,
             export: export,
+            preferences: preferences,
           ),
         ),
       );
@@ -584,7 +605,8 @@ void main() {
     testWidgets('previous passage switches to its camera and plays', (
       tester,
     ) async {
-      await pumpScreen(tester);
+      final preferences = Preferences.inMemory();
+      await pumpScreen(tester, preferences: preferences);
       // Inside the range opened: a seek, not a new opening.
       await tester.tap(find.byTooltip('Avancer de 10 s'));
       await tester.pump();
@@ -593,6 +615,18 @@ void main() {
       ]);
       expect(player.opened, hasLength(1));
 
+      // By default only the camera played, which has no passage.
+      await tester.tap(find.text('Passage préc.'));
+      await tester.pumpAndSettle();
+      expect(player.opened, hasLength(1));
+      expect(
+        find.text('Aucun passage de mouvement dans les 24 h'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.widgetWithText(FilterChip, 'Toutes'));
+      await tester.pump();
+      expect(preferences.read('fm_timeline_seek_all'), completion('true'));
       await tester.tap(find.text('Passage préc.'));
       await tester.pumpAndSettle();
       final (camera, start, _) = player.opened.last;
@@ -600,6 +634,21 @@ void main() {
       expect(start, passageAt);
       expect(player.playing, isTrue);
       expect(find.text('Lecture · Cour'), findsOneWidget);
+    });
+
+    testWidgets('the passage mode is kept', (tester) async {
+      await pumpScreen(
+        tester,
+        preferences: Preferences.inMemory({'fm_timeline_seek_all': 'true'}),
+      );
+      await tester.pumpAndSettle();
+      final chip = tester.widget<FilterChip>(
+        find.widgetWithText(FilterChip, 'Toutes'),
+      );
+      expect(chip.selected, isTrue);
+      await tester.tap(find.text('Passage préc.'));
+      await tester.pumpAndSettle();
+      expect(player.opened.last.$1, 'cam_b');
     });
 
     testWidgets('no passage shows a message', (tester) async {

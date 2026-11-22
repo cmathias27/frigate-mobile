@@ -197,5 +197,7 @@
   "clipCancel": "Cancel",
   "clipSaved": "Clip saved in the {album} album",
   "@clipSaved": {"placeholders": {"album": {"type": "String"}}},
-  "clipFailed": "The clip could not be downloaded."
+  "clipFailed": "The clip could not be downloaded.",
+  "timelineSeekAll": "All",
+  "timelineSeekAllHint": "Previous and next passage on every camera, otherwise on the camera played"
 }

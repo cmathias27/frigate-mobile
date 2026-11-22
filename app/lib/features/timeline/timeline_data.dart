@@ -126,13 +126,16 @@ class TimelineData extends ChangeNotifier {
   bool isLoaded(String camera, DateTime time) =>
       _chunks[camera]?.containsKey(_index(time)) ?? false;
 
-  /// The passage of any camera next to [from]: the first one starting after
-  /// it, or the last one starting before it. Hours are fetched outwards
-  /// until one is found or [TimelineDefaults.seekLimit] is reached.
+  /// The passage next to [from]: the first one starting after it, or the
+  /// last one starting before it, of [camera] only when given, of any
+  /// camera otherwise. Hours are fetched outwards until one is found or
+  /// [TimelineDefaults.seekLimit] is reached.
   Future<MotionPassage?> seekPassage(
     DateTime from, {
     required bool forward,
+    String? camera,
   }) async {
+    final searched = camera == null ? cameras : [camera];
     final base = _index(from);
     final steps =
         TimelineDefaults.seekLimit.inMilliseconds ~/
@@ -143,18 +146,18 @@ class TimelineData extends ChangeNotifier {
       if (forward && chunkStart.isAfter(_now())) break;
       final now = _now();
       await Future.wait([
-        for (final camera in cameras)
-          if (_inflight[(camera: camera, index: index)] case final pending?)
+        for (final c in searched)
+          if (_inflight[(camera: c, index: index)] case final pending?)
             pending
-          else if (_needs((camera: camera, index: index), now))
-            _load((camera: camera, index: index)),
+          else if (_needs((camera: c, index: index), now))
+            _load((camera: c, index: index)),
       ]);
-      final found = _neighbour(from, forward: forward);
+      final found = _neighbour(from, forward: forward, camera: camera);
       if (found == null) continue;
-      final searched = forward
+      final reached = forward
           ? found.start.isBefore(_start(index + 1))
           : !found.start.isBefore(chunkStart);
-      if (searched) return found;
+      if (reached) return found;
     }
     return null;
   }
@@ -177,8 +180,12 @@ class TimelineData extends ChangeNotifier {
     return cameras.every((c) => isLoaded(c, time));
   }
 
-  MotionPassage? _neighbour(DateTime from, {required bool forward}) {
-    final all = allPassages();
+  MotionPassage? _neighbour(
+    DateTime from, {
+    required bool forward,
+    String? camera,
+  }) {
+    final all = camera == null ? allPassages() : passages(camera);
     if (forward) {
       final after = from.add(const Duration(seconds: 1));
       for (final p in all) {

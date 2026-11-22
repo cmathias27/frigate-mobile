@@ -141,6 +141,7 @@ class _HomeShellState extends State<HomeShell> {
       playerFactory: () => HlsRecordingPlayer(proxy),
       loadHistory: () => _loadHistory(client, recorded),
       openAt: openAt,
+      preferences: _preferences,
       export: RecordingExport(
         open: client.openStream,
         frame: client.fetchRecordingImage,
