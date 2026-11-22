@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frigate_mobile/core/frigate/server_config.dart';
 import 'package:frigate_mobile/core/session/session_controller.dart';
 import 'package:frigate_mobile/core/storage/session_storage.dart';
+import 'package:frigate_mobile/features/live/feed_tile.dart';
 import 'package:frigate_mobile/main.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -105,6 +106,13 @@ void main() {
     expect(find.text('Alertes'), findsWidgets);
     expect(find.text('Plus'), findsWidgets);
     expect(find.text('2 caméras en ligne'), findsOneWidget);
+
+    // Direct tab: one tile per camera, layout buttons in the app bar.
+    expect(find.byType(FeedTile), findsNWidgets(2));
+    expect(find.byTooltip('4 par page'), findsOneWidget);
+    await tester.tap(find.text('1'));
+    await tester.pumpAndSettle();
+    expect(find.byType(FeedTile), findsOneWidget);
 
     // Switch to Chronologie
     await tester.tap(find.text('Chronologie'));

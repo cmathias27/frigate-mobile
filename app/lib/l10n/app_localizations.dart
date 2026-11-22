@@ -319,6 +319,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Adresse invalide (commencez par https://)'**
   String get invalidUrl;
+
+  /// No description provided for @liveBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'LIVE'**
+  String get liveBadge;
+
+  /// No description provided for @liveStale.
+  ///
+  /// In fr, this message translates to:
+  /// **'FIGÉ'**
+  String get liveStale;
+
+  /// No description provided for @liveUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Image indisponible'**
+  String get liveUnavailable;
+
+  /// No description provided for @liveNoCamera.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune caméra active sur ce serveur.'**
+  String get liveNoCamera;
+
+  /// No description provided for @liveLayout.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} par page'**
+  String liveLayout(int count);
+
+  /// No description provided for @livePage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Page {current} sur {total}'**
+  String livePage(int current, int total);
+
+  /// No description provided for @liveModeSnapshots.
+  ///
+  /// In fr, this message translates to:
+  /// **'Images · toutes les {seconds} s'**
+  String liveModeSnapshots(int seconds);
+
+  /// No description provided for @liveFullScreen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plein écran'**
+  String get liveFullScreen;
 }
 
 class _AppLocalizationsDelegate

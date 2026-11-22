@@ -36,5 +36,13 @@
   "refresh": "Refresh",
   "refreshSuccess": "Capabilities refreshed",
   "requiredField": "This field is required",
-  "invalidUrl": "Invalid address (start with https://)"
+  "invalidUrl": "Invalid address (start with https://)",
+  "liveBadge": "LIVE",
+  "liveStale": "FROZEN",
+  "liveUnavailable": "Image unavailable",
+  "liveNoCamera": "No active camera on this server.",
+  "liveLayout": "{count} per page",
+  "livePage": "Page {current} of {total}",
+  "liveModeSnapshots": "Images · every {seconds} s",
+  "liveFullScreen": "Full screen"
 }

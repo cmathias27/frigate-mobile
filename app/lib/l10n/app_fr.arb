@@ -56,5 +56,29 @@
   "refresh": "Actualiser",
   "refreshSuccess": "Capacités actualisées",
   "requiredField": "Ce champ est obligatoire",
-  "invalidUrl": "Adresse invalide (commencez par https://)"
+  "invalidUrl": "Adresse invalide (commencez par https://)",
+  "liveBadge": "LIVE",
+  "liveStale": "FIGÉ",
+  "liveUnavailable": "Image indisponible",
+  "liveNoCamera": "Aucune caméra active sur ce serveur.",
+  "liveLayout": "{count} par page",
+  "@liveLayout": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "livePage": "Page {current} sur {total}",
+  "@livePage": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "liveModeSnapshots": "Images · toutes les {seconds} s",
+  "@liveModeSnapshots": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "liveFullScreen": "Plein écran"
 }

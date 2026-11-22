@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
@@ -192,21 +193,43 @@ class FrigateClient {
     }
   }
 
+  /// Reads the most recent frame of [camera] from
+  /// `GET /api/<camera>/latest.jpg`, scaled by Frigate to [height] pixels
+  /// when given (thumbnails), at full resolution otherwise.
+  Future<Uint8List> fetchLatestImage(String camera, {int? height}) async {
+    final path = Uri(
+      path: '/api/${Uri.encodeComponent(camera)}/latest.jpg',
+      queryParameters: height != null ? {'h': '$height'} : null,
+    ).toString();
+    final response = await _send(
+      path,
+      timeout: const Duration(seconds: 10),
+      accept: 'image/jpeg',
+    );
+    return response.bodyBytes;
+  }
+
   /// Performs an authenticated GET request and returns raw response body.
-  Future<String> _get(String path) async {
+  Future<String> _get(String path) async => (await _send(path)).body;
+
+  /// Performs an authenticated GET request and returns the response when it
+  /// succeeded, throwing a [FrigateAuthException] or a
+  /// [FrigateNetworkException] otherwise.
+  Future<http.Response> _send(
+    String path, {
+    Duration timeout = const Duration(seconds: 15),
+    String accept = 'application/json',
+  }) async {
     final cleanPath = path.startsWith('/') ? path : '/$path';
     final uri = Uri.parse('$_activeBaseUrl$cleanPath');
 
     try {
       final response = await _client
-          .get(
-            uri,
-            headers: _buildAuthHeaders(),
-          )
-          .timeout(const Duration(seconds: 15));
+          .get(uri, headers: _buildAuthHeaders(accept: accept))
+          .timeout(timeout);
 
       if (response.statusCode == 200) {
-        return response.body;
+        return response;
       }
 
       if (response.statusCode == 401) {
@@ -218,15 +241,17 @@ class FrigateClient {
       );
     } on SocketException catch (e) {
       throw FrigateNetworkException('Connexion interrompue.', e);
+    } on HandshakeException catch (e) {
+      throw FrigateNetworkException('Certificat refusé.', e);
+    } on http.ClientException catch (e) {
+      throw FrigateNetworkException('Connexion interrompue.', e);
     } on TimeoutException catch (e) {
       throw FrigateNetworkException('Délai dépassé pour $path', e);
     }
   }
 
-  Map<String, String> _buildAuthHeaders() {
-    final headers = <String, String>{
-      'Accept': 'application/json',
-    };
+  Map<String, String> _buildAuthHeaders({String accept = 'application/json'}) {
+    final headers = <String, String>{'Accept': accept};
     if (_token != null && _token!.isNotEmpty) {
       headers['Authorization'] = 'Bearer $_token';
       headers['Cookie'] = '$_cookieName=$_token';

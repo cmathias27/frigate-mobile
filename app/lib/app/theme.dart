@@ -11,6 +11,9 @@ abstract final class AppColors {
   static const accent = Color(0xFF3D9BFF);
   static const textDim = Color(0xFF8B98A6);
 
+  /// Dot of the "LIVE" badge.
+  static const live = Color(0xFFFF5A4E);
+
   /// Timeline marks, shared by every screen that draws them.
   static const recording = Color(0xFF2B3540);
   static const motion = Color(0xFF5F7386);

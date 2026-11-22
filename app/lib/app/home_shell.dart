@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/session/session_controller.dart';
+import '../features/live/live_grid_screen.dart';
 import '../features/more/more_screen.dart';
 import '../l10n/app_localizations.dart';
 import 'theme.dart';
@@ -17,13 +18,17 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
+  int _liveLayout = 4;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     final serverName = widget.controller.config?.name ?? l.appTitle;
-    final cameraCount = widget.controller.capabilities?.cameras.length ?? 0;
+    final cameras =
+        widget.controller.capabilities?.cameras.values.toList() ?? const [];
+    final cameraCount = cameras.length;
+    final client = widget.controller.client;
 
     final tabs = [
       (l.tabLive, Icons.grid_view_rounded, l.liveDescription),
@@ -49,14 +54,34 @@ class _HomeShellState extends State<HomeShell> {
               ),
           ],
         ),
+        actions: [
+          if (_index == 0)
+            for (final layout in liveLayouts)
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: _LayoutButton(
+                  layout: layout,
+                  selected: layout == _liveLayout,
+                  onPressed: () => setState(() => _liveLayout = layout),
+                ),
+              ),
+          const SizedBox(width: 8),
+        ],
       ),
-      body: _index == 3
-          ? MoreScreen(controller: widget.controller)
-          : _Placeholder(
-              icon: icon,
-              description: description,
-              version: '0.1',
-            ),
+      body: switch (_index) {
+        0 when client != null => LiveGridScreen(
+          cameras: cameras,
+          fetch: client.fetchLatestImage,
+          layout: _liveLayout,
+          onAuthError: widget.controller.sessionExpired,
+        ),
+        3 => MoreScreen(controller: widget.controller),
+        _ => _Placeholder(
+          icon: icon,
+          description: description,
+          version: '0.1',
+        ),
+      },
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
@@ -64,6 +89,50 @@ class _HomeShellState extends State<HomeShell> {
           for (final (label, icon, _) in tabs)
             NavigationDestination(icon: Icon(icon), label: label),
         ],
+      ),
+    );
+  }
+}
+
+/// "1", "4" or "9" button of the live grid layouts (mock-up screen 2).
+class _LayoutButton extends StatelessWidget {
+  final int layout;
+  final bool selected;
+  final VoidCallback onPressed;
+
+  const _LayoutButton({
+    required this.layout,
+    required this.selected,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: AppLocalizations.of(context).liveLayout(layout),
+      child: Semantics(
+        selected: selected,
+        button: true,
+        child: Material(
+          color: selected ? AppColors.accent : AppColors.surface,
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: onPressed,
+            child: SizedBox.square(
+              dimension: 32,
+              child: Center(
+                child: Text(
+                  '$layout',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: selected ? AppColors.background : null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
