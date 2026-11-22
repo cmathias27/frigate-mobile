@@ -4,12 +4,12 @@ import 'package:frigate_mobile/core/frigate/server_config.dart';
 void main() {
   test('normalizeUrl handles trailing slashes and missing scheme', () {
     expect(
-      ServerConfig.normalizeUrl('192.168.1.53:8971/'),
-      'https://192.168.1.53:8971',
+      ServerConfig.normalizeUrl('192.168.1.10:8971/'),
+      'https://192.168.1.10:8971',
     );
     expect(
-      ServerConfig.normalizeUrl('http://192.168.1.53:5000///'),
-      'http://192.168.1.53:5000',
+      ServerConfig.normalizeUrl('http://192.168.1.10:5000///'),
+      'http://192.168.1.10:5000',
     );
     expect(
       ServerConfig.normalizeUrl('https://frigate.example.com'),
@@ -20,7 +20,7 @@ void main() {
   test('isLocalAddress detects private ranges and localhost', () {
     expect(ServerConfig.isLocalAddress('https://localhost:8971'), isTrue);
     expect(ServerConfig.isLocalAddress('https://127.0.0.1:8971'), isTrue);
-    expect(ServerConfig.isLocalAddress('https://192.168.1.53:8971'), isTrue);
+    expect(ServerConfig.isLocalAddress('https://192.168.1.10:8971'), isTrue);
     expect(ServerConfig.isLocalAddress('https://10.0.0.5:8971'), isTrue);
     expect(ServerConfig.isLocalAddress('https://172.20.0.2:8971'), isTrue);
     expect(ServerConfig.isLocalAddress('https://frigate.local:8971'), isTrue);
@@ -32,7 +32,7 @@ void main() {
   test('encode and decode roundtrips faithfully', () {
     const config = ServerConfig(
       name: 'Maison',
-      localUrl: 'https://192.168.1.53:8971',
+      localUrl: 'https://192.168.1.10:8971',
       remoteUrl: 'https://frigate.example.com',
       username: 'admin',
       allowSelfSignedCert: true,
@@ -43,7 +43,7 @@ void main() {
 
     expect(decoded, isNotNull);
     expect(decoded!.name, 'Maison');
-    expect(decoded.localUrl, 'https://192.168.1.53:8971');
+    expect(decoded.localUrl, 'https://192.168.1.10:8971');
     expect(decoded.remoteUrl, 'https://frigate.example.com');
     expect(decoded.username, 'admin');
     expect(decoded.allowSelfSignedCert, isTrue);

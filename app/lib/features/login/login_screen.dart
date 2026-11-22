@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
       text: existing?.name ?? 'Maison',
     );
     _localUrlController = TextEditingController(
-      text: existing?.localUrl ?? 'https://192.168.1.53:8971',
+      text: existing?.localUrl ?? 'https://192.168.1.10:8971',
     );
     _remoteUrlController = TextEditingController(
       text: existing?.remoteUrl ?? '',

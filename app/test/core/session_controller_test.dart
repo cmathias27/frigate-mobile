@@ -10,7 +10,7 @@ import 'package:http/testing.dart';
 void main() {
   const testConfig = ServerConfig(
     name: 'Maison',
-    localUrl: 'https://192.168.1.53:8971',
+    localUrl: 'https://192.168.1.10:8971',
     username: 'admin',
   );
 
@@ -46,7 +46,7 @@ void main() {
         return http.Response(
           jsonEncode({
             'cameras': {
-              'cam_portier': {
+              'cam_entree': {
                 'enabled': true,
                 'detect': {'enabled': false},
                 'record': {

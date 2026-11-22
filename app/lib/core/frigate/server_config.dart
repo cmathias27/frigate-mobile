@@ -10,7 +10,7 @@ class ServerConfig {
   final String name;
 
   /// Address on the local network, typically with port 8971
-  /// (e.g. "https://192.168.1.53:8971").
+  /// (e.g. "https://192.168.1.10:8971").
   final String localUrl;
 
   /// Address reachable from outside (e.g. "https://frigate.example.com"),

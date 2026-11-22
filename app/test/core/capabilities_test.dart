@@ -52,7 +52,7 @@ void main() {
         },
       ],
     },
-    'cam_garage_1': {
+    'cam_cour_1': {
       'producers': [
         {
           'medias': ['video, recvonly, H264'],
@@ -91,14 +91,14 @@ void main() {
 
   test('talk is found on any of the live streams of a camera', () {
     final caps = read({
-      'cam_garage': _camera(
+      'cam_cour': _camera(
         live: {
-          'streams': {'Stream 1': 'cam_garage_1', 'Stream 2': 'cam_door'},
+          'streams': {'Stream 1': 'cam_cour_1', 'Stream 2': 'cam_door'},
         },
       ),
     });
-    final garage = caps.cameras['cam_garage']!;
-    expect(garage.liveStreams, ['cam_garage_1', 'cam_door']);
+    final garage = caps.cameras['cam_cour']!;
+    expect(garage.liveStreams, ['cam_cour_1', 'cam_door']);
     expect(garage.talk, isTrue);
   });
 
@@ -152,10 +152,10 @@ void main() {
 
   test('labels: friendly name first, otherwise a readable camera name', () {
     final caps = read({
-      'cam_sous_sol': _camera(),
+      'cam_arriere_cour': _camera(),
       'cam_door': _camera(friendlyName: ' Porte d\'entrée '),
     });
-    expect(caps.cameras['cam_sous_sol']!.label, 'Sous sol');
+    expect(caps.cameras['cam_arriere_cour']!.label, 'Arriere cour');
     expect(caps.cameras['cam_door']!.label, 'Porte d\'entrée');
     expect(CameraCapabilities.defaultLabel('garage'), 'Garage');
   });

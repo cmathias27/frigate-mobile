@@ -62,7 +62,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localUrlLabel => 'Local address (port 8971)';
 
   @override
-  String get localUrlHint => 'https://192.168.1.53:8971';
+  String get localUrlHint => 'https://192.168.1.10:8971';
 
   @override
   String get remoteUrlLabel => 'Remote address (optional)';
