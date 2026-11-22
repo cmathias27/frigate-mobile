@@ -655,6 +655,162 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Impossible de lire l\'historique des enregistrements'**
   String get calendarLoadFailed;
+
+  /// No description provided for @ok.
+  ///
+  /// In fr, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @updateAvailableTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version {version} disponible'**
+  String updateAvailableTitle(String version);
+
+  /// No description provided for @updateInstalledVersion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version installée : {version}'**
+  String updateInstalledVersion(String version);
+
+  /// No description provided for @updateNoNotes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de note pour cette version.'**
+  String get updateNoNotes;
+
+  /// No description provided for @updateInstall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Installer'**
+  String get updateInstall;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tard'**
+  String get updateLater;
+
+  /// No description provided for @updateDownloading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargement et vérification…'**
+  String get updateDownloading;
+
+  /// No description provided for @updatePermissionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autoriser l\'installation'**
+  String get updatePermissionTitle;
+
+  /// No description provided for @updatePermissionMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Android demande d\'autoriser Frigate Mobile à installer ses propres mises à jour. Active « Autoriser cette source » dans les réglages qui vont s\'ouvrir, puis reviens appuyer sur Installer.'**
+  String get updatePermissionMessage;
+
+  /// No description provided for @updatePermissionOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir les réglages'**
+  String get updatePermissionOpen;
+
+  /// No description provided for @updateErrorNetwork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de joindre GitHub. Réessaie plus tard.'**
+  String get updateErrorNetwork;
+
+  /// No description provided for @updateErrorChecksum.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le fichier téléchargé ne correspond pas à son empreinte : installation annulée.'**
+  String get updateErrorChecksum;
+
+  /// No description provided for @updateErrorTooLarge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le fichier de mise à jour est anormalement gros : téléchargement arrêté.'**
+  String get updateErrorTooLarge;
+
+  /// No description provided for @updateErrorFolder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'enregistrer la mise à jour sur le téléphone.'**
+  String get updateErrorFolder;
+
+  /// No description provided for @updateErrorUnsupported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette version ne propose pas d\'APK à installer.'**
+  String get updateErrorUnsupported;
+
+  /// No description provided for @updateErrorPackage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le fichier téléchargé n\'est pas la version attendue de Frigate Mobile.'**
+  String get updateErrorPackage;
+
+  /// No description provided for @updateErrorSignature.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette version est signée par une autre clé : désinstalle l\'application pour l\'installer.'**
+  String get updateErrorSignature;
+
+  /// No description provided for @updateErrorInstall.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'installateur d\'Android n\'a pas pu s\'ouvrir.'**
+  String get updateErrorInstall;
+
+  /// No description provided for @updateAutoCheck.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier les mises à jour'**
+  String get updateAutoCheck;
+
+  /// No description provided for @updateAutoCheckHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une fois par jour au démarrage, auprès de GitHub'**
+  String get updateAutoCheckHint;
+
+  /// No description provided for @updateCheckNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une mise à jour'**
+  String get updateCheckNow;
+
+  /// No description provided for @updateChecking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recherche en cours…'**
+  String get updateChecking;
+
+  /// No description provided for @updateUpToDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'application est à jour'**
+  String get updateUpToDate;
+
+  /// No description provided for @updateCheckHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière version publiée sur GitHub'**
+  String get updateCheckHint;
+
+  /// No description provided for @releaseNotesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notes de version'**
+  String get releaseNotesTitle;
+
+  /// No description provided for @whatsNewTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveautés de la version {version}'**
+  String whatsNewTitle(String version);
 }
 
 class _AppLocalizationsDelegate

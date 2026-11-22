@@ -337,4 +337,98 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get calendarLoadFailed =>
       'Impossible de lire l\'historique des enregistrements';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String updateAvailableTitle(String version) {
+    return 'Version $version disponible';
+  }
+
+  @override
+  String updateInstalledVersion(String version) {
+    return 'Version installée : $version';
+  }
+
+  @override
+  String get updateNoNotes => 'Pas de note pour cette version.';
+
+  @override
+  String get updateInstall => 'Installer';
+
+  @override
+  String get updateLater => 'Plus tard';
+
+  @override
+  String get updateDownloading => 'Téléchargement et vérification…';
+
+  @override
+  String get updatePermissionTitle => 'Autoriser l\'installation';
+
+  @override
+  String get updatePermissionMessage =>
+      'Android demande d\'autoriser Frigate Mobile à installer ses propres mises à jour. Active « Autoriser cette source » dans les réglages qui vont s\'ouvrir, puis reviens appuyer sur Installer.';
+
+  @override
+  String get updatePermissionOpen => 'Ouvrir les réglages';
+
+  @override
+  String get updateErrorNetwork =>
+      'Impossible de joindre GitHub. Réessaie plus tard.';
+
+  @override
+  String get updateErrorChecksum =>
+      'Le fichier téléchargé ne correspond pas à son empreinte : installation annulée.';
+
+  @override
+  String get updateErrorTooLarge =>
+      'Le fichier de mise à jour est anormalement gros : téléchargement arrêté.';
+
+  @override
+  String get updateErrorFolder =>
+      'Impossible d\'enregistrer la mise à jour sur le téléphone.';
+
+  @override
+  String get updateErrorUnsupported =>
+      'Cette version ne propose pas d\'APK à installer.';
+
+  @override
+  String get updateErrorPackage =>
+      'Le fichier téléchargé n\'est pas la version attendue de Frigate Mobile.';
+
+  @override
+  String get updateErrorSignature =>
+      'Cette version est signée par une autre clé : désinstalle l\'application pour l\'installer.';
+
+  @override
+  String get updateErrorInstall =>
+      'L\'installateur d\'Android n\'a pas pu s\'ouvrir.';
+
+  @override
+  String get updateAutoCheck => 'Vérifier les mises à jour';
+
+  @override
+  String get updateAutoCheckHint =>
+      'Une fois par jour au démarrage, auprès de GitHub';
+
+  @override
+  String get updateCheckNow => 'Rechercher une mise à jour';
+
+  @override
+  String get updateChecking => 'Recherche en cours…';
+
+  @override
+  String get updateUpToDate => 'L\'application est à jour';
+
+  @override
+  String get updateCheckHint => 'Dernière version publiée sur GitHub';
+
+  @override
+  String get releaseNotesTitle => 'Notes de version';
+
+  @override
+  String whatsNewTitle(String version) {
+    return 'Nouveautés de la version $version';
+  }
 }
