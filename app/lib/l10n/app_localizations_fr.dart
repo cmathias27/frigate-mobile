@@ -586,4 +586,134 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get timelineRetryVideo => 'Réessayer la vidéo';
+
+  @override
+  String get alertsViewAlerts => 'Alertes';
+
+  @override
+  String get alertsViewDetections => 'Détections';
+
+  @override
+  String get alertsViewMotion => 'Mouvement';
+
+  @override
+  String reviewUnseen(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count non vues',
+      one: '1 non vue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewSince(String time) {
+    return 'Depuis $time';
+  }
+
+  @override
+  String reviewSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sélectionnées',
+      one: '1 sélectionnée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewMarkSeen => 'Marquer vu';
+
+  @override
+  String get reviewMarkUnseen => 'Marquer non vu';
+
+  @override
+  String get reviewMarkAllSeen => 'Tout marquer vu';
+
+  @override
+  String get reviewMarkFailed =>
+      'Frigate n\'a pas enregistré la marque « vu ».';
+
+  @override
+  String reviewEmptyAlerts(String time) {
+    return 'Aucune alerte depuis $time.';
+  }
+
+  @override
+  String reviewEmptyDetections(String time) {
+    return 'Aucune détection depuis $time.';
+  }
+
+  @override
+  String get reviewLoadMore => 'Voir le jour précédent';
+
+  @override
+  String get reviewLoadFailed => 'Les alertes n\'ont pas pu être lues.';
+
+  @override
+  String get reviewInProgress => 'en cours';
+
+  @override
+  String get reviewUnknown => 'Événement';
+
+  @override
+  String reviewTitle(String what, String camera) {
+    return '$what · $camera';
+  }
+
+  @override
+  String get objectPerson => 'Personne';
+
+  @override
+  String get objectCar => 'Voiture';
+
+  @override
+  String get objectTruck => 'Camion';
+
+  @override
+  String get objectBus => 'Bus';
+
+  @override
+  String get objectMotorcycle => 'Moto';
+
+  @override
+  String get objectBicycle => 'Vélo';
+
+  @override
+  String get objectBoat => 'Bateau';
+
+  @override
+  String get objectDog => 'Chien';
+
+  @override
+  String get objectCat => 'Chat';
+
+  @override
+  String get objectBird => 'Oiseau';
+
+  @override
+  String get objectHorse => 'Cheval';
+
+  @override
+  String get objectPackage => 'Colis';
+
+  @override
+  String get objectFace => 'Visage';
+
+  @override
+  String get objectLicensePlate => 'Plaque';
+
+  @override
+  String get objectBark => 'Aboiement';
+
+  @override
+  String get objectSpeech => 'Parole';
+
+  @override
+  String get objectScream => 'Cri';
+
+  @override
+  String get objectFireAlarm => 'Alarme incendie';
 }

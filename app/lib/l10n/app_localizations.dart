@@ -1039,6 +1039,216 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Réessayer la vidéo'**
   String get timelineRetryVideo;
+
+  /// No description provided for @alertsViewAlerts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alertes'**
+  String get alertsViewAlerts;
+
+  /// No description provided for @alertsViewDetections.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détections'**
+  String get alertsViewDetections;
+
+  /// No description provided for @alertsViewMotion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mouvement'**
+  String get alertsViewMotion;
+
+  /// No description provided for @reviewUnseen.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 non vue} other{{count} non vues}}'**
+  String reviewUnseen(int count);
+
+  /// No description provided for @reviewSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis {time}'**
+  String reviewSince(String time);
+
+  /// No description provided for @reviewSelected.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 sélectionnée} other{{count} sélectionnées}}'**
+  String reviewSelected(int count);
+
+  /// No description provided for @reviewMarkSeen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer vu'**
+  String get reviewMarkSeen;
+
+  /// No description provided for @reviewMarkUnseen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer non vu'**
+  String get reviewMarkUnseen;
+
+  /// No description provided for @reviewMarkAllSeen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout marquer vu'**
+  String get reviewMarkAllSeen;
+
+  /// No description provided for @reviewMarkFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frigate n\'a pas enregistré la marque « vu ».'**
+  String get reviewMarkFailed;
+
+  /// No description provided for @reviewEmptyAlerts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune alerte depuis {time}.'**
+  String reviewEmptyAlerts(String time);
+
+  /// No description provided for @reviewEmptyDetections.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune détection depuis {time}.'**
+  String reviewEmptyDetections(String time);
+
+  /// No description provided for @reviewLoadMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir le jour précédent'**
+  String get reviewLoadMore;
+
+  /// No description provided for @reviewLoadFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les alertes n\'ont pas pu être lues.'**
+  String get reviewLoadFailed;
+
+  /// No description provided for @reviewInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'en cours'**
+  String get reviewInProgress;
+
+  /// No description provided for @reviewUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Événement'**
+  String get reviewUnknown;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{what} · {camera}'**
+  String reviewTitle(String what, String camera);
+
+  /// No description provided for @objectPerson.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne'**
+  String get objectPerson;
+
+  /// No description provided for @objectCar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voiture'**
+  String get objectCar;
+
+  /// No description provided for @objectTruck.
+  ///
+  /// In fr, this message translates to:
+  /// **'Camion'**
+  String get objectTruck;
+
+  /// No description provided for @objectBus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bus'**
+  String get objectBus;
+
+  /// No description provided for @objectMotorcycle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moto'**
+  String get objectMotorcycle;
+
+  /// No description provided for @objectBicycle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vélo'**
+  String get objectBicycle;
+
+  /// No description provided for @objectBoat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bateau'**
+  String get objectBoat;
+
+  /// No description provided for @objectDog.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chien'**
+  String get objectDog;
+
+  /// No description provided for @objectCat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chat'**
+  String get objectCat;
+
+  /// No description provided for @objectBird.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oiseau'**
+  String get objectBird;
+
+  /// No description provided for @objectHorse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cheval'**
+  String get objectHorse;
+
+  /// No description provided for @objectPackage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colis'**
+  String get objectPackage;
+
+  /// No description provided for @objectFace.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visage'**
+  String get objectFace;
+
+  /// No description provided for @objectLicensePlate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plaque'**
+  String get objectLicensePlate;
+
+  /// No description provided for @objectBark.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aboiement'**
+  String get objectBark;
+
+  /// No description provided for @objectSpeech.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parole'**
+  String get objectSpeech;
+
+  /// No description provided for @objectScream.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cri'**
+  String get objectScream;
+
+  /// No description provided for @objectFireAlarm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alarme incendie'**
+  String get objectFireAlarm;
 }
 
 class _AppLocalizationsDelegate

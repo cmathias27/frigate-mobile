@@ -8,6 +8,7 @@ import 'package:http/io_client.dart';
 
 import 'capabilities.dart';
 import 'recordings.dart';
+import 'reviews.dart';
 import 'server_config.dart';
 
 /// Thrown when authentication with Frigate fails.
@@ -382,6 +383,55 @@ class FrigateClient {
     } on FormatException catch (e) {
       throw FrigateNetworkException('Réponse invalide reçue de $path', e);
     }
+  }
+
+  /// Reads the review items (alerts and detections) that overlap
+  /// [after]..[before] from `GET /api/review`, newest first.
+  Future<List<ReviewItem>> fetchReviews({
+    required DateTime after,
+    required DateTime before,
+    ReviewSeverity? severity,
+    List<String>? cameras,
+    int? limit,
+  }) async {
+    final path = Uri(
+      path: '/api/review',
+      queryParameters: {
+        'after': epochSeconds(after),
+        'before': epochSeconds(before),
+        if (severity != null) 'severity': severity.name,
+        if (cameras != null && cameras.isNotEmpty) 'cameras': cameras.join(','),
+        if (limit != null) 'limit': '$limit',
+      },
+    ).toString();
+    final body = await _get(path);
+    try {
+      final items = parseReviews(jsonDecode(body))
+        ..sort((a, b) => b.start.compareTo(a.start));
+      return items;
+    } on FormatException catch (e) {
+      throw FrigateNetworkException('Réponse invalide reçue de $path', e);
+    }
+  }
+
+  /// Marks review items as seen, or not seen, for the user signed in:
+  /// `POST /api/reviews/viewed`.
+  Future<void> markReviewed(List<String> ids, {bool reviewed = true}) async {
+    if (ids.isEmpty) return;
+    await _send(
+      '/api/reviews/viewed',
+      body: jsonEncode({'ids': ids, 'reviewed': reviewed}),
+    );
+  }
+
+  /// Reads a review thumbnail from the [path] given by [ReviewItem.thumbnail].
+  Future<Uint8List> fetchReviewThumbnail(String path) async {
+    final response = await _send(
+      path,
+      timeout: const Duration(seconds: 10),
+      accept: 'image/webp,image/*',
+    );
+    return response.bodyBytes;
   }
 
   /// Opens an authenticated GET of [path] and returns the response as it

@@ -275,6 +275,68 @@ void main() {
     expect(segments.single.end.millisecondsSinceEpoch, 1010500);
   });
 
+  test('review items: listed newest first, marked seen, thumbnails', () async {
+    final sent = <http.Request>[];
+    final mockClient = MockClient((request) async {
+      sent.add(request);
+      return switch (request.url.path) {
+        '/api/review' => http.Response(
+          jsonEncode([
+            {
+              'id': 'old',
+              'camera': 'cam_a',
+              'start_time': 1000.0,
+              'end_time': 1010.0,
+              'severity': 'alert',
+              'has_been_reviewed': false,
+            },
+            {
+              'id': 'new',
+              'camera': 'cam_b',
+              'start_time': 2000.0,
+              'end_time': 2010.0,
+              'severity': 'detection',
+              'has_been_reviewed': true,
+            },
+          ]),
+          200,
+        ),
+        '/api/reviews/viewed' => http.Response('{"success": true}', 200),
+        _ => http.Response.bytes([7, 8], 200),
+      };
+    });
+    final client = FrigateClient(
+      config: config,
+      token: 'jwt-rev',
+      client: mockClient,
+    );
+    final items = await client.fetchReviews(
+      after: DateTime.fromMillisecondsSinceEpoch(500000),
+      before: DateTime.fromMillisecondsSinceEpoch(3000000),
+      cameras: ['cam_a', 'cam_b'],
+    );
+    expect(items.map((i) => i.id), ['new', 'old']);
+    expect(sent.last.url.queryParameters, {
+      'after': '500',
+      'before': '3000',
+      'cameras': 'cam_a,cam_b',
+    });
+
+    await client.markReviewed(['old', 'new']);
+    expect(sent.last.method, 'POST');
+    expect(jsonDecode(sent.last.body), {
+      'ids': ['old', 'new'],
+      'reviewed': true,
+    });
+    await client.markReviewed([]);
+    expect(sent, hasLength(2));
+
+    final bytes = await client.fetchReviewThumbnail('/clips/review/t.webp');
+    expect(sent.last.url.path, '/clips/review/t.webp');
+    expect(sent.last.headers['Authorization'], 'Bearer jwt-rev');
+    expect(bytes, [7, 8]);
+  });
+
   test('openStream forwards headers and reports an expired session', () async {
     late http.BaseRequest sent;
     var status = 206;
