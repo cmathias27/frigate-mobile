@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../core/session/session_controller.dart';
+import '../features/more/more_screen.dart';
 import '../l10n/app_localizations.dart';
 import 'theme.dart';
 
-/// The four tabs of the mock-ups. Each tab is its own feature module under
-/// `lib/features/`; until a module exists its tab shows what it will do.
+/// The four tabs of the mock-ups.
 class HomeShell extends StatefulWidget {
-  const HomeShell({super.key});
+  final SessionController controller;
+
+  const HomeShell({super.key, required this.controller});
 
   @override
   State<HomeShell> createState() => _HomeShellState();
@@ -18,6 +21,10 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
+    final serverName = widget.controller.config?.name ?? l.appTitle;
+    final cameraCount = widget.controller.capabilities?.cameras.length ?? 0;
+
     final tabs = [
       (l.tabLive, Icons.grid_view_rounded, l.liveDescription),
       (l.tabTimeline, Icons.timeline_rounded, l.timelineDescription),
@@ -25,13 +32,31 @@ class _HomeShellState extends State<HomeShell> {
       (l.tabMore, Icons.menu_rounded, l.moreDescription),
     ];
     final (title, icon, description) = tabs[_index];
+
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: _Placeholder(
-        icon: icon,
-        description: description,
-        version: '0.1',
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _index == 3 ? title : serverName,
+              style: text.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            if (_index != 3 && cameraCount > 0)
+              Text(
+                l.serverInfoCameras(cameraCount),
+                style: text.bodySmall?.copyWith(color: AppColors.textDim),
+              ),
+          ],
+        ),
       ),
+      body: _index == 3
+          ? MoreScreen(controller: widget.controller)
+          : _Placeholder(
+              icon: icon,
+              description: description,
+              version: '0.1',
+            ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),

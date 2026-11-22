@@ -3,14 +3,20 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'app/home_shell.dart';
 import 'app/theme.dart';
+import 'core/session/session_controller.dart';
+import 'features/login/login_screen.dart';
 import 'l10n/app_localizations.dart';
 
 void main() {
-  runApp(const FrigateMobileApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  final session = SessionController()..init();
+  runApp(FrigateMobileApp(session: session));
 }
 
 class FrigateMobileApp extends StatelessWidget {
-  const FrigateMobileApp({super.key});
+  final SessionController session;
+
+  const FrigateMobileApp({super.key, required this.session});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +30,23 @@ class FrigateMobileApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const HomeShell(),
+      home: ListenableBuilder(
+        listenable: session,
+        builder: (context, _) {
+          switch (session.status) {
+            case SessionStatus.initializing:
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            case SessionStatus.authenticated:
+              return HomeShell(controller: session);
+            case SessionStatus.unauthenticated:
+            case SessionStatus.loading:
+            case SessionStatus.connectionError:
+              return LoginScreen(controller: session);
+          }
+        },
+      ),
     );
   }
 }

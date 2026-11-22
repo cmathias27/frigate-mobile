@@ -163,6 +163,162 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Version {version}'**
   String aboutVersion(String version);
+
+  /// No description provided for @loginTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un serveur'**
+  String get loginTitle;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comme dans DS cam : un serveur, plusieurs caméras.'**
+  String get loginSubtitle;
+
+  /// No description provided for @serverNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du serveur'**
+  String get serverNameLabel;
+
+  /// No description provided for @localUrlLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse locale (port 8971)'**
+  String get localUrlLabel;
+
+  /// No description provided for @localUrlHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'https://192.168.1.53:8971'**
+  String get localUrlHint;
+
+  /// No description provided for @remoteUrlLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse à distance (optionnelle)'**
+  String get remoteUrlLabel;
+
+  /// No description provided for @remoteUrlHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'https://frigate.exemple.fr'**
+  String get remoteUrlHint;
+
+  /// No description provided for @usernameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilisateur'**
+  String get usernameLabel;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get passwordLabel;
+
+  /// No description provided for @selfSignedLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certificat auto-signé accepté sur le réseau local'**
+  String get selfSignedLabel;
+
+  /// No description provided for @connectButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get connectButton;
+
+  /// No description provided for @connectingStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion en cours…'**
+  String get connectingStatus;
+
+  /// No description provided for @connectedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Serveur connecté'**
+  String get connectedTitle;
+
+  /// No description provided for @serverInfoCameras.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 caméra en ligne} other{{count} caméras en ligne}}'**
+  String serverInfoCameras(int count);
+
+  /// No description provided for @detectionModeMotionOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode mouvement seul (sans détection d\'objets)'**
+  String get detectionModeMotionOnly;
+
+  /// No description provided for @detectionModeObjects.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détection d\'objets active'**
+  String get detectionModeObjects;
+
+  /// No description provided for @continuousDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rétention continu : {days} jours'**
+  String continuousDays(String days);
+
+  /// No description provided for @disconnectButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se déconnecter'**
+  String get disconnectButton;
+
+  /// No description provided for @disconnectConfirmTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déconnexion'**
+  String get disconnectConfirmTitle;
+
+  /// No description provided for @disconnectConfirmMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voulez-vous vous déconnecter de ce serveur Frigate ?'**
+  String get disconnectConfirmMessage;
+
+  /// No description provided for @cancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get cancel;
+
+  /// No description provided for @confirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get confirm;
+
+  /// No description provided for @refresh.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actualiser'**
+  String get refresh;
+
+  /// No description provided for @refreshSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capacités actualisées'**
+  String get refreshSuccess;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce champ est obligatoire'**
+  String get requiredField;
+
+  /// No description provided for @invalidUrl.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse invalide (commencez par https://)'**
+  String get invalidUrl;
 }
 
 class _AppLocalizationsDelegate
