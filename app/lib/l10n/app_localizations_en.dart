@@ -547,4 +547,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clipFailed => 'The clip could not be downloaded.';
+
+  @override
+  String get timelineSeekAll => 'All';
+
+  @override
+  String get timelineSeekAllHint =>
+      'Previous and next passage on every camera, otherwise on the camera played';
 }

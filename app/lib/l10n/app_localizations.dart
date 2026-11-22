@@ -991,6 +991,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'L\'extrait n\'a pas pu être téléchargé.'**
   String get clipFailed;
+
+  /// No description provided for @timelineSeekAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get timelineSeekAll;
+
+  /// No description provided for @timelineSeekAllHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passage préc. et suiv. sur toutes les caméras, sinon sur la caméra lue'**
+  String get timelineSeekAllHint;
 }
 
 class _AppLocalizationsDelegate
