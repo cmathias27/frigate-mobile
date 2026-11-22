@@ -2,7 +2,7 @@
 
 Application Android libre pour [Frigate NVR](https://frigate.video), inspirée de DS cam de Synology : direct en grille, chronologie de tous les enregistrements avec le mouvement et les détections, alertes, notifications.
 
-**État : squelette (0.0.1).** Les écrans prévus sont dans [`docs/maquettes.html`](docs/maquettes.html), l'ordre de réalisation dans [`docs/ROADBOOK.md`](docs/ROADBOOK.md).
+**État : 0.1.0, direct, chronologie et mises à jour.** Les écrans prévus sont dans [`docs/maquettes.html`](docs/maquettes.html), l'ordre de réalisation dans [`docs/ROADBOOK.md`](docs/ROADBOOK.md).
 
 ## Principes
 
