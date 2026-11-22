@@ -16,12 +16,15 @@ abstract final class LiveDefaults {
   /// Delay between two frames of the full-screen view.
   static const fullScreenInterval = Duration(seconds: 1);
 
-  /// Thumbnail height asked to Frigate for each grid layout.
-  static int thumbnailHeight(int layout) => switch (layout) {
-    1 => 720,
-    4 => 360,
-    _ => 240,
-  };
+  /// Thumbnail heights Frigate is asked for, from the smallest.
+  static const thumbnailHeights = [240, 360, 480, 720];
+
+  /// The smallest thumbnail sharp enough for a tile [pixels] high on
+  /// screen (a little downscaling is not visible).
+  static int thumbnailHeightFor(double pixels) => thumbnailHeights.firstWhere(
+    (h) => h >= pixels * 0.8,
+    orElse: () => thumbnailHeights.last,
+  );
 }
 
 /// Keeps the latest frame of one camera fresh while started.

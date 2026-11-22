@@ -48,7 +48,8 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
-  int _liveLayout = 4;
+  int _liveLayout = liveLayoutDefault;
+  static const _keyLiveLayout = 'fm_live_layout';
 
   // Kept across tab changes so the hours fetched stay cached.
   FrigateClient? _timelineClient;
@@ -64,12 +65,26 @@ class _HomeShellState extends State<HomeShell> {
   @override
   void initState() {
     super.initState();
+    _readLiveLayout();
     final update = widget.update;
     if (update != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) unawaited(runStartupUpdate(context, update));
       });
     }
+  }
+
+  Future<void> _readLiveLayout() async {
+    final stored = int.tryParse(
+      await _preferences.read(_keyLiveLayout) ?? '',
+    );
+    if (stored == null || !liveLayouts.contains(stored) || !mounted) return;
+    setState(() => _liveLayout = stored);
+  }
+
+  void _setLiveLayout(int layout) {
+    setState(() => _liveLayout = layout);
+    _preferences.write(_keyLiveLayout, '$layout');
   }
 
   @override
@@ -224,7 +239,7 @@ class _HomeShellState extends State<HomeShell> {
                 child: _LayoutButton(
                   layout: layout,
                   selected: layout == _liveLayout,
-                  onPressed: () => setState(() => _liveLayout = layout),
+                  onPressed: () => _setLiveLayout(layout),
                 ),
               ),
           const SizedBox(width: 8),
@@ -268,7 +283,8 @@ class _HomeShellState extends State<HomeShell> {
   }
 }
 
-/// "1", "4" or "9" button of the live grid layouts (mock-up screen 2).
+/// "Auto", "1", "4" or "9" button of the live grid layouts (mock-up
+/// screen 2).
 class _LayoutButton extends StatelessWidget {
   final int layout;
   final bool selected;
@@ -282,8 +298,11 @@ class _LayoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final auto = layout == liveLayoutAuto;
+    final color = selected ? AppColors.background : null;
     return Tooltip(
-      message: AppLocalizations.of(context).liveLayout(layout),
+      message: auto ? l.liveLayoutAuto : l.liveLayout(layout),
       child: Semantics(
         selected: selected,
         button: true,
@@ -296,13 +315,19 @@ class _LayoutButton extends StatelessWidget {
             child: SizedBox.square(
               dimension: 32,
               child: Center(
-                child: Text(
-                  '$layout',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: selected ? AppColors.background : null,
-                  ),
-                ),
+                child: auto
+                    ? Icon(
+                        Icons.auto_awesome_mosaic_rounded,
+                        size: 18,
+                        color: color,
+                      )
+                    : Text(
+                        '$layout',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                      ),
               ),
             ),
           ),

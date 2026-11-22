@@ -42,6 +42,7 @@
   "liveUnavailable": "Image unavailable",
   "liveNoCamera": "No active camera on this server.",
   "liveLayout": "{count} per page",
+  "liveLayoutAuto": "Automatic layout: every camera, as large as possible",
   "livePage": "Page {current} of {total}",
   "liveModeSnapshots": "Images · every {seconds} s",
   "liveFullScreen": "Full screen",
