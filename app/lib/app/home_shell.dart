@@ -6,9 +6,14 @@ import '../core/frigate/capabilities.dart';
 import '../core/frigate/client.dart';
 import '../core/frigate/vod_proxy.dart';
 import '../core/session/session_controller.dart';
+import '../core/storage/preferences.dart';
+import '../features/events/events_screen.dart';
+import '../features/events/motion_list.dart';
+import '../features/events/thumbnails.dart';
 import '../features/live/live_grid_screen.dart';
 import '../features/live/webrtc_live_video.dart';
 import '../features/more/more_screen.dart';
+import '../features/timeline/motion_passages.dart';
 import '../features/timeline/recording_history.dart';
 import '../features/timeline/recording_player.dart';
 import '../features/timeline/timeline_data.dart';
@@ -25,7 +30,15 @@ class HomeShell extends StatefulWidget {
   /// In-app update; none in tests.
   final UpdateController? update;
 
-  const HomeShell({super.key, required this.controller, this.update});
+  /// Small settings of the app; in memory in tests.
+  final Preferences? preferences;
+
+  const HomeShell({
+    super.key,
+    required this.controller,
+    this.update,
+    this.preferences,
+  });
 
   @override
   State<HomeShell> createState() => _HomeShellState();
@@ -39,6 +52,12 @@ class _HomeShellState extends State<HomeShell> {
   FrigateClient? _timelineClient;
   TimelineData? _timelineData;
   VodProxy? _vodProxy;
+  MotionList? _motionList;
+  RecordingThumbnails? _thumbnails;
+  late final Preferences _preferences = widget.preferences ?? Preferences();
+
+  /// Passage opened from the Alerts tab, played once by the timeline.
+  MotionPassage? _openAt;
 
   @override
   void initState() {
@@ -58,40 +77,83 @@ class _HomeShellState extends State<HomeShell> {
   }
 
   void _releaseTimeline() {
+    _motionList?.dispose();
     _timelineData?.dispose();
     _vodProxy?.close();
+    _motionList = null;
+    _thumbnails = null;
     _timelineData = null;
     _vodProxy = null;
     _timelineClient = null;
   }
 
+  /// Recordings of the session, shared by the timeline and the Alerts tab
+  /// so an hour is fetched once.
+  void _prepareRecordings(
+    FrigateClient client,
+    List<CameraCapabilities> recorded,
+  ) {
+    if (identical(client, _timelineClient)) return;
+    _releaseTimeline();
+    _timelineClient = client;
+    final data = _timelineData = TimelineData(
+      cameras: [for (final c in recorded) c.name],
+      fetch: client.fetchRecordings,
+      onAuthError: widget.controller.sessionExpired,
+    );
+    _vodProxy = VodProxy(
+      client.openStream,
+      onAuthError: widget.controller.sessionExpired,
+    );
+    _motionList = MotionList(
+      data: data,
+      history: historySpan(
+        recorded.expand((c) => [c.continuousDays, c.motionDays]),
+      ),
+      preferences: _preferences,
+    );
+    _thumbnails = RecordingThumbnails(
+      (camera, time) => client.fetchRecordingImage(
+        camera,
+        time,
+        height: ThumbnailDefaults.height,
+      ),
+    );
+  }
+
+  Widget _noRecording() => _Placeholder(
+    icon: Icons.videocam_off_outlined,
+    description: AppLocalizations.of(context).timelineNoRecordingCamera,
+  );
+
   Widget _timeline(FrigateClient client, List<CameraCapabilities> cameras) {
     final recorded = cameras.where((c) => c.recording).toList();
-    if (recorded.isEmpty) {
-      return _Placeholder(
-        icon: Icons.videocam_off_outlined,
-        description: AppLocalizations.of(context).timelineNoRecordingCamera,
-      );
-    }
-    if (!identical(client, _timelineClient)) {
-      _releaseTimeline();
-      _timelineClient = client;
-      _timelineData = TimelineData(
-        cameras: [for (final c in recorded) c.name],
-        fetch: client.fetchRecordings,
-        onAuthError: widget.controller.sessionExpired,
-      );
-      _vodProxy = VodProxy(
-        client.openStream,
-        onAuthError: widget.controller.sessionExpired,
-      );
-    }
+    if (recorded.isEmpty) return _noRecording();
+    _prepareRecordings(client, recorded);
     final proxy = _vodProxy!;
+    final openAt = _openAt;
+    _openAt = null;
     return TimelineScreen(
       cameras: recorded,
       data: _timelineData!,
       playerFactory: () => HlsRecordingPlayer(proxy),
       loadHistory: () => _loadHistory(client, recorded),
+      openAt: openAt,
+    );
+  }
+
+  Widget _events(FrigateClient client, List<CameraCapabilities> cameras) {
+    final recorded = cameras.where((c) => c.recording).toList();
+    if (recorded.isEmpty) return _noRecording();
+    _prepareRecordings(client, recorded);
+    return EventsScreen(
+      cameras: recorded,
+      list: _motionList!,
+      thumbnails: _thumbnails!,
+      onOpen: (passage) => setState(() {
+        _openAt = passage;
+        _index = 1;
+      }),
     );
   }
 
@@ -171,6 +233,7 @@ class _HomeShellState extends State<HomeShell> {
           onAuthError: widget.controller.sessionExpired,
         ),
         1 when client != null => _timeline(client, cameras),
+        2 when client != null => _events(client, cameras),
         3 => MoreScreen(
           controller: widget.controller,
           appVersion: widget.update?.currentVersion,

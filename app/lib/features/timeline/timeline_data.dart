@@ -159,6 +159,24 @@ class TimelineData extends ChangeNotifier {
     return null;
   }
 
+  /// Start of the hour of fetching that holds [time].
+  DateTime hourStart(DateTime time) => _start(_index(time));
+
+  /// Fetches the hour holding [time] for every camera and waits for it.
+  /// Returns false when a camera could not be read.
+  Future<bool> loadHour(DateTime time) async {
+    final index = _index(time);
+    final now = _now();
+    await Future.wait([
+      for (final camera in cameras)
+        if (_inflight[(camera: camera, index: index)] case final pending?)
+          pending
+        else if (_needs((camera: camera, index: index), now))
+          _load((camera: camera, index: index)),
+    ]);
+    return cameras.every((c) => isLoaded(c, time));
+  }
+
   MotionPassage? _neighbour(DateTime from, {required bool forward}) {
     final all = allPassages();
     if (forward) {

@@ -421,4 +421,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String whatsNewTitle(String version) {
     return 'What\'s new in version $version';
   }
+
+  @override
+  String get eventsAllCameras => 'All cameras';
+
+  @override
+  String eventsNewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new passages',
+      one: '1 new passage',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String eventsSince(String time) {
+    return 'Motion passages since $time';
+  }
+
+  @override
+  String eventsEmpty(String time) {
+    return 'No motion passage since $time.';
+  }
+
+  @override
+  String get eventsNew => 'New';
+
+  @override
+  String get eventsToday => 'Today';
+
+  @override
+  String get eventsYesterday => 'Yesterday';
+
+  @override
+  String eventsPassageTitle(String camera) {
+    return 'Motion · $camera';
+  }
+
+  @override
+  String eventsLoadMore(int hours) {
+    return 'Show the previous $hours hours';
+  }
+
+  @override
+  String get eventsLoadFailed => 'The recordings could not be read.';
+
+  @override
+  String get eventsHistoryStart => 'Start of the recorded history.';
+
+  @override
+  String durationSeconds(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String durationMinutes(int minutes, String seconds) {
+    return '$minutes min $seconds s';
+  }
+
+  @override
+  String durationHours(int hours, String minutes) {
+    return '$hours h $minutes min';
+  }
 }

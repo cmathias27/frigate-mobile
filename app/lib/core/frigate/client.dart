@@ -210,6 +210,28 @@ class FrigateClient {
     return response.bodyBytes;
   }
 
+  /// Reads the recorded frame of [camera] at [time] from
+  /// `GET /api/<camera>/recordings/<time>/snapshot.jpg`, scaled by Frigate
+  /// to [height] pixels when given.
+  Future<Uint8List> fetchRecordingImage(
+    String camera,
+    DateTime time, {
+    int? height,
+  }) async {
+    final path = Uri(
+      path:
+          '/api/${Uri.encodeComponent(camera)}/recordings/'
+          '${epochSeconds(time)}/snapshot.jpg',
+      queryParameters: height != null ? {'height': '$height'} : null,
+    ).toString();
+    final response = await _send(
+      path,
+      timeout: const Duration(seconds: 10),
+      accept: 'image/jpeg',
+    );
+    return response.bodyBytes;
+  }
+
   /// Exchanges a WebRTC offer for go2rtc's answer through Frigate's
   /// authenticated proxy, `POST /api/go2rtc/webrtc?src=<stream>`.
   ///

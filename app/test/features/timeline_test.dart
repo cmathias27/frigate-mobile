@@ -459,7 +459,10 @@ void main() {
 
     tearDown(() => data.dispose());
 
-    Future<void> pumpScreen(WidgetTester tester) async {
+    Future<void> pumpScreen(
+      WidgetTester tester, {
+      MotionPassage? openAt,
+    }) async {
       // Phone-sized screen, so every control is laid out.
       tester.view.physicalSize = const Size(1080, 2340);
       tester.view.devicePixelRatio = 3;
@@ -472,11 +475,30 @@ void main() {
             playerFactory: () => player,
             clock: () => _now,
             loadHistory: history == null ? null : () async => history!,
+            openAt: openAt,
           ),
         ),
       );
       await tester.pump();
     }
+
+    testWidgets('plays a passage opened from the Alerts tab', (tester) async {
+      await pumpScreen(
+        tester,
+        openAt: MotionPassage(
+          camera: 'cam_b',
+          start: passageAt,
+          end: passageAt.add(const Duration(seconds: 10)),
+          peak: 80,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final (camera, start, _) = player.opened.single;
+      expect(camera, 'cam_b');
+      expect(start, passageAt);
+      expect(player.playing, isTrue);
+      expect(find.text('Lecture · Cour'), findsOneWidget);
+    });
 
     testWidgets('opens the first camera just behind now', (tester) async {
       await pumpScreen(tester);

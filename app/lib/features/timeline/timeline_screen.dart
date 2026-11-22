@@ -44,6 +44,10 @@ class TimelineScreen extends StatefulWidget {
   /// Reads every day recorded, for the calendar; no calendar without it.
   final Future<RecordingHistory> Function()? loadHistory;
 
+  /// A passage opened from the Alerts tab, played as the timeline opens;
+  /// otherwise the first camera, just behind the live edge.
+  final MotionPassage? openAt;
+
   const TimelineScreen({
     super.key,
     required this.cameras,
@@ -51,6 +55,7 @@ class TimelineScreen extends StatefulWidget {
     required this.playerFactory,
     this.clock,
     this.loadHistory,
+    this.openAt,
   });
 
   @override
@@ -86,12 +91,16 @@ class _TimelineScreenState extends State<TimelineScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _camera = widget.cameras.first.name;
-    _playhead = _now().subtract(TimelineScreenDefaults.startBehindNow);
+    final openAt = widget.openAt;
+    final known = widget.cameras.any((c) => c.name == openAt?.camera);
+    _camera = known ? openAt!.camera : widget.cameras.first.name;
+    _playhead = known
+        ? openAt!.start
+        : _now().subtract(TimelineScreenDefaults.startBehindNow);
     _player = widget.playerFactory()..addListener(_onPlayer);
     widget.data.addListener(_onData);
     _ensure();
-    _open(_playhead);
+    _open(_playhead, play: known);
   }
 
   @override
