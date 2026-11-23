@@ -347,5 +347,19 @@
   "settingsSeconds": "{count} s",
   "@settingsSeconds": {"placeholders": {"count": {"type": "int"}}},
   "settingsMinutes": "{count} min",
-  "@settingsMinutes": {"placeholders": {"count": {"type": "int"}}}
+  "@settingsMinutes": {"placeholders": {"count": {"type": "int"}}},
+  "settingsGroups": "Groupes de caméras",
+  "settingsGroupsSummary": "{count, plural, =0{Aucun groupe} =1{1 groupe} other{{count} groupes}}",
+  "@settingsGroupsSummary": {"placeholders": {"count": {"type": "int"}}},
+  "settingsGroupsHelp": "Un groupe réunit des caméras à regarder ensemble : il se choisit en haut du direct.",
+  "settingsGroupCameras": "{count, plural, =1{1 caméra} other{{count} caméras}}",
+  "@settingsGroupCameras": {"placeholders": {"count": {"type": "int"}}},
+  "settingsGroupNew": "Nouveau groupe",
+  "settingsGroupEdit": "Modifier le groupe",
+  "settingsGroupName": "Nom du groupe",
+  "settingsGroupNameTaken": "Un autre groupe porte déjà ce nom",
+  "settingsGroupSave": "Enregistrer",
+  "settingsGroupDelete": "Supprimer le groupe",
+  "liveGroupAll": "Toutes",
+  "liveGroupEmpty": "Aucune caméra de ce groupe n'est affichée"
 }

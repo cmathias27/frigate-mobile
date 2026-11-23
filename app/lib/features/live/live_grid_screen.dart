@@ -89,6 +89,15 @@ class _LiveGridScreenState extends State<LiveGridScreen>
       }
       _feeds.clear();
     }
+    // Fewer cameras (some hidden): the page shown stays within the pages.
+    if (_page >= _pageCount) {
+      _page = _pageCount - 1;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _pageController.hasClients) {
+          _pageController.jumpToPage(_page);
+        }
+      });
+    }
     if (_perPage != null) _syncFeeds();
   }
 

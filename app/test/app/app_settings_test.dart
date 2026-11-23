@@ -109,6 +109,24 @@ void main() {
       expect(settings.threshold('cam_a'), isNull);
     });
 
+    test('groups are added, changed, removed and kept', () async {
+      final preferences = Preferences.inMemory();
+      final settings = AppSettings(preferences)
+        ..setGroup(const CameraGroup('Dehors', ['cam_b', 'cam_door']))
+        ..setGroup(const CameraGroup('Dedans', ['cam_a']))
+        ..setGroup(const CameraGroup('Devant', ['cam_door']), index: 0);
+      expect(settings.group('Devant')?.cameras, ['cam_door']);
+      expect(settings.group('Dehors'), isNull);
+      settings.removeGroup(1);
+      await Future<void>.delayed(Duration.zero);
+
+      final read = AppSettings(preferences);
+      await read.load();
+      expect(read.groups, [
+        const CameraGroup('Devant', ['cam_door']),
+      ]);
+    });
+
     test('a broken or odd document keeps the defaults', () async {
       for (final stored in [
         'not json',
@@ -118,6 +136,11 @@ void main() {
           'order': 'cam_a',
           'thresholds': {'cam_a': -3, 'cam_b': 'x'},
           'mergeGap': -1,
+          'groups': [
+            {'name': ' ', 'cameras': <String>[]},
+            {'name': 'A'},
+            'B',
+          ],
         }),
       ]) {
         final settings = AppSettings(
@@ -127,6 +150,7 @@ void main() {
         expect(settings.quality, LiveQuality.auto, reason: stored);
         expect(settings.threshold('cam_a'), isNull, reason: stored);
         expect(settings.mergeGap, const Duration(seconds: 30), reason: stored);
+        expect(settings.groups, isEmpty, reason: stored);
       }
     });
 
@@ -200,6 +224,48 @@ void main() {
       await tester.tap(find.text('2 min').last);
       await tester.pumpAndSettle();
       expect(settings.mergeGap, const Duration(minutes: 2));
+    });
+
+    testWidgets('groups: create, rename, delete', (tester) async {
+      final settings = AppSettings(Preferences.inMemory())
+        ..setGroup(const CameraGroup('Dedans', ['cam_a']));
+      await tester.pumpWidget(
+        _app(GroupsScreen(settings: settings, cameras: _cameras)),
+      );
+      expect(find.text('1 caméra'), findsOneWidget);
+
+      await tester.tap(find.text('Nouveau groupe'));
+      await tester.pumpAndSettle();
+      final save = find.widgetWithText(TextButton, 'Enregistrer');
+      expect(tester.widget<TextButton>(save).onPressed, isNull);
+      await tester.enterText(find.byType(TextField), 'Dedans');
+      await tester.pump();
+      expect(find.text('Un autre groupe porte déjà ce nom'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'Dehors');
+      await tester.tap(find.text('Portail'));
+      await tester.tap(find.text('Cour'));
+      await tester.pump();
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+      // Kept in the order of the cameras, not of the taps.
+      expect(
+        settings.groups.last,
+        const CameraGroup('Dehors', ['cam_b', 'cam_door']),
+      );
+      expect(find.text('2 caméras'), findsOneWidget);
+
+      await tester.tap(find.text('Dedans'));
+      await tester.pumpAndSettle();
+      expect(find.text('Modifier le groupe'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'Maison');
+      await tester.pump();
+      await tester.tap(find.widgetWithText(TextButton, 'Enregistrer'));
+      await tester.pumpAndSettle();
+      expect(settings.groups.first, const CameraGroup('Maison', ['cam_a']));
+
+      await tester.tap(find.byTooltip('Supprimer le groupe').first);
+      await tester.pump();
+      expect(settings.groups.map((g) => g.name), ['Dehors']);
     });
 
     testWidgets('cameras: hide, never the last one, and threshold', (

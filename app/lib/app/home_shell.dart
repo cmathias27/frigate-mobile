@@ -57,6 +57,10 @@ class _HomeShellState extends State<HomeShell> {
   int _index = 0;
   int _liveLayout = liveLayoutDefault;
   static const _keyLiveLayout = 'fm_live_layout';
+  static const _keyLiveGroup = 'fm_live_group';
+
+  /// Group shown in the live view, `null` for every camera.
+  String? _liveGroup;
 
   // Kept across tab changes so the hours fetched stay cached.
   FrigateClient? _timelineClient;
@@ -95,8 +99,77 @@ class _HomeShellState extends State<HomeShell> {
     final stored = int.tryParse(
       await _preferences.read(_keyLiveLayout) ?? '',
     );
-    if (stored == null || !liveLayouts.contains(stored) || !mounted) return;
-    setState(() => _liveLayout = stored);
+    final group = await _preferences.read(_keyLiveGroup);
+    if (!mounted) return;
+    setState(() {
+      if (stored != null && liveLayouts.contains(stored)) _liveLayout = stored;
+      _liveGroup = group;
+    });
+  }
+
+  void _setLiveGroup(String? group) {
+    setState(() => _liveGroup = group);
+    unawaited(_preferences.write(_keyLiveGroup, group));
+  }
+
+  Widget _live(FrigateClient client, List<CameraCapabilities> cameras) {
+    final l = AppLocalizations.of(context);
+    final groups = _settings.groups;
+    // A group removed or renamed since: every camera.
+    final group = _settings.group(_liveGroup);
+    final shown = group == null
+        ? cameras
+        : [
+            for (final c in cameras)
+              if (group.cameras.contains(c.name)) c,
+          ];
+    return Column(
+      children: [
+        if (groups.isNotEmpty)
+          SizedBox(
+            height: 48,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              children: [
+                for (final (name, label) in [
+                  (null, l.liveGroupAll),
+                  for (final g in groups) (g.name, g.name),
+                ])
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: ChoiceChip(
+                      label: Text(label),
+                      selected: group?.name == name,
+                      onSelected: (_) => _setLiveGroup(name),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        Expanded(
+          child: shown.isEmpty
+              ? _Placeholder(
+                  icon: Icons.videocam_off_outlined,
+                  description: l.liveGroupEmpty,
+                )
+              : LiveGridScreen(
+                  key: ValueKey(group?.name),
+                  cameras: shown,
+                  fetch: client.fetchLatestImage,
+                  videoFactory: (stream) => WebRtcLiveVideo(
+                    stream: stream,
+                    negotiate: client.negotiateWebRtc,
+                  ),
+                  layout: _liveLayout,
+                  onAuthError: widget.controller.sessionExpired,
+                  minTileWidth: _settings.tileSize.width,
+                  lightStreamFirst: _settings.fullScreenLightFirst,
+                  tryOtherStreams: _settings.tryOtherStreams,
+                ),
+        ),
+      ],
+    );
   }
 
   void _setLiveLayout(int layout) {
@@ -381,19 +454,7 @@ class _HomeShellState extends State<HomeShell> {
         ],
       ),
       body: switch (_index) {
-        0 when client != null => LiveGridScreen(
-          cameras: cameras,
-          fetch: client.fetchLatestImage,
-          videoFactory: (stream) => WebRtcLiveVideo(
-            stream: stream,
-            negotiate: client.negotiateWebRtc,
-          ),
-          layout: _liveLayout,
-          onAuthError: widget.controller.sessionExpired,
-          minTileWidth: _settings.tileSize.width,
-          lightStreamFirst: _settings.fullScreenLightFirst,
-          tryOtherStreams: _settings.tryOtherStreams,
-        ),
+        0 when client != null => _live(client, cameras),
         1 when client != null => _timeline(client, cameras),
         2 when client != null => _events(client, cameras),
         3 => MoreScreen(
