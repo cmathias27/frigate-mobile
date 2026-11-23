@@ -14,7 +14,15 @@ Application Android libre pour [Frigate NVR](https://frigate.video), inspirée d
 ## Prérequis côté Frigate
 
 - Frigate 0.14 ou plus récent (testé avec 0.18).
-- Port 8971 accessible depuis le téléphone, et un compte Frigate.
+- Port 8971 accessible depuis le téléphone, et un compte Frigate. Adresse en `https://` obligatoire ; le port 5000, sans authentification, est refusé.
+- Certificat auto-signé de Frigate : accepté seulement sur l'adresse locale, après confirmation de son empreinte SHA-256 à la première connexion (décision 0004). Pour l'afficher sur le serveur, en comparant avec celle montrée par l'application :
+
+  ```sh
+  docker exec frigate openssl x509 -noout -fingerprint -sha256 \
+    -in /etc/letsencrypt/live/frigate/fullchain.pem
+  ```
+
+  L'application la redemande si le certificat change. L'adresse distante exige un certificat valide (Caddy, Let's Encrypt…).
 - Pour le direct WebRTC : `go2rtc.webrtc.candidates` avec l'adresse locale du serveur et le port 8555, publié en TCP et UDP. Sans cela, le plein écran reste en images.
 - Pour le son en direct : WebRTC n'accepte que l'audio Opus, PCMA ou PCMU. Une caméra en AAC n'a pas de son tant que go2rtc ne le convertit pas, par exemple avec une seconde source `ffmpeg:<flux>#audio=opus` dans `go2rtc.streams`. Le bouton Son n'apparaît que sur les flux qui en ont.
 

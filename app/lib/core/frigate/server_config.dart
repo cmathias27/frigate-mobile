@@ -20,9 +20,14 @@ class ServerConfig {
   /// Frigate username (e.g. "admin").
   final String username;
 
-  /// Accept self-signed certificates on the local address (decision 0004).
-  /// Ignored for remote addresses, which always require valid certificates.
+  /// Accept a self-signed certificate on the local address, once its
+  /// fingerprint is confirmed (decision 0004). Never for the remote address,
+  /// which always requires a valid certificate.
   final bool allowSelfSignedCert;
+
+  /// SHA-256 fingerprint of the self-signed certificate of the local
+  /// address confirmed by the user (see `CertificateGuard`).
+  final String? certFingerprint;
 
   const ServerConfig({
     required this.name,
@@ -30,7 +35,22 @@ class ServerConfig {
     this.remoteUrl,
     required this.username,
     this.allowSelfSignedCert = true,
+    this.certFingerprint,
   });
+
+  /// Frigate's unauthenticated port, never used by the app (decision 0004).
+  static const unauthenticatedPort = 5000;
+
+  /// Why [raw] cannot be a server address, or null when it can.
+  static AddressProblem? addressProblem(String raw) {
+    final uri = Uri.tryParse(normalizeUrl(raw));
+    if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
+      return AddressProblem.invalid;
+    }
+    if (uri.scheme != 'https') return AddressProblem.notHttps;
+    if (uri.port == unauthenticatedPort) return AddressProblem.unauthenticated;
+    return null;
+  }
 
   /// Normalizes a URL: strips trailing slashes and ensures scheme.
   static String normalizeUrl(String raw) {
@@ -44,37 +64,13 @@ class ServerConfig {
     return url;
   }
 
-  /// Returns whether a URL looks like a local network address (private IP,
-  /// localhost, .local).
-  static bool isLocalAddress(String urlString) {
-    final uri = Uri.tryParse(urlString);
-    if (uri == null) return false;
-    final host = uri.host.toLowerCase();
-    if (host == 'localhost' || host == '127.0.0.1' || host == '::1') {
-      return true;
-    }
-    if (host.endsWith('.local')) return true;
-    // Private IPv4 ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16.
-    final parts = host.split('.');
-    if (parts.length == 4) {
-      final octets = parts.map(int.tryParse).toList();
-      if (octets.every((o) => o != null && o >= 0 && o <= 255)) {
-        final a = octets[0]!;
-        final b = octets[1]!;
-        if (a == 10) return true;
-        if (a == 172 && b >= 16 && b <= 31) return true;
-        if (a == 192 && b == 168) return true;
-      }
-    }
-    return false;
-  }
-
   Map<String, dynamic> toJson() => {
     'name': name,
     'localUrl': localUrl,
     if (remoteUrl != null && remoteUrl!.isNotEmpty) 'remoteUrl': remoteUrl,
     'username': username,
     'allowSelfSignedCert': allowSelfSignedCert,
+    if (certFingerprint != null) 'certFingerprint': certFingerprint,
   };
 
   factory ServerConfig.fromJson(Map<String, dynamic> json) {
@@ -88,6 +84,7 @@ class ServerConfig {
           : null,
       username: json['username'] as String? ?? '',
       allowSelfSignedCert: json['allowSelfSignedCert'] as bool? ?? true,
+      certFingerprint: json['certFingerprint'] as String?,
     );
   }
 
@@ -110,6 +107,7 @@ class ServerConfig {
     String? remoteUrl,
     String? username,
     bool? allowSelfSignedCert,
+    String? certFingerprint,
   }) {
     return ServerConfig(
       name: name ?? this.name,
@@ -117,6 +115,19 @@ class ServerConfig {
       remoteUrl: remoteUrl != null ? normalizeUrl(remoteUrl) : this.remoteUrl,
       username: username ?? this.username,
       allowSelfSignedCert: allowSelfSignedCert ?? this.allowSelfSignedCert,
+      certFingerprint: certFingerprint ?? this.certFingerprint,
     );
   }
+}
+
+/// Reasons a typed address is refused on the login screen.
+enum AddressProblem {
+  /// Not a URL with a host.
+  invalid,
+
+  /// `http://`: password and token would travel in clear.
+  notHttps,
+
+  /// Frigate's port 5000, without authentication (decision 0004).
+  unauthenticated,
 }

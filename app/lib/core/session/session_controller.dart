@@ -34,9 +34,14 @@ class SessionController extends ChangeNotifier {
   ServerCapabilities? _capabilities;
   FrigateClient? _client;
   String? _errorMessage;
+  FrigateCertificateException? _pendingCertificate;
 
   SessionController({SessionStorage? storage, this.httpClient})
     : _storage = storage ?? SessionStorage();
+
+  /// After a failed [login]: the self-signed certificate of the local
+  /// address, to confirm before logging in again (decision 0004).
+  FrigateCertificateException? get pendingCertificate => _pendingCertificate;
 
   SessionStatus get status => _status;
   ServerConfig? get config => _config;
@@ -103,6 +108,7 @@ class SessionController extends ChangeNotifier {
   }) async {
     _status = SessionStatus.loading;
     _errorMessage = null;
+    _pendingCertificate = null;
     notifyListeners();
 
     final c = FrigateClient(config: config, client: httpClient);
@@ -126,6 +132,13 @@ class SessionController extends ChangeNotifier {
       c.close();
       _status = SessionStatus.unauthenticated;
       _errorMessage = e.message;
+      notifyListeners();
+      return false;
+    } on FrigateCertificateException catch (e) {
+      // The login screen asks the user to confirm the fingerprint.
+      c.close();
+      _status = SessionStatus.unauthenticated;
+      _pendingCertificate = e;
       notifyListeners();
       return false;
     } on FrigateNetworkException catch (e) {

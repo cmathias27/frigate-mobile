@@ -78,7 +78,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selfSignedLabel =>
-      'Accept self-signed certificate on local network';
+      'Accept a self-signed certificate on the local address, once its fingerprint is confirmed';
 
   @override
   String get connectButton => 'Connect';
@@ -138,6 +138,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidUrl => 'Invalid address (start with https://)';
+
+  @override
+  String get addressNotHttps =>
+      'An https:// address is required: over http the password would travel in clear text';
+
+  @override
+  String get addressUnauthenticatedPort =>
+      'Frigate\'s port 5000 has no authentication: use port 8971';
+
+  @override
+  String get certificateTitle => 'Server certificate';
+
+  @override
+  String get certificateNew =>
+      'The local address presents a self-signed certificate. Before trusting it, check that its SHA-256 fingerprint is the one of your Frigate:';
+
+  @override
+  String get certificateChanged =>
+      'The certificate of the local address changed since the last login. If you did not renew it, another device may be impersonating your Frigate. New SHA-256 fingerprint:';
+
+  @override
+  String get certificateHint =>
+      'The command to display it on the server is in the README. You will not be asked again while the certificate stays the same.';
+
+  @override
+  String get certificateTrust => 'Trust';
 
   @override
   String get liveBadge => 'LIVE';

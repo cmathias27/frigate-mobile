@@ -221,7 +221,7 @@ abstract class AppLocalizations {
   /// No description provided for @selfSignedLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Certificat auto-signé accepté sur le réseau local'**
+  /// **'Certificat auto-signé accepté sur l\'adresse locale, après confirmation de son empreinte'**
   String get selfSignedLabel;
 
   /// No description provided for @connectButton.
@@ -319,6 +319,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Adresse invalide (commencez par https://)'**
   String get invalidUrl;
+
+  /// No description provided for @addressNotHttps.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse en https:// obligatoire : en http, le mot de passe circulerait en clair'**
+  String get addressNotHttps;
+
+  /// No description provided for @addressUnauthenticatedPort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le port 5000 de Frigate n\'a pas d\'authentification : utilisez le port 8971'**
+  String get addressUnauthenticatedPort;
+
+  /// No description provided for @certificateTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certificat du serveur'**
+  String get certificateTitle;
+
+  /// No description provided for @certificateNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'adresse locale présente un certificat auto-signé. Avant de lui faire confiance, vérifiez que son empreinte SHA-256 est bien celle de votre Frigate :'**
+  String get certificateNew;
+
+  /// No description provided for @certificateChanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le certificat de l\'adresse locale a changé depuis la dernière connexion. Si vous ne l\'avez pas renouvelé, un autre appareil se fait peut-être passer pour votre Frigate. Nouvelle empreinte SHA-256 :'**
+  String get certificateChanged;
+
+  /// No description provided for @certificateHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'La commande pour l\'afficher sur le serveur est dans le README. Elle ne sera plus demandée tant que le certificat ne change pas.'**
+  String get certificateHint;
+
+  /// No description provided for @certificateTrust.
+  ///
+  /// In fr, this message translates to:
+  /// **'Faire confiance'**
+  String get certificateTrust;
 
   /// No description provided for @liveBadge.
   ///

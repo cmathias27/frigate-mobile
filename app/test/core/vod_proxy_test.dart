@@ -77,6 +77,23 @@ void main() {
     final url = proxy.playlist('cam_a', DateTime(2026), DateTime(2026));
     expect((await get(url.replace(path: '/vod/cam_a/x'))).$1, 404);
     expect((await get(url.replace(path: '/s3cr3t/api/config'))).$1, 404);
+    expect((await get(url.replace(path: '/s3cr3u/vod/cam_a/x'))).$1, 404);
+    expect(opened, isEmpty);
+  });
+
+  test('relays nothing but recordings, even with the secret', () async {
+    final url = proxy.playlist('cam_a', DateTime(2026), DateTime(2026));
+    final base = 'http://127.0.0.1:${url.port}/s3cr3t';
+    for (final path in const [
+      '/vod/..%2F..%2Fapi%2Fconfig',
+      '/vod/cam_a/start/1/end/2/..%2F..%2F..%2Fapi%2Fconfig',
+      '/vod/..%2Fapi/start/1/end/2/master.m3u8',
+      '/vod/cam_a/start/1/end/2/sub/master.m3u8',
+      '/vod/cam_a/start/x/end/2/master.m3u8',
+      '/vod/%2E%2E/start/1/end/2/master.m3u8',
+    ]) {
+      expect((await get(Uri.parse('$base$path'))).$1, 404, reason: path);
+    }
     expect(opened, isEmpty);
   });
 

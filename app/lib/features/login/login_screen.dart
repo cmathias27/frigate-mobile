@@ -4,6 +4,7 @@ import '../../app/theme.dart';
 import '../../core/frigate/server_config.dart';
 import '../../core/session/session_controller.dart';
 import '../../l10n/app_localizations.dart';
+import 'certificate_dialog.dart';
 
 /// Screen 1 of mock-ups: connect to a Frigate server.
 class LoginScreen extends StatefulWidget {
@@ -57,17 +58,24 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
+  /// Logs in; [trusted] is the certificate fingerprint just confirmed.
+  Future<void> _submit({String? trusted}) async {
     if (!_formKey.currentState!.validate()) return;
 
+    final localUrl = ServerConfig.normalizeUrl(_localUrlController.text.trim());
+    final existing = widget.controller.config;
     final config = ServerConfig(
       name: _nameController.text.trim(),
-      localUrl: ServerConfig.normalizeUrl(_localUrlController.text.trim()),
+      localUrl: localUrl,
       remoteUrl: _remoteUrlController.text.trim().isNotEmpty
           ? ServerConfig.normalizeUrl(_remoteUrlController.text.trim())
           : null,
       username: _userController.text.trim(),
       allowSelfSignedCert: _allowSelfSigned,
+      // A confirmed certificate belongs to its address only.
+      certFingerprint:
+          trusted ??
+          (existing?.localUrl == localUrl ? existing?.certFingerprint : null),
     );
 
     final success = await widget.controller.login(
@@ -76,6 +84,12 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (!mounted) return;
+    final certificate = widget.controller.pendingCertificate;
+    if (!success && certificate != null && trusted == null) {
+      final trust = await showCertificateDialog(context, certificate);
+      if (trust && mounted) await _submit(trusted: certificate.fingerprint);
+      return;
+    }
     if (!success && widget.controller.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -172,16 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderSide: BorderSide.none,
                         ),
                       ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return l.requiredField;
-                        }
-                        final uri = Uri.tryParse(ServerConfig.normalizeUrl(v));
-                        if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
-                          return l.invalidUrl;
-                        }
-                        return null;
-                      },
+                      validator: (v) => addressError(l, v, required: true),
                     ),
                     const SizedBox(height: 12),
 
@@ -199,6 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderSide: BorderSide.none,
                         ),
                       ),
+                      validator: (v) => addressError(l, v, required: false),
                     ),
                     const SizedBox(height: 12),
 

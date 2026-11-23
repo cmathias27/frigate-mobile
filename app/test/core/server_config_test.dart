@@ -17,16 +17,18 @@ void main() {
     );
   });
 
-  test('isLocalAddress detects private ranges and localhost', () {
-    expect(ServerConfig.isLocalAddress('https://localhost:8971'), isTrue);
-    expect(ServerConfig.isLocalAddress('https://127.0.0.1:8971'), isTrue);
-    expect(ServerConfig.isLocalAddress('https://192.168.1.10:8971'), isTrue);
-    expect(ServerConfig.isLocalAddress('https://10.0.0.5:8971'), isTrue);
-    expect(ServerConfig.isLocalAddress('https://172.20.0.2:8971'), isTrue);
-    expect(ServerConfig.isLocalAddress('https://frigate.local:8971'), isTrue);
-
-    expect(ServerConfig.isLocalAddress('https://frigate.example.com'), isFalse);
-    expect(ServerConfig.isLocalAddress('https://8.8.8.8'), isFalse);
+  test('addressProblem refuses clear text and the unauthenticated port', () {
+    expect(ServerConfig.addressProblem('192.168.1.10:8971'), isNull);
+    expect(ServerConfig.addressProblem('https://frigate.example.com'), isNull);
+    expect(
+      ServerConfig.addressProblem('http://192.168.1.10:8971'),
+      AddressProblem.notHttps,
+    );
+    expect(
+      ServerConfig.addressProblem('https://192.168.1.10:5000'),
+      AddressProblem.unauthenticated,
+    );
+    expect(ServerConfig.addressProblem(''), AddressProblem.invalid);
   });
 
   test('encode and decode roundtrips faithfully', () {
@@ -36,6 +38,7 @@ void main() {
       remoteUrl: 'https://frigate.example.com',
       username: 'admin',
       allowSelfSignedCert: true,
+      certFingerprint: 'AB:CD',
     );
 
     final encoded = config.encode();
@@ -47,6 +50,7 @@ void main() {
     expect(decoded.remoteUrl, 'https://frigate.example.com');
     expect(decoded.username, 'admin');
     expect(decoded.allowSelfSignedCert, isTrue);
+    expect(decoded.certFingerprint, 'AB:CD');
   });
 
   test('decode returns null on invalid or empty json', () {

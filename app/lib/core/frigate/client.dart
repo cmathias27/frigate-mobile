@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
 import 'capabilities.dart';
+import 'certificate_guard.dart';
 import 'recordings.dart';
 import 'reviews.dart';
 import 'server_config.dart';
@@ -40,6 +42,22 @@ class FrigateUnreachableException extends FrigateNetworkException {
   const FrigateUnreachableException(super.message, [super.cause]);
 }
 
+/// The local address presented a self-signed certificate the user has not
+/// confirmed yet, or one that changed since (decision 0004, point 4).
+class FrigateCertificateException extends FrigateUnreachableException {
+  /// SHA-256 fingerprint of the certificate presented.
+  final String fingerprint;
+
+  /// Whether another certificate was confirmed before.
+  final bool changed;
+
+  const FrigateCertificateException(
+    this.fingerprint, {
+    required this.changed,
+    Object? cause,
+  }) : super('Certificat du serveur à confirmer.', cause);
+}
+
 abstract final class AddressDefaults {
   /// Time given to the local address before the remote one is used.
   static const probe = Duration(seconds: 3);
@@ -53,19 +71,32 @@ class FrigateClient {
   final ServerConfig config;
   final http.Client _client;
   final bool _ownsClient;
+  final CertificateGuard _certificates;
 
   String? _token;
   String _cookieName = 'frigate_token';
   String _activeBaseUrl;
 
   FrigateClient({
-    required this.config,
+    required ServerConfig config,
+    String? token,
+    http.Client? client,
+    String? activeBaseUrl,
+  }) : this._(config, token, client, activeBaseUrl, CertificateGuard(config));
+
+  FrigateClient._(
+    this.config,
     this._token,
     http.Client? client,
     String? activeBaseUrl,
-  }) : _client = client ?? _createDefaultClient(config),
-       _ownsClient = client == null,
-       _activeBaseUrl = activeBaseUrl ?? config.localUrl;
+    this._certificates,
+  ) : _client = client ?? _createDefaultClient(_certificates),
+      _ownsClient = client == null,
+      _activeBaseUrl = activeBaseUrl ?? config.localUrl;
+
+  /// Certificates refused on the local address (tests simulate one).
+  @visibleForTesting
+  CertificateGuard get certificates => _certificates;
 
   /// Called when requests move to the other address of the server.
   void Function(String url)? onAddressChanged;
@@ -93,7 +124,8 @@ class FrigateClient {
 
   /// Picks the local address when it answers within
   /// [AddressDefaults.probe], the remote one otherwise. Any HTTP answer
-  /// counts: only reaching the server matters here.
+  /// counts: only reaching the server matters here, so the probe carries no
+  /// session (on another network, the local address may be someone else).
   Future<String> resolveAddress({
     Duration probe = AddressDefaults.probe,
   }) async {
@@ -106,7 +138,7 @@ class FrigateClient {
       await _client
           .get(
             Uri.parse('${config.localUrl}/api/version'),
-            headers: _buildAuthHeaders(accept: 'text/plain'),
+            headers: const {'Accept': 'text/plain'},
           )
           .timeout(probe);
       _use(config.localUrl);
@@ -122,14 +154,38 @@ class FrigateClient {
     final tried = _activeBaseUrl;
     try {
       return await attempt(tried);
-    } on FrigateUnreachableException {
+    } on FrigateUnreachableException catch (first) {
       // Another request may have moved already; otherwise try the other one.
       final next = _activeBaseUrl != tried ? _activeBaseUrl : _alternate(tried);
       if (next == null) rethrow;
-      final result = await attempt(next);
-      _use(next);
-      return result;
+      try {
+        final result = await attempt(next);
+        _use(next);
+        return result;
+      } on FrigateUnreachableException {
+        // A certificate to confirm says more than the other address failing.
+        if (first is FrigateCertificateException) throw first;
+        rethrow;
+      }
     }
+  }
+
+  /// A TLS failure on [base]: a certificate to confirm when the local
+  /// address presented one the user has not trusted.
+  FrigateUnreachableException _handshakeError(
+    String base,
+    HandshakeException e,
+    String message,
+  ) {
+    final fingerprint = _certificates.takeRejected();
+    if (fingerprint != null && base == config.localUrl) {
+      return FrigateCertificateException(
+        fingerprint,
+        changed: config.certFingerprint != null,
+        cause: e,
+      );
+    }
+    return FrigateUnreachableException(message, e);
   }
 
   String? get token => _token;
@@ -143,17 +199,13 @@ class FrigateClient {
     _activeBaseUrl = ServerConfig.normalizeUrl(url);
   }
 
-  static http.Client _createDefaultClient(ServerConfig config) {
+  static http.Client _createDefaultClient(CertificateGuard certificates) {
     final httpClient = HttpClient();
     httpClient.connectionTimeout = const Duration(seconds: 10);
-
-    if (config.allowSelfSignedCert) {
-      httpClient.badCertificateCallback = (cert, host, port) {
-        // Accept self-signed certificate only if the host is a local/private address.
-        return ServerConfig.isLocalAddress('https://$host:$port');
-      };
-    }
-
+    // Called only for certificates the system refuses: the confirmed
+    // self-signed one of the local address passes, nothing else.
+    httpClient.badCertificateCallback = (cert, host, port) =>
+        certificates.accepts(cert.der, host, port);
     return IOClient(httpClient);
   }
 
@@ -228,9 +280,10 @@ class FrigateClient {
         e,
       );
     } on HandshakeException catch (e) {
-      throw FrigateUnreachableException(
-        'Erreur TLS/certificat à $base. Un certificat auto-signé n\'est accepté que sur l\'adresse locale.',
+      throw _handshakeError(
+        base,
         e,
+        'Erreur TLS/certificat à $base. Un certificat auto-signé n\'est accepté que sur l\'adresse locale.',
       );
     } on http.ClientException catch (e) {
       throw FrigateUnreachableException(
@@ -463,7 +516,7 @@ class FrigateClient {
     } on SocketException catch (e) {
       throw FrigateUnreachableException('Connexion interrompue.', e);
     } on HandshakeException catch (e) {
-      throw FrigateUnreachableException('Certificat refusé.', e);
+      throw _handshakeError(base, e, 'Certificat refusé.');
     } on http.ClientException catch (e) {
       throw FrigateUnreachableException('Connexion interrompue.', e);
     } on TimeoutException catch (e) {
@@ -522,7 +575,7 @@ class FrigateClient {
     } on SocketException catch (e) {
       throw FrigateUnreachableException('Connexion interrompue.', e);
     } on HandshakeException catch (e) {
-      throw FrigateUnreachableException('Certificat refusé.', e);
+      throw _handshakeError(base, e, 'Certificat refusé.');
     } on http.ClientException catch (e) {
       throw FrigateUnreachableException('Connexion interrompue.', e);
     } on TimeoutException catch (e) {

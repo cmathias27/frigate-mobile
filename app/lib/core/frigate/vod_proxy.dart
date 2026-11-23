@@ -21,7 +21,8 @@ typedef StreamOpener = Future<http.StreamedResponse> Function(
 /// app's own authenticated client (port 8971 only, decision 0004).
 ///
 /// Other apps of the phone can reach the loopback address too: every URL
-/// carries a random secret, and only `/vod/` paths are relayed.
+/// carries a random secret, and only recording paths
+/// (`/vod/<camera>/start/<s>/end/<s>/<file>`) are relayed.
 class VodProxy {
   final StreamOpener _open;
   final String _secret;
@@ -62,18 +63,53 @@ class VodProxy {
     await server?.close(force: true);
   }
 
+  /// The Frigate path asked by the player, or null when [segments] are not
+  /// `<secret>/vod/<camera>/start/<s>/end/<s>/<file>`: nothing else of the
+  /// server can be reached through the relay, even with the secret.
+  String? _vodPath(List<String> segments) {
+    if (segments.length != 8 ||
+        !_sameSecret(segments[0]) ||
+        segments[1] != 'vod' ||
+        segments[3] != 'start' ||
+        segments[5] != 'end' ||
+        !_digits.hasMatch(segments[4]) ||
+        !_digits.hasMatch(segments[6]) ||
+        !_name.hasMatch(segments[2]) ||
+        !_name.hasMatch(segments[7])) {
+      return null;
+    }
+    return '/vod/${Uri.encodeComponent(segments[2])}'
+        '/start/${segments[4]}/end/${segments[6]}/${segments[7]}';
+  }
+
+  static final _digits = RegExp(r'^\d{1,12}$');
+
+  /// Camera names of Frigate and HLS file names: no separator, no `..`.
+  static final _name = RegExp(r'^(?!\.{1,2}$)[\w.-]{1,128}$');
+
+  /// Compares in constant time, as any app of the phone can try secrets.
+  bool _sameSecret(String candidate) {
+    if (candidate.length != _secret.length) return false;
+    var diff = 0;
+    for (var i = 0; i < candidate.length; i++) {
+      diff |= candidate.codeUnitAt(i) ^ _secret.codeUnitAt(i);
+    }
+    return diff == 0;
+  }
+
   Future<void> _handle(HttpRequest request) async {
     final response = request.response;
-    final prefix = '/$_secret/vod/';
-    final path = request.uri.path;
     try {
-      if (request.method != 'GET' || !path.startsWith(prefix)) {
+      final path = request.method == 'GET'
+          ? _vodPath(request.uri.pathSegments)
+          : null;
+      if (path == null) {
         response.statusCode = HttpStatus.notFound;
         await response.close();
         return;
       }
       final upstream = await _open(
-        '/vod/${path.substring(prefix.length)}',
+        path,
         headers: {
           for (final name in const ['range', 'accept'])
             name: ?request.headers.value(name),
