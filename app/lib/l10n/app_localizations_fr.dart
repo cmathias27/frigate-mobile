@@ -80,7 +80,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get selfSignedLabel =>
-      'Certificat auto-signé accepté sur le réseau local';
+      'Certificat auto-signé accepté sur l\'adresse locale, après confirmation de son empreinte';
 
   @override
   String get connectButton => 'Se connecter';
@@ -141,6 +141,32 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get invalidUrl => 'Adresse invalide (commencez par https://)';
+
+  @override
+  String get addressNotHttps =>
+      'Adresse en https:// obligatoire : en http, le mot de passe circulerait en clair';
+
+  @override
+  String get addressUnauthenticatedPort =>
+      'Le port 5000 de Frigate n\'a pas d\'authentification : utilisez le port 8971';
+
+  @override
+  String get certificateTitle => 'Certificat du serveur';
+
+  @override
+  String get certificateNew =>
+      'L\'adresse locale présente un certificat auto-signé. Avant de lui faire confiance, vérifiez que son empreinte SHA-256 est bien celle de votre Frigate :';
+
+  @override
+  String get certificateChanged =>
+      'Le certificat de l\'adresse locale a changé depuis la dernière connexion. Si vous ne l\'avez pas renouvelé, un autre appareil se fait peut-être passer pour votre Frigate. Nouvelle empreinte SHA-256 :';
+
+  @override
+  String get certificateHint =>
+      'La commande pour l\'afficher sur le serveur est dans le README. Elle ne sera plus demandée tant que le certificat ne change pas.';
+
+  @override
+  String get certificateTrust => 'Faire confiance';
 
   @override
   String get liveBadge => 'LIVE';
