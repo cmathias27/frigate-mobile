@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -77,10 +78,17 @@ class _FakePlatform implements UpdatePlatform {
   bool settingsOpened = false;
   final installed = <(String, String)>[];
 
+  /// Holds [currentVersion] back while set, like a slow platform channel.
+  Completer<void>? hold;
+
   _FakePlatform(this.cache);
 
   @override
-  Future<String?> currentVersion() async => version;
+  Future<String?> currentVersion() async {
+    await hold?.future;
+    return version;
+  }
+
   @override
   Future<Directory> cacheDirectory() async => cache;
   @override
@@ -303,6 +311,26 @@ void main() {
       await updated.init();
       expect(await updated.takeWhatsNew(), isTrue);
       expect(await updated.takeWhatsNew(), isFalse);
+    });
+
+    test('the start-up steps wait for a slow start', () async {
+      final first = controller();
+      await first.init();
+      await first.takeWhatsNew();
+      await first.setAutoCheck(false);
+
+      platform
+        ..version = '0.2.0'
+        ..hold = Completer<void>();
+      final update = controller();
+      unawaited(update.init());
+      final whatsNew = update.takeWhatsNew();
+      final release = update.checkOnStartup();
+      platform.hold!.complete();
+
+      expect(await whatsNew, isTrue);
+      expect(await release, isNull);
+      expect(github.asked, isEmpty);
     });
   });
 

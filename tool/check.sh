@@ -26,6 +26,7 @@ step "Analyse"
 (cd app && flutter analyze --fatal-infos)
 
 step "Tests"
-(cd app && flutter test)
+# A zone with summer time, so the tests see the days the clocks change.
+(cd app && TZ=Europe/Paris flutter test)
 
 printf '\nTout est vert.\n'

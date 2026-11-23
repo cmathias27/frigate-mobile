@@ -6,6 +6,8 @@
 /// Frigate later makes the matching controls appear without a new version.
 library;
 
+import 'dart:math';
+
 /// Features of the whole server.
 class ServerCapabilities {
   final String version;
@@ -76,10 +78,17 @@ class CameraCapabilities {
   /// Recording is on, so the timeline can play the past back.
   final bool recording;
 
-  /// Days kept for continuous recording, motion recording and alerts.
+  /// Days kept for continuous recording, motion recording, alerts and
+  /// detections.
   final double continuousDays;
   final double motionDays;
   final double alertDays;
+  final double detectionDays;
+
+  /// Longest time any recording of the camera is kept, in days: what the
+  /// timeline and the lists may reach back to.
+  double get retentionDays =>
+      [continuousDays, motionDays, alertDays, detectionDays].reduce(max);
 
   /// Audio detection (barking, glass breaking…) is on.
   final bool audioDetection;
@@ -107,6 +116,7 @@ class CameraCapabilities {
     required this.continuousDays,
     required this.motionDays,
     required this.alertDays,
+    this.detectionDays = 0,
     required this.audioDetection,
     required this.ptz,
     required this.talk,
@@ -151,6 +161,9 @@ class CameraCapabilities {
       continuousDays: _days(_map(record['continuous'])['days']),
       motionDays: _days(_map(record['motion'])['days']),
       alertDays: _days(_map(_map(record['alerts'])['retain'])['days']),
+      detectionDays: _days(
+        _map(_map(record['detections'])['retain'])['days'],
+      ),
       audioDetection: _enabled(cam['audio']),
       ptz: '${_map(cam['onvif'])['host'] ?? ''}'.trim().isNotEmpty,
       talk: medias.any(_isTalkMedia),

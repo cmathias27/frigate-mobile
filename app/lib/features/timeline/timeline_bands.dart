@@ -289,7 +289,7 @@ class _BandsPainter extends CustomPainter {
               ? DateFormat.H(locale)
               : DateFormat.Hm(locale));
     final end = from.add(span);
-    var t = _alignUp(from, step);
+    var t = alignTick(from, step);
     final line = Paint()
       ..color = AppColors.textDim.withValues(alpha: 0.5)
       ..strokeWidth = 1;
@@ -298,7 +298,7 @@ class _BandsPainter extends CustomPainter {
       canvas.drawLine(Offset(x, top), Offset(x, top + 4), line);
       final painter = _text(format.format(t), 10, AppColors.textDim);
       painter.paint(canvas, Offset(x - painter.width / 2, top + 5));
-      t = t.add(step);
+      t = nextTick(t, step);
     }
   }
 
@@ -307,20 +307,6 @@ class _BandsPainter extends CustomPainter {
     if (span <= const Duration(hours: 6)) return const Duration(hours: 1);
     if (span <= const Duration(hours: 24)) return const Duration(hours: 4);
     return const Duration(days: 1);
-  }
-
-  /// First local time at or after [t] that is a multiple of [step].
-  static DateTime _alignUp(DateTime t, Duration step) {
-    if (step >= const Duration(days: 1)) {
-      final day = DateTime(t.year, t.month, t.day);
-      return day.isBefore(t) ? DateTime(t.year, t.month, t.day + 1) : day;
-    }
-    final minutes = step.inMinutes;
-    final day = DateTime(t.year, t.month, t.day);
-    final elapsed = t.difference(day).inMinutes;
-    var aligned = day.add(Duration(minutes: (elapsed ~/ minutes) * minutes));
-    if (aligned.isBefore(t)) aligned = aligned.add(step);
-    return aligned;
   }
 
   TextPainter _text(String text, double size, Color color) => TextPainter(
@@ -333,4 +319,47 @@ class _BandsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BandsPainter old) => true;
+}
+
+/// First tick at or after [t]: a local time whose clock reading is a
+/// multiple of [step] (midnight for days), whatever the summer time.
+DateTime alignTick(DateTime t, Duration step) {
+  if (step >= const Duration(days: 1)) {
+    final day = DateTime(t.year, t.month, t.day);
+    return day.isBefore(t) ? DateTime(t.year, t.month, t.day + 1) : day;
+  }
+  final minutes = step.inMinutes;
+  // The clock reading, not the time elapsed since midnight: the two differ
+  // by an hour on the days the clocks change.
+  final reading = t.hour * 60 + t.minute;
+  var aligned = DateTime(
+    t.year,
+    t.month,
+    t.day,
+    0,
+    (reading ~/ minutes) * minutes,
+  );
+  // In the hour repeated in autumn, the reading may name the first pass.
+  while (aligned.isBefore(t)) {
+    aligned = nextTick(aligned, step);
+  }
+  return aligned;
+}
+
+/// The tick after [t]: same clock steps across a change of the clocks, a
+/// day being from midnight to midnight.
+DateTime nextTick(DateTime t, Duration step) {
+  if (step >= const Duration(days: 1)) {
+    return DateTime(t.year, t.month, t.day + step.inDays);
+  }
+  final next = DateTime(
+    t.year,
+    t.month,
+    t.day,
+    t.hour,
+    t.minute + step.inMinutes,
+  );
+  // An hour skipped in spring gives a reading that does not exist: the
+  // clock then jumps, never back to [t] or before.
+  return next.isAfter(t) ? next : t.add(step);
 }

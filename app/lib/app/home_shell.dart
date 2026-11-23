@@ -81,12 +81,20 @@ class _HomeShellState extends State<HomeShell> {
   /// Passage opened from the Alerts tab, played once by the timeline.
   MotionPassage? _openAt;
 
+  /// False until the settings are read: cameras would otherwise show
+  /// first in the default order, hidden ones included.
+  bool _settingsReady = false;
+
   @override
   void initState() {
     super.initState();
     _readLiveLayout();
     _settings.addListener(_onSettings);
-    unawaited(_settings.load());
+    unawaited(
+      _settings.load().whenComplete(() {
+        if (mounted) setState(() => _settingsReady = true);
+      }),
+    );
     final update = widget.update;
     if (update != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -233,7 +241,7 @@ class _HomeShellState extends State<HomeShell> {
       mark: client.markReviewed,
       cameras: [for (final c in reviewed) c.name],
       history: historySpan(
-        reviewed.expand((c) => [c.alertDays, c.continuousDays, c.motionDays]),
+        reviewed.map((c) => c.retentionDays),
       ),
     );
     _reviewThumbnails = ReviewThumbnails(client.fetchReviewThumbnail);
@@ -265,7 +273,7 @@ class _HomeShellState extends State<HomeShell> {
     _motionList = MotionList(
       data: data,
       history: historySpan(
-        recorded.expand((c) => [c.continuousDays, c.motionDays]),
+        recorded.map((c) => c.retentionDays),
       ),
       preferences: _preferences,
     );
@@ -411,6 +419,9 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_settingsReady) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     final l = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     final serverName = widget.controller.config?.name ?? l.appTitle;

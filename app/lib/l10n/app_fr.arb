@@ -36,10 +36,10 @@
   },
   "detectionModeMotionOnly": "Mode mouvement seul (sans détection d'objets)",
   "detectionModeObjects": "Détection d'objets active",
-  "continuousDays": "Rétention continu : {days} jours",
-  "@continuousDays": {
+  "retentionDays": "Enregistrements conservés jusqu'à {days, plural, =1{1 jour} other{{days} jours}}",
+  "@retentionDays": {
     "placeholders": {
-      "days": {"type": "String"}
+      "days": {"type": "int"}
     }
   },
   "disconnectButton": "Se déconnecter",

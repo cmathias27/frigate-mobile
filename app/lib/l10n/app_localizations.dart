@@ -254,11 +254,11 @@ abstract class AppLocalizations {
   /// **'Détection d\'objets active'**
   String get detectionModeObjects;
 
-  /// No description provided for @continuousDays.
+  /// No description provided for @retentionDays.
   ///
   /// In fr, this message translates to:
-  /// **'Rétention continu : {days} jours'**
-  String continuousDays(String days);
+  /// **'Enregistrements conservés jusqu\'à {days, plural, =1{1 jour} other{{days} jours}}'**
+  String retentionDays(int days);
 
   /// No description provided for @disconnectButton.
   ///

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frigate_mobile/core/frigate/server_config.dart';
 import 'package:frigate_mobile/core/session/session_controller.dart';
+import 'package:frigate_mobile/core/storage/preferences.dart';
 import 'package:frigate_mobile/core/storage/session_storage.dart';
 import 'package:frigate_mobile/features/live/feed_tile.dart';
 import 'package:frigate_mobile/main.dart';
@@ -80,7 +81,9 @@ void main() {
     final session = SessionController(storage: storage);
     await session.init();
 
-    await tester.pumpWidget(FrigateMobileApp(session: session));
+    await tester.pumpWidget(
+      FrigateMobileApp(session: session, preferences: Preferences.inMemory()),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Ajouter un serveur'), findsOneWidget);
@@ -99,7 +102,9 @@ void main() {
       httpClient: _createFakeServer(refuse: true),
     );
     await session.init();
-    await tester.pumpWidget(FrigateMobileApp(session: session));
+    await tester.pumpWidget(
+      FrigateMobileApp(session: session, preferences: Preferences.inMemory()),
+    );
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextFormField);
@@ -132,7 +137,9 @@ void main() {
       httpClient: _createFakeServer(down: () => down),
     );
     await session.init();
-    await tester.pumpWidget(FrigateMobileApp(session: session));
+    await tester.pumpWidget(
+      FrigateMobileApp(session: session, preferences: Preferences.inMemory()),
+    );
     await tester.pumpAndSettle();
 
     expect(session.status, SessionStatus.connectionError);
@@ -170,7 +177,9 @@ void main() {
     );
     await session.init();
 
-    await tester.pumpWidget(FrigateMobileApp(session: session));
+    await tester.pumpWidget(
+      FrigateMobileApp(session: session, preferences: Preferences.inMemory()),
+    );
     await tester.pumpAndSettle();
 
     // Fill address, username & password
@@ -210,7 +219,10 @@ void main() {
       find.text('Mode mouvement seul (sans détection d\'objets)'),
       findsOneWidget,
     );
-    expect(find.text('Rétention continu : 3 jours'), findsOneWidget);
+    expect(
+      find.text("Enregistrements conservés jusqu'à 3 jours"),
+      findsOneWidget,
+    );
     expect(find.text('Se déconnecter'), findsOneWidget);
 
     // Tap Disconnect -> dialog -> Confirm -> returns to LoginScreen
@@ -249,7 +261,9 @@ void main() {
     );
     await session.init();
 
-    await tester.pumpWidget(FrigateMobileApp(session: session));
+    await tester.pumpWidget(
+      FrigateMobileApp(session: session, preferences: Preferences.inMemory()),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Home'), findsOneWidget);

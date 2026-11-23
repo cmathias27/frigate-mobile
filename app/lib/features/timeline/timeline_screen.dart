@@ -18,6 +18,18 @@ import 'recording_player.dart';
 import 'timeline_bands.dart';
 import 'timeline_data.dart';
 
+/// The same clock time [days] later, not [days] × 24 h: across a change
+/// of the clocks the two differ by an hour.
+DateTime shiftDay(DateTime t, int days) => DateTime(
+  t.year,
+  t.month,
+  t.day + days,
+  t.hour,
+  t.minute,
+  t.second,
+  t.millisecond,
+);
+
 abstract final class TimelineScreenDefaults {
   /// Where the timeline opens: just behind the live edge.
   static const startBehindNow = Duration(minutes: 1);
@@ -128,9 +140,7 @@ class _TimelineScreenState extends State<TimelineScreen>
   Duration get _span =>
       timelineZooms[_zoom] ??
       historySpan(
-        widget.cameras.expand(
-          (c) => [c.continuousDays, c.motionDays, c.alertDays],
-        ),
+        widget.cameras.map((c) => c.retentionDays),
       );
 
   @override
@@ -391,8 +401,7 @@ class _TimelineScreenState extends State<TimelineScreen>
     });
   }
 
-  void _shiftDay(int days) =>
-      _goTo(_playhead.add(Duration(days: days)), play: false);
+  void _shiftDay(int days) => _goTo(shiftDay(_playhead, days), play: false);
 
   Future<void> _openCalendar() async {
     final load = widget.loadHistory;
@@ -550,8 +559,7 @@ class _TimelineScreenState extends State<TimelineScreen>
                     IconButton(
                       tooltip: l.timelineNextDay,
                       icon: const Icon(Icons.chevron_right_rounded),
-                      onPressed:
-                          _playhead.add(const Duration(days: 1)).isAfter(now)
+                      onPressed: shiftDay(_playhead, 1).isAfter(now)
                           ? null
                           : () => _shiftDay(1),
                     ),
