@@ -203,7 +203,7 @@ void main() {
       expect(settings.quality, LiveQuality.light);
       expect(
         find.text(
-          'Flux léger partout : moins de données, lisible par tout téléphone',
+          'Flux léger partout\u00a0: moins de données, lisible par tout téléphone',
         ),
         findsOneWidget,
       );
@@ -219,9 +219,9 @@ void main() {
       await tester.tap(find.text('Lecture en images si la vidéo échoue'));
       await tester.pump();
       expect(settings.imageFallback, isFalse);
-      await tester.tap(find.text('30 s'));
+      await tester.tap(find.text('30\u00a0s'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('2 min').last);
+      await tester.tap(find.text('2\u00a0min').last);
       await tester.pumpAndSettle();
       expect(settings.mergeGap, const Duration(minutes: 2));
     });
@@ -282,10 +282,13 @@ void main() {
         ),
       );
       expect(
-        find.text('Seuil de mouvement : automatique (42)'),
+        find.text('Seuil de mouvement\u00a0: automatique (42)'),
         findsOneWidget,
       );
-      expect(find.text('Seuil de mouvement : automatique'), findsOneWidget);
+      expect(
+        find.text('Seuil de mouvement\u00a0: automatique'),
+        findsOneWidget,
+      );
 
       Switch switchOf(String label) => tester.widget<Switch>(
         find.descendant(
@@ -314,7 +317,7 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
       expect(settings.threshold('cam_a'), 75);
-      expect(find.text('Seuil de mouvement : 75'), findsOneWidget);
+      expect(find.text('Seuil de mouvement\u00a0: 75'), findsOneWidget);
     });
   });
 }

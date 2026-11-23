@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:frigate_mobile/app/formatting.dart';
 import 'package:frigate_mobile/app/theme.dart';
 import 'package:frigate_mobile/core/frigate/capabilities.dart';
@@ -200,13 +201,37 @@ void main() {
     });
   });
 
+  test('day and time keep the case of each language', () async {
+    await initializeDateFormatting();
+    final now = DateTime(2026, 1, 12, 9);
+    final fr = lookupAppLocalizations(const Locale('fr'));
+    final en = lookupAppLocalizations(const Locale('en'));
+    expect(eventsDayTime(DateTime(2026, 1, 12, 8, 5), now, 'fr', fr), '08:05');
+    expect(
+      eventsDayTime(DateTime(2026, 1, 11, 14, 31), now, 'fr', fr),
+      'hier 14:31',
+    );
+    expect(
+      eventsDayTime(DateTime(2026, 1, 11, 14, 31), now, 'en', en),
+      'yesterday 14:31',
+    );
+    expect(
+      eventsDayTime(DateTime(2026, 1, 10, 14, 31), now, 'fr', fr),
+      'samedi 10 janvier 14:31',
+    );
+    expect(
+      eventsDayTime(DateTime(2026, 1, 10, 14, 31), now, 'en', en),
+      'Saturday, January 10 14:31',
+    );
+  });
+
   test('passage lengths', () {
     final l = lookupAppLocalizations(const Locale('fr'));
-    expect(formatDuration(const Duration(seconds: 42), l), '42 s');
-    expect(formatDuration(const Duration(seconds: 65), l), '1 min 05');
+    expect(formatDuration(const Duration(seconds: 42), l), '42\u00a0s');
+    expect(formatDuration(const Duration(seconds: 65), l), '1\u00a0min 05');
     expect(
       formatDuration(const Duration(hours: 2, minutes: 3), l),
-      '2 h 03',
+      '2\u00a0h 03',
     );
   });
 
@@ -255,7 +280,7 @@ void main() {
     expect(find.text("AUJOURD'HUI"), findsOneWidget);
     expect(find.text('Mouvement · Entrée'), findsNWidgets(2));
     expect(find.text('Mouvement · Cour'), findsOneWidget);
-    expect(find.text('Voir les 3 heures précédentes'), findsOneWidget);
+    expect(find.text('Voir les 3\u00a0heures précédentes'), findsOneWidget);
     expect(find.text('Toutes caméras'), findsOneWidget);
 
     // The test font is wide: the chip is past the screen edge.

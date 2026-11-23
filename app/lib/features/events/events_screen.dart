@@ -179,7 +179,8 @@ String eventsDayLabel(
   return DateFormat.MMMMEEEEd(locale).format(day);
 }
 
-/// "14:31" today, "hier 14:31" or "samedi 10 janvier 14:31" before.
+/// "14:31" today, "hier 14:31" or "samedi 10 janvier 14:31" before; the
+/// day keeps the case of the language (English days take a capital).
 String eventsDayTime(
   DateTime time,
   DateTime now,
@@ -189,7 +190,10 @@ String eventsDayTime(
   final day = DateTime(time.year, time.month, time.day);
   final hour = DateFormat.Hm(locale).format(time);
   if (day == DateTime(now.year, now.month, now.day)) return hour;
-  return '${eventsDayLabel(day, now, locale, l).toLowerCase()} $hour';
+  if (day == DateTime(now.year, now.month, now.day - 1)) {
+    return l.eventsYesterdayAt(hour);
+  }
+  return '${DateFormat.MMMMEEEEd(locale).format(day)} $hour';
 }
 
 class DaySeparator extends StatelessWidget {

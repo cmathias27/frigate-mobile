@@ -229,14 +229,14 @@ void main() {
       expect(find.text('Extrait · Entrée'), findsOneWidget);
       expect(find.text('11:59:45'), findsOneWidget);
       expect(find.text('12:00:15'), findsOneWidget);
-      expect(find.text('Durée : 30 s'), findsOneWidget);
+      expect(find.text('Durée\u00a0: 30\u00a0s'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('10 s plus tôt').first);
+      await tester.tap(find.byTooltip('10\u00a0s plus tôt').first);
       await tester.pump();
       expect(find.text('11:59:35'), findsOneWidget);
-      expect(find.text('Durée : 40 s'), findsOneWidget);
+      expect(find.text('Durée\u00a0: 40\u00a0s'), findsOneWidget);
 
-      await tester.tap(find.text('5 min 00'));
+      await tester.tap(find.text('5\u00a0min 00'));
       await tester.pump();
       expect(find.text('11:57:30'), findsOneWidget);
       expect(find.text('12:02:30'), findsOneWidget);
@@ -266,13 +266,13 @@ void main() {
           peak: 60,
         ),
       );
-      expect(find.text('Durée : 45 s'), findsOneWidget);
-      await tester.tap(find.text('30 s'));
+      expect(find.text('Durée\u00a0: 45\u00a0s'), findsOneWidget);
+      await tester.tap(find.text('30\u00a0s'));
       await tester.pump();
-      expect(find.text('Durée : 30 s'), findsOneWidget);
+      expect(find.text('Durée\u00a0: 30\u00a0s'), findsOneWidget);
       await tester.tap(find.text('Passage'));
       await tester.pump();
-      expect(find.text('Durée : 45 s'), findsOneWidget);
+      expect(find.text('Durée\u00a0: 45\u00a0s'), findsOneWidget);
 
       await tester.runAsync(() async {
         await tester.tap(find.text('Partager'));
@@ -320,7 +320,7 @@ void main() {
           ),
         ),
       );
-      final later = find.byTooltip('10 s plus tard').last;
+      final later = find.byTooltip('10\u00a0s plus tard').last;
       expect(
         tester
             .widget<IconButton>(

@@ -721,7 +721,7 @@ void main() {
       await tester.tap(find.text('Images'));
       await tester.pumpAndSettle();
       expect(find.text('Lecture en images'), findsOneWidget);
-      expect(find.text('Détail : Decoder init failed'), findsOneWidget);
+      expect(find.text('Détail\u00a0: Decoder init failed'), findsOneWidget);
       await tester.tap(find.text('Réessayer la vidéo'));
       await tester.pumpAndSettle();
       expect(player.videoRetries, 1);
@@ -738,7 +738,7 @@ void main() {
       expect(start, _now.subtract(TimelineScreenDefaults.startBehindNow));
       expect(end, _now);
       expect(server.calls, isNotEmpty);
-      expect(find.text('6 h'), findsOneWidget);
+      expect(find.text('6\u00a0h'), findsOneWidget);
       expect(find.text('Tout'), findsOneWidget);
     });
 
@@ -768,7 +768,7 @@ void main() {
       final preferences = Preferences.inMemory();
       await pumpScreen(tester, preferences: preferences);
       // Inside the range opened: a seek, not a new opening.
-      await tester.tap(find.byTooltip('Avancer de 10 s'));
+      await tester.tap(find.byTooltip('Avancer de 10\u00a0s'));
       await tester.pump();
       expect(player.seeks, [
         _now.subtract(const Duration(seconds: 50)),
@@ -780,7 +780,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(player.opened, hasLength(1));
       expect(
-        find.text('Aucun passage de mouvement dans les 24 h'),
+        find.text('Aucun passage de mouvement dans les 24\u00a0h'),
         findsOneWidget,
       );
 
@@ -832,7 +832,7 @@ void main() {
       await tester.tap(find.text('Passage suiv.'));
       await tester.pumpAndSettle();
       expect(
-        find.text('Aucun passage de mouvement dans les 24 h'),
+        find.text('Aucun passage de mouvement dans les 24\u00a0h'),
         findsOneWidget,
       );
     });
@@ -852,11 +852,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(player.opened.last.$1, 'cam_b');
 
-      await tester.tap(find.text('1 h'));
+      await tester.tap(find.text('1\u00a0h'));
       await tester.pump();
       expect(
         tester
-            .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '1 h'))
+            .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '1\u00a0h'))
             .selected,
         isTrue,
       );

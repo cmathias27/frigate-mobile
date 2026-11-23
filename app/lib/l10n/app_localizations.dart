@@ -167,7 +167,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In fr, this message translates to:
-  /// **'Comme dans DS cam : un serveur, plusieurs caméras.'**
+  /// **'Comme dans DS cam : un serveur, plusieurs caméras.'**
   String get loginSubtitle;
 
   /// No description provided for @serverNameLabel.
@@ -224,18 +224,6 @@ abstract class AppLocalizations {
   /// **'Se connecter'**
   String get connectButton;
 
-  /// No description provided for @connectingStatus.
-  ///
-  /// In fr, this message translates to:
-  /// **'Connexion en cours…'**
-  String get connectingStatus;
-
-  /// No description provided for @connectedTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Serveur connecté'**
-  String get connectedTitle;
-
   /// No description provided for @serverInfoCameras.
   ///
   /// In fr, this message translates to:
@@ -257,7 +245,7 @@ abstract class AppLocalizations {
   /// No description provided for @retentionDays.
   ///
   /// In fr, this message translates to:
-  /// **'Enregistrements conservés jusqu\'à {days, plural, =1{1 jour} other{{days} jours}}'**
+  /// **'Enregistrements conservés jusqu\'à {days, plural, =1{1 jour} other{{days} jours}}'**
   String retentionDays(int days);
 
   /// No description provided for @disconnectButton.
@@ -275,7 +263,7 @@ abstract class AppLocalizations {
   /// No description provided for @disconnectConfirmMessage.
   ///
   /// In fr, this message translates to:
-  /// **'Voulez-vous vous déconnecter de ce serveur Frigate ?'**
+  /// **'Voulez-vous vous déconnecter de ce serveur Frigate ?'**
   String get disconnectConfirmMessage;
 
   /// No description provided for @cancel.
@@ -317,13 +305,13 @@ abstract class AppLocalizations {
   /// No description provided for @addressNotHttps.
   ///
   /// In fr, this message translates to:
-  /// **'Adresse en https:// obligatoire : en http, le mot de passe circulerait en clair'**
+  /// **'Adresse en https:// obligatoire : en http, le mot de passe circulerait en clair'**
   String get addressNotHttps;
 
   /// No description provided for @addressUnauthenticatedPort.
   ///
   /// In fr, this message translates to:
-  /// **'Le port 5000 de Frigate n\'a pas d\'authentification : utilisez le port 8971'**
+  /// **'Le port 5000 de Frigate n\'a pas d\'authentification : utilisez le port 8971'**
   String get addressUnauthenticatedPort;
 
   /// No description provided for @certificateTitle.
@@ -335,13 +323,13 @@ abstract class AppLocalizations {
   /// No description provided for @certificateNew.
   ///
   /// In fr, this message translates to:
-  /// **'L\'adresse locale présente un certificat auto-signé. Avant de lui faire confiance, vérifiez que son empreinte SHA-256 est bien celle de votre Frigate :'**
+  /// **'L\'adresse locale présente un certificat auto-signé. Avant de lui faire confiance, vérifiez que son empreinte SHA-256 est bien celle de votre Frigate :'**
   String get certificateNew;
 
   /// No description provided for @certificateChanged.
   ///
   /// In fr, this message translates to:
-  /// **'Le certificat de l\'adresse locale a changé depuis la dernière connexion. Si vous ne l\'avez pas renouvelé, un autre appareil se fait peut-être passer pour votre Frigate. Nouvelle empreinte SHA-256 :'**
+  /// **'Le certificat de l\'adresse locale a changé depuis la dernière connexion. Si vous ne l\'avez pas renouvelé, un autre appareil se fait peut-être passer pour votre Frigate. Nouvelle empreinte SHA-256 :'**
   String get certificateChanged;
 
   /// No description provided for @certificateHint.
@@ -359,7 +347,7 @@ abstract class AppLocalizations {
   /// No description provided for @liveBadge.
   ///
   /// In fr, this message translates to:
-  /// **'LIVE'**
+  /// **'DIRECT'**
   String get liveBadge;
 
   /// No description provided for @liveStale.
@@ -389,7 +377,7 @@ abstract class AppLocalizations {
   /// No description provided for @liveLayoutAuto.
   ///
   /// In fr, this message translates to:
-  /// **'Disposition automatique : toutes les caméras, le plus grand possible'**
+  /// **'Disposition automatique : toutes les caméras, le plus grand possible'**
   String get liveLayoutAuto;
 
   /// No description provided for @livePage.
@@ -401,7 +389,7 @@ abstract class AppLocalizations {
   /// No description provided for @liveModeSnapshots.
   ///
   /// In fr, this message translates to:
-  /// **'Images · toutes les {seconds} s'**
+  /// **'{seconds, plural, =1{Images · chaque seconde} other{Images · toutes les {seconds} s}}'**
   String liveModeSnapshots(int seconds);
 
   /// No description provided for @liveFullScreen.
@@ -515,7 +503,7 @@ abstract class AppLocalizations {
   /// No description provided for @timelineZoomHours.
   ///
   /// In fr, this message translates to:
-  /// **'{hours} h'**
+  /// **'{hours} h'**
   String timelineZoomHours(int hours);
 
   /// No description provided for @timelineZoomAll.
@@ -539,19 +527,19 @@ abstract class AppLocalizations {
   /// No description provided for @timelineBack.
   ///
   /// In fr, this message translates to:
-  /// **'Reculer de {seconds} s'**
+  /// **'Reculer de {seconds} s'**
   String timelineBack(int seconds);
 
   /// No description provided for @timelineForward.
   ///
   /// In fr, this message translates to:
-  /// **'Avancer de {seconds} s'**
+  /// **'Avancer de {seconds} s'**
   String timelineForward(int seconds);
 
   /// No description provided for @timelineSeconds.
   ///
   /// In fr, this message translates to:
-  /// **'{seconds} s'**
+  /// **'{seconds} s'**
   String timelineSeconds(int seconds);
 
   /// No description provided for @timelinePlay.
@@ -581,7 +569,7 @@ abstract class AppLocalizations {
   /// No description provided for @timelineNoPassage.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun passage de mouvement dans les {hours} h'**
+  /// **'Aucun passage de mouvement dans les {hours} h'**
   String timelineNoPassage(int hours);
 
   /// No description provided for @timelineNoRecording.
@@ -665,7 +653,7 @@ abstract class AppLocalizations {
   /// No description provided for @calendarHourAgo.
   ///
   /// In fr, this message translates to:
-  /// **'Il y a 1 h'**
+  /// **'Il y a 1 h'**
   String get calendarHourAgo;
 
   /// No description provided for @calendarThisMorning.
@@ -689,7 +677,7 @@ abstract class AppLocalizations {
   /// No description provided for @calendarOldestAt.
   ///
   /// In fr, this message translates to:
-  /// **'Plus ancien enregistrement : {date}'**
+  /// **'Plus ancien enregistrement : {date}'**
   String calendarOldestAt(String date);
 
   /// No description provided for @calendarLoadFailed.
@@ -713,7 +701,7 @@ abstract class AppLocalizations {
   /// No description provided for @updateInstalledVersion.
   ///
   /// In fr, this message translates to:
-  /// **'Version installée : {version}'**
+  /// **'Version installée : {version}'**
   String updateInstalledVersion(String version);
 
   /// No description provided for @updateNoNotes.
@@ -749,7 +737,7 @@ abstract class AppLocalizations {
   /// No description provided for @updatePermissionMessage.
   ///
   /// In fr, this message translates to:
-  /// **'Android demande d\'autoriser Frigate Mobile à installer ses propres mises à jour. Active « Autoriser cette source » dans les réglages qui vont s\'ouvrir, puis reviens appuyer sur Installer.'**
+  /// **'Android demande d\'autoriser Frigate Mobile à installer ses propres mises à jour. Activez « Autoriser cette source » dans les réglages qui vont s\'ouvrir, puis revenez appuyer sur Installer.'**
   String get updatePermissionMessage;
 
   /// No description provided for @updatePermissionOpen.
@@ -761,19 +749,19 @@ abstract class AppLocalizations {
   /// No description provided for @updateErrorNetwork.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de joindre GitHub. Réessaie plus tard.'**
+  /// **'Impossible de joindre GitHub. Réessayez plus tard.'**
   String get updateErrorNetwork;
 
   /// No description provided for @updateErrorChecksum.
   ///
   /// In fr, this message translates to:
-  /// **'Le fichier téléchargé ne correspond pas à son empreinte : installation annulée.'**
+  /// **'Le fichier téléchargé ne correspond pas à son empreinte : installation annulée.'**
   String get updateErrorChecksum;
 
   /// No description provided for @updateErrorTooLarge.
   ///
   /// In fr, this message translates to:
-  /// **'Le fichier de mise à jour est anormalement gros : téléchargement arrêté.'**
+  /// **'Le fichier de mise à jour est anormalement gros : téléchargement arrêté.'**
   String get updateErrorTooLarge;
 
   /// No description provided for @updateErrorFolder.
@@ -797,7 +785,7 @@ abstract class AppLocalizations {
   /// No description provided for @updateErrorSignature.
   ///
   /// In fr, this message translates to:
-  /// **'Cette version est signée par une autre clé : désinstalle l\'application pour l\'installer.'**
+  /// **'Cette version est signée par une autre clé : désinstallez l\'application pour l\'installer.'**
   String get updateErrorSignature;
 
   /// No description provided for @updateErrorInstall.
@@ -905,7 +893,7 @@ abstract class AppLocalizations {
   /// No description provided for @eventsLoadMore.
   ///
   /// In fr, this message translates to:
-  /// **'Voir les {hours} heures précédentes'**
+  /// **'{hours, plural, =1{Voir l\'heure précédente} other{Voir les {hours} heures précédentes}}'**
   String eventsLoadMore(int hours);
 
   /// No description provided for @eventsLoadFailed.
@@ -923,19 +911,19 @@ abstract class AppLocalizations {
   /// No description provided for @durationSeconds.
   ///
   /// In fr, this message translates to:
-  /// **'{seconds} s'**
+  /// **'{seconds} s'**
   String durationSeconds(int seconds);
 
   /// No description provided for @durationMinutes.
   ///
   /// In fr, this message translates to:
-  /// **'{minutes} min {seconds}'**
+  /// **'{minutes} min {seconds}'**
   String durationMinutes(int minutes, String seconds);
 
   /// No description provided for @durationHours.
   ///
   /// In fr, this message translates to:
-  /// **'{hours} h {minutes}'**
+  /// **'{hours} h {minutes}'**
   String durationHours(int hours, String minutes);
 
   /// No description provided for @timelineClip.
@@ -971,25 +959,25 @@ abstract class AppLocalizations {
   /// No description provided for @clipEarlier.
   ///
   /// In fr, this message translates to:
-  /// **'{seconds} s plus tôt'**
+  /// **'{seconds} s plus tôt'**
   String clipEarlier(int seconds);
 
   /// No description provided for @clipLater.
   ///
   /// In fr, this message translates to:
-  /// **'{seconds} s plus tard'**
+  /// **'{seconds} s plus tard'**
   String clipLater(int seconds);
 
   /// No description provided for @clipLength.
   ///
   /// In fr, this message translates to:
-  /// **'Durée : {length}'**
+  /// **'Durée : {length}'**
   String clipLength(String length);
 
   /// No description provided for @clipLengthMax.
   ///
   /// In fr, this message translates to:
-  /// **'Durée : {length}, le maximum'**
+  /// **'Durée : {length}, le maximum'**
   String clipLengthMax(String length);
 
   /// No description provided for @clipPassage.
@@ -1013,7 +1001,7 @@ abstract class AppLocalizations {
   /// No description provided for @clipDownloading.
   ///
   /// In fr, this message translates to:
-  /// **'Téléchargement… {size} Mo'**
+  /// **'Téléchargement… {size} Mo'**
   String clipDownloading(String size);
 
   /// No description provided for @clipCancel.
@@ -1067,7 +1055,7 @@ abstract class AppLocalizations {
   /// No description provided for @timelineImagePlaybackDetail.
   ///
   /// In fr, this message translates to:
-  /// **'Détail : {error}'**
+  /// **'Détail : {error}'**
   String timelineImagePlaybackDetail(String error);
 
   /// No description provided for @timelineRetryVideo.
@@ -1133,7 +1121,7 @@ abstract class AppLocalizations {
   /// No description provided for @reviewMarkFailed.
   ///
   /// In fr, this message translates to:
-  /// **'Frigate n\'a pas enregistré la marque « vu ».'**
+  /// **'Frigate n\'a pas enregistré la marque « vu ».'**
   String get reviewMarkFailed;
 
   /// No description provided for @reviewEmptyAlerts.
@@ -1343,19 +1331,19 @@ abstract class AppLocalizations {
   /// No description provided for @settingsThresholdAuto.
   ///
   /// In fr, this message translates to:
-  /// **'Seuil de mouvement : automatique'**
+  /// **'Seuil de mouvement : automatique'**
   String get settingsThresholdAuto;
 
   /// No description provided for @settingsThresholdAutoValue.
   ///
   /// In fr, this message translates to:
-  /// **'Seuil de mouvement : automatique ({value})'**
+  /// **'Seuil de mouvement : automatique ({value})'**
   String settingsThresholdAutoValue(int value);
 
   /// No description provided for @settingsThresholdFixed.
   ///
   /// In fr, this message translates to:
-  /// **'Seuil de mouvement : {value}'**
+  /// **'Seuil de mouvement : {value}'**
   String settingsThresholdFixed(int value);
 
   /// No description provided for @settingsThresholdTitle.
@@ -1439,7 +1427,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsQualityLightHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Flux léger partout : moins de données, lisible par tout téléphone'**
+  /// **'Flux léger partout : moins de données, lisible par tout téléphone'**
   String get settingsQualityLightHelp;
 
   /// No description provided for @settingsOtherStreams.
@@ -1463,7 +1451,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsTileSizeHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Disposition automatique : plus grandes, moins de caméras par page'**
+  /// **'Disposition automatique : plus grandes, moins de caméras par page'**
   String get settingsTileSizeHelp;
 
   /// No description provided for @settingsTileSmall.
@@ -1499,7 +1487,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsImageFallbackHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Enregistrement illisible par le téléphone ou figé : images enregistrées à la place'**
+  /// **'Enregistrement illisible par le téléphone ou figé : images enregistrées à la place'**
   String get settingsImageFallbackHelp;
 
   /// No description provided for @settingsMinPassage.
@@ -1529,13 +1517,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsSeconds.
   ///
   /// In fr, this message translates to:
-  /// **'{count} s'**
+  /// **'{count} s'**
   String settingsSeconds(int count);
 
   /// No description provided for @settingsMinutes.
   ///
   /// In fr, this message translates to:
-  /// **'{count} min'**
+  /// **'{count} min'**
   String settingsMinutes(int count);
 
   /// No description provided for @settingsGroups.
@@ -1553,7 +1541,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsGroupsHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Un groupe réunit des caméras à regarder ensemble : il se choisit en haut du direct.'**
+  /// **'Un groupe réunit des caméras à regarder ensemble : il se choisit en haut du direct.'**
   String get settingsGroupsHelp;
 
   /// No description provided for @settingsGroupCameras.
@@ -1619,7 +1607,7 @@ abstract class AppLocalizations {
   /// No description provided for @sessionErrorTooManyAttempts.
   ///
   /// In fr, this message translates to:
-  /// **'Trop de tentatives : Frigate refuse les connexions un moment. Réessayez dans une minute.'**
+  /// **'Trop de tentatives : Frigate refuse les connexions un moment. Réessayez dans une minute.'**
   String get sessionErrorTooManyAttempts;
 
   /// No description provided for @sessionErrorServer.
@@ -1643,25 +1631,25 @@ abstract class AppLocalizations {
   /// No description provided for @sessionErrorCertificate.
   ///
   /// In fr, this message translates to:
-  /// **'Certificat du serveur refusé : un certificat auto-signé n\'est accepté que sur l\'adresse locale.'**
+  /// **'Certificat du serveur refusé : un certificat auto-signé n\'est accepté que sur l\'adresse locale.'**
   String get sessionErrorCertificate;
 
   /// No description provided for @sessionErrorCertificateToConfirm.
   ///
   /// In fr, this message translates to:
-  /// **'Certificat du serveur à confirmer : connectez-vous pour vérifier son empreinte.'**
+  /// **'Certificat du serveur à confirmer : connectez-vous pour vérifier son empreinte.'**
   String get sessionErrorCertificateToConfirm;
 
   /// No description provided for @sessionErrorInvalidResponse.
   ///
   /// In fr, this message translates to:
-  /// **'Réponse inattendue : cette adresse est-elle bien celle de Frigate ?'**
+  /// **'Réponse inattendue : cette adresse est-elle bien celle de Frigate ?'**
   String get sessionErrorInvalidResponse;
 
   /// No description provided for @sessionErrorExpired.
   ///
   /// In fr, this message translates to:
-  /// **'Session expirée : reconnectez-vous.'**
+  /// **'Session expirée : reconnectez-vous.'**
   String get sessionErrorExpired;
 
   /// No description provided for @sessionErrorUnexpected.
@@ -1697,8 +1685,14 @@ abstract class AppLocalizations {
   /// No description provided for @alertNoRecording.
   ///
   /// In fr, this message translates to:
-  /// **'Cette caméra n\'enregistre pas : l\'alerte ne peut pas être lue.'**
+  /// **'Cette caméra n\'enregistre pas : l\'alerte ne peut pas être lue.'**
   String get alertNoRecording;
+
+  /// No description provided for @eventsYesterdayAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'hier {time}'**
+  String eventsYesterdayAt(String time);
 }
 
 class _AppLocalizationsDelegate

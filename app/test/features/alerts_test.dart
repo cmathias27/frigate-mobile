@@ -366,7 +366,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('2 non vues'), findsOneWidget);
       expect(
-        find.text("Frigate n'a pas enregistré la marque « vu »."),
+        find.text("Frigate n'a pas enregistré la marque «\u00a0vu\u00a0»."),
         findsOneWidget,
       );
     });

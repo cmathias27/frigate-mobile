@@ -79,12 +79,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connectButton => 'Connect';
 
   @override
-  String get connectingStatus => 'Connecting…';
-
-  @override
-  String get connectedTitle => 'Connected server';
-
-  @override
   String serverInfoCameras(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -194,7 +188,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String liveModeSnapshots(int seconds) {
-    return 'Images · every $seconds s';
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Images · every $seconds s',
+      one: 'Images · every second',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -493,7 +493,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String eventsLoadMore(int hours) {
-    return 'Show the previous $hours hours';
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'Show the previous $hours hours',
+      one: 'Show the previous hour',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -975,4 +981,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get alertNoRecording =>
       'This camera does not record: the alert cannot be played.';
+
+  @override
+  String eventsYesterdayAt(String time) {
+    return 'yesterday $time';
+  }
 }

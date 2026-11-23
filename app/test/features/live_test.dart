@@ -247,7 +247,7 @@ void main() {
       expect(server.cameras, {'cam_a', 'cam_b', 'cam_c', 'cam_d'});
       // 2 × 2 tiles of an 800 × 600 screen at 3 pixels per point.
       expect(server.calls.every((c) => c.$2 == 720), isTrue);
-      expect(find.text('LIVE'), findsNWidgets(4));
+      expect(find.text('DIRECT'), findsNWidgets(4));
       expect(find.text('A'), findsOneWidget);
 
       // Second page: the two last cameras, the first ones stop.
@@ -342,7 +342,7 @@ void main() {
       await tester.tap(find.text('C'));
       await tester.pumpAndSettle();
       expect(find.byType(CameraFullScreen), findsOneWidget);
-      expect(find.text('Images · toutes les 1 s'), findsOneWidget);
+      expect(find.text('Images · chaque seconde'), findsOneWidget);
 
       // Only the opened camera refreshes, every second, without `h`.
       server.calls.clear();
@@ -460,7 +460,7 @@ void main() {
       await tester.pump();
       expect(find.byType(FeedImage), findsOneWidget);
       expect(
-        find.text('Vidéo indisponible · Images · toutes les 1 s'),
+        find.text('Vidéo indisponible · Images · chaque seconde'),
         findsOneWidget,
       );
       server.calls.clear();
@@ -502,7 +502,7 @@ void main() {
       await tester.pump();
       expect(videos.map((v) => v.stream), ['cam_g_1', 'cam_g_2', 'cam_g_3']);
       expect(
-        find.text('Vidéo indisponible · Images · toutes les 1 s'),
+        find.text('Vidéo indisponible · Images · chaque seconde'),
         findsOneWidget,
       );
 

@@ -50,7 +50,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get loginSubtitle =>
-      'Comme dans DS cam : un serveur, plusieurs caméras.';
+      'Comme dans DS cam : un serveur, plusieurs caméras.';
 
   @override
   String get serverNameLabel => 'Nom du serveur';
@@ -81,12 +81,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get connectButton => 'Se connecter';
 
   @override
-  String get connectingStatus => 'Connexion en cours…';
-
-  @override
-  String get connectedTitle => 'Serveur connecté';
-
-  @override
   String serverInfoCameras(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -109,8 +103,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days jours',
-      one: '1 jour',
+      other: '$days jours',
+      one: '1 jour',
     );
     return 'Enregistrements conservés jusqu\'à $_temp0';
   }
@@ -123,7 +117,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get disconnectConfirmMessage =>
-      'Voulez-vous vous déconnecter de ce serveur Frigate ?';
+      'Voulez-vous vous déconnecter de ce serveur Frigate ?';
 
   @override
   String get cancel => 'Annuler';
@@ -145,22 +139,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get addressNotHttps =>
-      'Adresse en https:// obligatoire : en http, le mot de passe circulerait en clair';
+      'Adresse en https:// obligatoire : en http, le mot de passe circulerait en clair';
 
   @override
   String get addressUnauthenticatedPort =>
-      'Le port 5000 de Frigate n\'a pas d\'authentification : utilisez le port 8971';
+      'Le port 5000 de Frigate n\'a pas d\'authentification : utilisez le port 8971';
 
   @override
   String get certificateTitle => 'Certificat du serveur';
 
   @override
   String get certificateNew =>
-      'L\'adresse locale présente un certificat auto-signé. Avant de lui faire confiance, vérifiez que son empreinte SHA-256 est bien celle de votre Frigate :';
+      'L\'adresse locale présente un certificat auto-signé. Avant de lui faire confiance, vérifiez que son empreinte SHA-256 est bien celle de votre Frigate :';
 
   @override
   String get certificateChanged =>
-      'Le certificat de l\'adresse locale a changé depuis la dernière connexion. Si vous ne l\'avez pas renouvelé, un autre appareil se fait peut-être passer pour votre Frigate. Nouvelle empreinte SHA-256 :';
+      'Le certificat de l\'adresse locale a changé depuis la dernière connexion. Si vous ne l\'avez pas renouvelé, un autre appareil se fait peut-être passer pour votre Frigate. Nouvelle empreinte SHA-256 :';
 
   @override
   String get certificateHint =>
@@ -170,7 +164,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get certificateTrust => 'Faire confiance';
 
   @override
-  String get liveBadge => 'LIVE';
+  String get liveBadge => 'DIRECT';
 
   @override
   String get liveStale => 'FIGÉ';
@@ -188,7 +182,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get liveLayoutAuto =>
-      'Disposition automatique : toutes les caméras, le plus grand possible';
+      'Disposition automatique : toutes les caméras, le plus grand possible';
 
   @override
   String livePage(int current, int total) {
@@ -197,7 +191,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String liveModeSnapshots(int seconds) {
-    return 'Images · toutes les $seconds s';
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Images · toutes les $seconds s',
+      one: 'Images · chaque seconde',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -264,7 +264,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String timelineZoomHours(int hours) {
-    return '$hours h';
+    return '$hours h';
   }
 
   @override
@@ -278,17 +278,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String timelineBack(int seconds) {
-    return 'Reculer de $seconds s';
+    return 'Reculer de $seconds s';
   }
 
   @override
   String timelineForward(int seconds) {
-    return 'Avancer de $seconds s';
+    return 'Avancer de $seconds s';
   }
 
   @override
   String timelineSeconds(int seconds) {
-    return '$seconds s';
+    return '$seconds s';
   }
 
   @override
@@ -305,7 +305,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String timelineNoPassage(int hours) {
-    return 'Aucun passage de mouvement dans les $hours h';
+    return 'Aucun passage de mouvement dans les $hours h';
   }
 
   @override
@@ -349,7 +349,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get calendarGo => 'Aller';
 
   @override
-  String get calendarHourAgo => 'Il y a 1 h';
+  String get calendarHourAgo => 'Il y a 1 h';
 
   @override
   String get calendarThisMorning => 'Ce matin';
@@ -362,7 +362,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String calendarOldestAt(String date) {
-    return 'Plus ancien enregistrement : $date';
+    return 'Plus ancien enregistrement : $date';
   }
 
   @override
@@ -379,7 +379,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String updateInstalledVersion(String version) {
-    return 'Version installée : $version';
+    return 'Version installée : $version';
   }
 
   @override
@@ -399,22 +399,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get updatePermissionMessage =>
-      'Android demande d\'autoriser Frigate Mobile à installer ses propres mises à jour. Active « Autoriser cette source » dans les réglages qui vont s\'ouvrir, puis reviens appuyer sur Installer.';
+      'Android demande d\'autoriser Frigate Mobile à installer ses propres mises à jour. Activez « Autoriser cette source » dans les réglages qui vont s\'ouvrir, puis revenez appuyer sur Installer.';
 
   @override
   String get updatePermissionOpen => 'Ouvrir les réglages';
 
   @override
   String get updateErrorNetwork =>
-      'Impossible de joindre GitHub. Réessaie plus tard.';
+      'Impossible de joindre GitHub. Réessayez plus tard.';
 
   @override
   String get updateErrorChecksum =>
-      'Le fichier téléchargé ne correspond pas à son empreinte : installation annulée.';
+      'Le fichier téléchargé ne correspond pas à son empreinte : installation annulée.';
 
   @override
   String get updateErrorTooLarge =>
-      'Le fichier de mise à jour est anormalement gros : téléchargement arrêté.';
+      'Le fichier de mise à jour est anormalement gros : téléchargement arrêté.';
 
   @override
   String get updateErrorFolder =>
@@ -430,7 +430,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get updateErrorSignature =>
-      'Cette version est signée par une autre clé : désinstalle l\'application pour l\'installer.';
+      'Cette version est signée par une autre clé : désinstallez l\'application pour l\'installer.';
 
   @override
   String get updateErrorInstall =>
@@ -503,7 +503,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String eventsLoadMore(int hours) {
-    return 'Voir les $hours heures précédentes';
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'Voir les $hours heures précédentes',
+      one: 'Voir l\'heure précédente',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -514,17 +520,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String durationSeconds(int seconds) {
-    return '$seconds s';
+    return '$seconds s';
   }
 
   @override
   String durationMinutes(int minutes, String seconds) {
-    return '$minutes min $seconds';
+    return '$minutes min $seconds';
   }
 
   @override
   String durationHours(int hours, String minutes) {
-    return '$hours h $minutes';
+    return '$hours h $minutes';
   }
 
   @override
@@ -546,22 +552,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String clipEarlier(int seconds) {
-    return '$seconds s plus tôt';
+    return '$seconds s plus tôt';
   }
 
   @override
   String clipLater(int seconds) {
-    return '$seconds s plus tard';
+    return '$seconds s plus tard';
   }
 
   @override
   String clipLength(String length) {
-    return 'Durée : $length';
+    return 'Durée : $length';
   }
 
   @override
   String clipLengthMax(String length) {
-    return 'Durée : $length, le maximum';
+    return 'Durée : $length, le maximum';
   }
 
   @override
@@ -575,7 +581,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String clipDownloading(String size) {
-    return 'Téléchargement… $size Mo';
+    return 'Téléchargement… $size Mo';
   }
 
   @override
@@ -608,7 +614,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String timelineImagePlaybackDetail(String error) {
-    return 'Détail : $error';
+    return 'Détail : $error';
   }
 
   @override
@@ -661,7 +667,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reviewMarkFailed =>
-      'Frigate n\'a pas enregistré la marque « vu ».';
+      'Frigate n\'a pas enregistré la marque « vu ».';
 
   @override
   String reviewEmptyAlerts(String time) {
@@ -775,16 +781,16 @@ class AppLocalizationsFr extends AppLocalizations {
       'Glisser la poignée pour changer l\'ordre. Une caméra masquée disparaît du direct, de la chronologie et des alertes. Toucher une caméra pour régler son seuil de mouvement.';
 
   @override
-  String get settingsThresholdAuto => 'Seuil de mouvement : automatique';
+  String get settingsThresholdAuto => 'Seuil de mouvement : automatique';
 
   @override
   String settingsThresholdAutoValue(int value) {
-    return 'Seuil de mouvement : automatique ($value)';
+    return 'Seuil de mouvement : automatique ($value)';
   }
 
   @override
   String settingsThresholdFixed(int value) {
-    return 'Seuil de mouvement : $value';
+    return 'Seuil de mouvement : $value';
   }
 
   @override
@@ -834,7 +840,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsQualityLightHelp =>
-      'Flux léger partout : moins de données, lisible par tout téléphone';
+      'Flux léger partout : moins de données, lisible par tout téléphone';
 
   @override
   String get settingsOtherStreams => 'Essayer les autres flux';
@@ -848,7 +854,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsTileSizeHelp =>
-      'Disposition automatique : plus grandes, moins de caméras par page';
+      'Disposition automatique : plus grandes, moins de caméras par page';
 
   @override
   String get settingsTileSmall => 'Petites';
@@ -867,7 +873,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsImageFallbackHelp =>
-      'Enregistrement illisible par le téléphone ou figé : images enregistrées à la place';
+      'Enregistrement illisible par le téléphone ou figé : images enregistrées à la place';
 
   @override
   String get settingsMinPassage => 'Durée minimale d\'un passage';
@@ -884,12 +890,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String settingsSeconds(int count) {
-    return '$count s';
+    return '$count s';
   }
 
   @override
   String settingsMinutes(int count) {
-    return '$count min';
+    return '$count min';
   }
 
   @override
@@ -909,7 +915,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsGroupsHelp =>
-      'Un groupe réunit des caméras à regarder ensemble : il se choisit en haut du direct.';
+      'Un groupe réunit des caméras à regarder ensemble : il se choisit en haut du direct.';
 
   @override
   String settingsGroupCameras(int count) {
@@ -952,7 +958,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sessionErrorTooManyAttempts =>
-      'Trop de tentatives : Frigate refuse les connexions un moment. Réessayez dans une minute.';
+      'Trop de tentatives : Frigate refuse les connexions un moment. Réessayez dans une minute.';
 
   @override
   String get sessionErrorServer =>
@@ -967,18 +973,18 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sessionErrorCertificate =>
-      'Certificat du serveur refusé : un certificat auto-signé n\'est accepté que sur l\'adresse locale.';
+      'Certificat du serveur refusé : un certificat auto-signé n\'est accepté que sur l\'adresse locale.';
 
   @override
   String get sessionErrorCertificateToConfirm =>
-      'Certificat du serveur à confirmer : connectez-vous pour vérifier son empreinte.';
+      'Certificat du serveur à confirmer : connectez-vous pour vérifier son empreinte.';
 
   @override
   String get sessionErrorInvalidResponse =>
-      'Réponse inattendue : cette adresse est-elle bien celle de Frigate ?';
+      'Réponse inattendue : cette adresse est-elle bien celle de Frigate ?';
 
   @override
-  String get sessionErrorExpired => 'Session expirée : reconnectez-vous.';
+  String get sessionErrorExpired => 'Session expirée : reconnectez-vous.';
 
   @override
   String get sessionErrorUnexpected => 'Erreur inattendue.';
@@ -999,5 +1005,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get alertNoRecording =>
-      'Cette caméra n\'enregistre pas : l\'alerte ne peut pas être lue.';
+      'Cette caméra n\'enregistre pas : l\'alerte ne peut pas être lue.';
+
+  @override
+  String eventsYesterdayAt(String time) {
+    return 'hier $time';
+  }
 }

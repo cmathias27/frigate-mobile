@@ -5,7 +5,7 @@ import '../../app/theme.dart';
 import '../../l10n/app_localizations.dart';
 import 'camera_feed.dart';
 
-/// One camera of the live grid: latest frame, "LIVE" badge, time of the
+/// One camera of the live grid: latest frame, live badge, time of the
 /// frame and camera name (mock-up screen 2).
 class FeedTile extends StatelessWidget {
   final CameraFeed feed;
@@ -108,7 +108,7 @@ class FeedImage extends StatelessWidget {
   }
 }
 
-/// "LIVE" with a red dot while frames arrive, a grey "paused" badge when
+/// The live badge with a red dot while frames arrive, a grey "paused" badge when
 /// the picture is frozen.
 class LiveBadge extends StatelessWidget {
   final bool stale;
