@@ -56,6 +56,9 @@ class ImageRecordingPlayer extends RecordingPlayer {
   Timer? _timer;
   bool _fetching = false;
   int _generation = 0;
+
+  /// Number of the newest image asked during playback or seeking.
+  int _request = 0;
   bool _disposed = false;
   double _speed = 1;
 
@@ -96,6 +99,9 @@ class ImageRecordingPlayer extends RecordingPlayer {
   @override
   Future<void> open(String camera, DateTime start, DateTime end) async {
     final generation = ++_generation;
+    // An image still on its way belongs to the previous range.
+    _request++;
+    _fetching = false;
     _stopTimer();
     _camera = camera;
     _start = start;
@@ -187,17 +193,19 @@ class ImageRecordingPlayer extends RecordingPlayer {
   Future<void> _show(DateTime t) async {
     final camera = _camera;
     if (camera == null) return;
-    final generation = _generation;
+    // Only the newest request shows its image and frees the next tick: an
+    // older one (before a seek or an open) must neither win nor block.
+    final request = ++_request;
     _fetching = true;
     try {
       final image = await _fetch(camera, t, height: height);
-      if (generation != _generation || _disposed) return;
+      if (request != _request || _disposed) return;
       _image = image;
       _notify();
     } catch (_) {
       // A missing frame keeps the previous one; the next tick asks again.
     } finally {
-      if (generation == _generation) _fetching = false;
+      if (request == _request) _fetching = false;
     }
   }
 
@@ -226,6 +234,7 @@ class ImageRecordingPlayer extends RecordingPlayer {
   void dispose() {
     _disposed = true;
     _generation++;
+    _request++;
     _stopTimer();
     super.dispose();
   }

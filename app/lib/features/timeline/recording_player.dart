@@ -107,31 +107,50 @@ class HlsRecordingPlayer extends RecordingPlayer {
   Future<void> open(String camera, DateTime start, DateTime end) async {
     final generation = ++_generation;
     await _release();
+    // A newer open (or dispose) came while the previous video was released.
+    if (generation != _generation) return;
     _camera = camera;
     _start = start;
     _end = end;
     _error = null;
     _status = PlayerStatus.opening;
     notifyListeners();
+    VideoPlayerController? controller;
     try {
       await _proxy.start();
-      final controller = VideoPlayerController.networkUrl(
+      if (generation != _generation) return;
+      controller = VideoPlayerController.networkUrl(
         _proxy.playlist(camera, start, end),
         formatHint: VideoFormat.hls,
       );
-      _controller = controller;
       await controller.initialize();
-      if (generation != _generation) return;
-      if (_speed != 1) await controller.setPlaybackSpeed(_speed);
-      if (generation != _generation) return;
+      if (_speed != 1 && generation == _generation) {
+        await controller.setPlaybackSpeed(_speed);
+      }
+      if (generation != _generation) {
+        // Outdated: its decoder must not stay allocated.
+        await _discard(controller);
+        return;
+      }
+      _controller = controller;
       controller.addListener(_onController);
       _status = PlayerStatus.ready;
     } catch (e) {
+      await _discard(controller);
       if (generation != _generation) return;
       _error = '$e';
       _status = PlayerStatus.failed;
     }
     notifyListeners();
+  }
+
+  /// Frees a video that will not be shown.
+  static Future<void> _discard(VideoPlayerController? controller) async {
+    try {
+      await controller?.dispose();
+    } catch (_) {
+      // Already broken: nothing left to free.
+    }
   }
 
   void _onController() {

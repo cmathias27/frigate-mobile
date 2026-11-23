@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -43,6 +44,9 @@ class _Frigate {
   bool failing = false;
   bool refuseMark = false;
 
+  /// When set, the next fetch waits for it before answering.
+  Completer<void>? hold;
+
   _Frigate(this.items);
 
   Future<List<ReviewItem>> fetch({
@@ -53,6 +57,9 @@ class _Frigate {
     int? limit,
   }) async {
     asked.add((after, before));
+    final wait = hold;
+    hold = null;
+    if (wait != null) await wait.future;
     if (failing) throw Exception('offline');
     return [
       for (final i in items)
@@ -211,6 +218,33 @@ void main() {
       // Nothing to change: Frigate is not asked.
       expect(await list.mark([c]), isTrue);
       expect(frigate.marked, hasLength(2));
+      list.dispose();
+    });
+
+    test('a page still on its way is dropped by a refresh', () async {
+      final frigate = _Frigate([
+        _item('a', minutesAgo: 10),
+        _item('old', minutesAgo: 60 * 30),
+      ]);
+      final list = _list(frigate);
+      await list.open();
+      final late = Completer<void>();
+      frigate.hold = late;
+      final more = list.loadMore();
+      expect(list.loading, isTrue);
+
+      // The alert is gone from Frigate; the refresh answers first.
+      frigate.items = [_item('a', minutesAgo: 10)];
+      await list.refresh();
+      expect(list.loading, isFalse);
+      late.complete();
+      await more;
+
+      // The older day, asked before the refresh, is not mixed in.
+      expect(list.items(ReviewSeverity.alert).map((i) => i.id), ['a']);
+      expect(list.loading, isFalse);
+      expect(list.reachedEnd, isFalse);
+      expect(list.from, _now.subtract(ReviewListDefaults.page));
       list.dispose();
     });
 

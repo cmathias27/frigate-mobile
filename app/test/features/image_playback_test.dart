@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
@@ -142,6 +143,44 @@ void main() {
       // Kept across an opening.
       await player.open('cam_b', start, end);
       expect(player.speed, 0.5);
+      player.dispose();
+    });
+
+    testWidgets('a frame still on its way does not freeze the next range', (
+      tester,
+    ) async {
+      final frames = _Frames();
+      final late = Completer<Uint8List>();
+      var hold = false;
+      Future<Uint8List> fetch(String camera, DateTime t, {int? height}) {
+        if (hold) {
+          hold = false;
+          frames.asked.add((camera, t, height));
+          return late.future;
+        }
+        return frames.fetch(camera, t, height: height);
+      }
+
+      final player = ImageRecordingPlayer(fetch, clock: clock);
+      await player.open('cam_a', start, end);
+      await player.play();
+      hold = true;
+      now = now.add(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(frames.asked, hasLength(2)); // The slow frame is asked.
+
+      // The next hour opens while that frame is still on its way.
+      await player.open('cam_a', end, end.add(const Duration(minutes: 1)));
+      await player.play();
+      final asked = frames.asked.length;
+      now = now.add(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(frames.asked.length, greaterThan(asked));
+
+      // The late frame, from the previous range, is not shown.
+      late.complete(Uint8List.fromList([9]));
+      await tester.pump();
+      await player.pause();
       player.dispose();
     });
 
