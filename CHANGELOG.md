@@ -5,6 +5,29 @@ l'application affiche avant d'installer une mise à jour et dans
 « Nouveautés » après l'installation (décision 0003). Écrire pour
 l'utilisateur : ce qui change pour lui, pas comment c'est codé.
 
+## 0.2.0
+
+Fin de l'étape « liste et réglages fins ».
+
+- Chronologie : elle s'ouvre sur le direct de la caméra, avec la
+  pastille « DIRECT ». Glisser la frise en arrière lit l'enregistrement,
+  le bouton « Direct » ramène au présent.
+- Chronologie : vitesse de lecture des enregistrements, de ×0,5 à ×8,
+  gardée d'une fois sur l'autre. Elle vaut aussi pour la lecture en
+  images.
+- Onglet Alertes : quand Frigate détecte des objets ou des sons, ses
+  alertes et détections s'affichent jour par jour, avec un filtre par
+  caméra. On les marque vues une à une (glisser), par sélection ou
+  toutes d'un coup.
+- Nouvel écran **Réglages** (onglet Plus) :
+  - caméras : ordre, caméras masquées, seuil de mouvement propre à
+    chaque caméra (la valeur automatique reste proposée) ;
+  - groupes de caméras, à choisir en haut du direct ;
+  - direct : flux ouvert d'abord (principal, léger ou automatique),
+    passage aux autres flux en cas d'échec, taille des vignettes ;
+  - chronologie : lecture en images si la vidéo échoue, durée minimale
+    d'un passage, regroupement des passages proches.
+
 ## 0.1.2
 
 - Chronologie : une caméra dont le téléphone ne sait pas lire la vidéo
