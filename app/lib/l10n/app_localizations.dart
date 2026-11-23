@@ -1501,6 +1501,78 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count} min'**
   String settingsMinutes(int count);
+
+  /// No description provided for @settingsGroups.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupes de caméras'**
+  String get settingsGroups;
+
+  /// No description provided for @settingsGroupsSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun groupe} =1{1 groupe} other{{count} groupes}}'**
+  String settingsGroupsSummary(int count);
+
+  /// No description provided for @settingsGroupsHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un groupe réunit des caméras à regarder ensemble : il se choisit en haut du direct.'**
+  String get settingsGroupsHelp;
+
+  /// No description provided for @settingsGroupCameras.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 caméra} other{{count} caméras}}'**
+  String settingsGroupCameras(int count);
+
+  /// No description provided for @settingsGroupNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau groupe'**
+  String get settingsGroupNew;
+
+  /// No description provided for @settingsGroupEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le groupe'**
+  String get settingsGroupEdit;
+
+  /// No description provided for @settingsGroupName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du groupe'**
+  String get settingsGroupName;
+
+  /// No description provided for @settingsGroupNameTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un autre groupe porte déjà ce nom'**
+  String get settingsGroupNameTaken;
+
+  /// No description provided for @settingsGroupSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get settingsGroupSave;
+
+  /// No description provided for @settingsGroupDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le groupe'**
+  String get settingsGroupDelete;
+
+  /// No description provided for @liveGroupAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get liveGroupAll;
+
+  /// No description provided for @liveGroupEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune caméra de ce groupe n\'est affichée'**
+  String get liveGroupEmpty;
 }
 
 class _AppLocalizationsDelegate

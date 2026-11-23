@@ -30,6 +30,24 @@ enum TileSize {
   const TileSize(this.width);
 }
 
+/// A named set of cameras watched together in the live view.
+@immutable
+class CameraGroup {
+  final String name;
+  final List<String> cameras;
+
+  const CameraGroup(this.name, this.cameras);
+
+  @override
+  bool operator ==(Object other) =>
+      other is CameraGroup &&
+      other.name == name &&
+      listEquals(other.cameras, cameras);
+
+  @override
+  int get hashCode => Object.hash(name, Object.hashAll(cameras));
+}
+
 /// Values used while nothing was chosen (decision 0002).
 abstract final class SettingsDefaults {
   static const quality = LiveQuality.auto;
@@ -65,6 +83,7 @@ class AppSettings extends ChangeNotifier {
   List<String> _order = const [];
   Set<String> _hidden = const {};
   Map<String, int> _thresholds = const {};
+  List<CameraGroup> _groups = const [];
   LiveQuality _quality = SettingsDefaults.quality;
   bool _tryOtherStreams = SettingsDefaults.tryOtherStreams;
   bool _imageFallback = SettingsDefaults.imageFallback;
@@ -104,6 +123,12 @@ class AppSettings extends ChangeNotifier {
           in (pick<Map<Object?, Object?>>('thresholds') ?? const {}).entries)
         if (key is String && value is int && value > 0) key: value,
     };
+    _groups = [
+      for (final g in pick<List<Object?>>('groups') ?? const [])
+        if (g case {'name': final String name, 'cameras': final List<Object?> c}
+            when name.trim().isNotEmpty)
+          CameraGroup(name, [...c.whereType<String>()]),
+    ];
     _quality = named(LiveQuality.values, 'quality') ?? _quality;
     _tileSize = named(TileSize.values, 'tileSize') ?? _tileSize;
     _tryOtherStreams = pick<bool>('tryOtherStreams') ?? _tryOtherStreams;
@@ -154,6 +179,30 @@ class AppSettings extends ChangeNotifier {
     _thresholds = next;
   });
 
+  List<CameraGroup> get groups => _groups;
+
+  /// Adds [group], or replaces the group at [index].
+  void setGroup(CameraGroup group, {int? index}) => _change(() {
+    final next = [..._groups];
+    if (index == null) {
+      next.add(group);
+    } else {
+      next[index] = group;
+    }
+    _groups = List.unmodifiable(next);
+  });
+
+  void removeGroup(int index) =>
+      _change(() => _groups = List.unmodifiable([..._groups]..removeAt(index)));
+
+  /// The group named [name], if any.
+  CameraGroup? group(String? name) {
+    for (final g in _groups) {
+      if (g.name == name) return g;
+    }
+    return null;
+  }
+
   /// [cameras] in the order chosen, cameras never ordered after in the
   /// server's order; hidden ones left out unless [withHidden].
   List<CameraCapabilities> arrange(
@@ -192,6 +241,9 @@ class AppSettings extends ChangeNotifier {
     'order': _order,
     'hidden': _hidden.toList(),
     'thresholds': _thresholds,
+    'groups': [
+      for (final g in _groups) {'name': g.name, 'cameras': g.cameras},
+    ],
     'quality': _quality.name,
     'tryOtherStreams': _tryOtherStreams,
     'imageFallback': _imageFallback,

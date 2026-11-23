@@ -57,6 +57,21 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+              if (cameras.length > 1)
+                ListTile(
+                  leading: const Icon(Icons.dashboard_customize_outlined),
+                  title: Text(l.settingsGroups),
+                  subtitle: Text(
+                    l.settingsGroupsSummary(settings.groups.length),
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          GroupsScreen(settings: settings, cameras: cameras),
+                    ),
+                  ),
+                ),
               _Header(l.settingsLive),
               _Choice<LiveQuality>(
                 title: l.settingsQuality,
@@ -238,6 +253,159 @@ class CameraSettingsScreen extends StatelessWidget {
       ),
     );
     if (result != null) settings.setThreshold(camera.name, result.value);
+  }
+}
+
+/// The camera groups of the live view: list, add, change, remove.
+class GroupsScreen extends StatelessWidget {
+  final AppSettings settings;
+  final List<CameraCapabilities> cameras;
+
+  const GroupsScreen({
+    super.key,
+    required this.settings,
+    required this.cameras,
+  });
+
+  Future<void> _edit(BuildContext context, [int? index]) async {
+    final group = await Navigator.of(context).push<CameraGroup>(
+      MaterialPageRoute(
+        builder: (_) => GroupEditorScreen(
+          cameras: settings.arrange(cameras, withHidden: true),
+          group: index == null ? null : settings.groups[index],
+          taken: {
+            for (final (i, g) in settings.groups.indexed)
+              if (i != index) g.name,
+          },
+        ),
+      ),
+    );
+    if (group != null) settings.setGroup(group, index: index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
+    return Scaffold(
+      appBar: AppBar(title: Text(l.settingsGroups)),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _edit(context),
+        icon: const Icon(Icons.add_rounded),
+        label: Text(l.settingsGroupNew),
+      ),
+      body: ListenableBuilder(
+        listenable: settings,
+        builder: (context, _) => ListView(
+          padding: const EdgeInsets.only(bottom: 88),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Text(
+                l.settingsGroupsHelp,
+                style: text.bodySmall?.copyWith(color: AppColors.textDim),
+              ),
+            ),
+            for (final (i, group) in settings.groups.indexed)
+              ListTile(
+                title: Text(group.name),
+                subtitle: Text(l.settingsGroupCameras(group.cameras.length)),
+                onTap: () => _edit(context, i),
+                trailing: IconButton(
+                  tooltip: l.settingsGroupDelete,
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  onPressed: () => settings.removeGroup(i),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Name and cameras of a group; pops the group saved.
+class GroupEditorScreen extends StatefulWidget {
+  final List<CameraCapabilities> cameras;
+  final CameraGroup? group;
+
+  /// Names of the other groups.
+  final Set<String> taken;
+
+  const GroupEditorScreen({
+    super.key,
+    required this.cameras,
+    this.group,
+    this.taken = const {},
+  });
+
+  @override
+  State<GroupEditorScreen> createState() => _GroupEditorScreenState();
+}
+
+class _GroupEditorScreenState extends State<GroupEditorScreen> {
+  late final _name = TextEditingController(text: widget.group?.name ?? '');
+  late final _chosen = {...?widget.group?.cameras};
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final name = _name.text.trim();
+    final taken = widget.taken.contains(name);
+    final valid = name.isNotEmpty && !taken && _chosen.isNotEmpty;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          widget.group == null ? l.settingsGroupNew : l.settingsGroupEdit,
+        ),
+        actions: [
+          TextButton(
+            onPressed: valid
+                ? () => Navigator.of(context).pop(
+                    CameraGroup(name, [
+                      for (final c in widget.cameras)
+                        if (_chosen.contains(c.name)) c.name,
+                    ]),
+                  )
+                : null,
+            child: Text(l.settingsGroupSave),
+          ),
+        ],
+      ),
+      body: ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: _name,
+              autofocus: widget.group == null,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration(
+                labelText: l.settingsGroupName,
+                errorText: taken ? l.settingsGroupNameTaken : null,
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          for (final camera in widget.cameras)
+            CheckboxListTile(
+              title: Text(camera.label),
+              value: _chosen.contains(camera.name),
+              onChanged: (v) => setState(
+                () => v == true
+                    ? _chosen.add(camera.name)
+                    : _chosen.remove(camera.name),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }
 

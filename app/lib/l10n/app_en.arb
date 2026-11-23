@@ -289,5 +289,17 @@
   "settingsMergeGap": "Join close passages",
   "settingsMergeGapHelp": "Two passages less than this apart make one",
   "settingsSeconds": "{count} s",
-  "settingsMinutes": "{count} min"
+  "settingsMinutes": "{count} min",
+  "settingsGroups": "Camera groups",
+  "settingsGroupsSummary": "{count, plural, =0{No group} =1{1 group} other{{count} groups}}",
+  "settingsGroupsHelp": "A group brings together cameras watched side by side: pick it at the top of the live view.",
+  "settingsGroupCameras": "{count, plural, =1{1 camera} other{{count} cameras}}",
+  "settingsGroupNew": "New group",
+  "settingsGroupEdit": "Edit group",
+  "settingsGroupName": "Group name",
+  "settingsGroupNameTaken": "Another group already has this name",
+  "settingsGroupSave": "Save",
+  "settingsGroupDelete": "Delete group",
+  "liveGroupAll": "All",
+  "liveGroupEmpty": "No camera of this group is shown"
 }

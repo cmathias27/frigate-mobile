@@ -841,4 +841,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String settingsMinutes(int count) {
     return '$count min';
   }
+
+  @override
+  String get settingsGroups => 'Camera groups';
+
+  @override
+  String settingsGroupsSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count groups',
+      one: '1 group',
+      zero: 'No group',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsGroupsHelp =>
+      'A group brings together cameras watched side by side: pick it at the top of the live view.';
+
+  @override
+  String settingsGroupCameras(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cameras',
+      one: '1 camera',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsGroupNew => 'New group';
+
+  @override
+  String get settingsGroupEdit => 'Edit group';
+
+  @override
+  String get settingsGroupName => 'Group name';
+
+  @override
+  String get settingsGroupNameTaken => 'Another group already has this name';
+
+  @override
+  String get settingsGroupSave => 'Save';
+
+  @override
+  String get settingsGroupDelete => 'Delete group';
+
+  @override
+  String get liveGroupAll => 'All';
+
+  @override
+  String get liveGroupEmpty => 'No camera of this group is shown';
 }
