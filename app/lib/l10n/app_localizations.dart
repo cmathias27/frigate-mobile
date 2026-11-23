@@ -1273,6 +1273,234 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vitesse de lecture'**
   String get timelineSpeed;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réglages'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caméras, direct, chronologie'**
+  String get settingsSubtitle;
+
+  /// No description provided for @settingsCameras.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caméras'**
+  String get settingsCameras;
+
+  /// No description provided for @settingsCamerasSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'{shown} affichées sur {total}'**
+  String settingsCamerasSummary(int shown, int total);
+
+  /// No description provided for @settingsCamerasHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Glisser la poignée pour changer l\'ordre. Une caméra masquée disparaît du direct, de la chronologie et des alertes. Toucher une caméra pour régler son seuil de mouvement.'**
+  String get settingsCamerasHelp;
+
+  /// No description provided for @settingsThresholdAuto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil de mouvement : automatique'**
+  String get settingsThresholdAuto;
+
+  /// No description provided for @settingsThresholdAutoValue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil de mouvement : automatique ({value})'**
+  String settingsThresholdAutoValue(int value);
+
+  /// No description provided for @settingsThresholdFixed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil de mouvement : {value}'**
+  String settingsThresholdFixed(int value);
+
+  /// No description provided for @settingsThresholdTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil de mouvement · {camera}'**
+  String settingsThresholdTitle(String camera);
+
+  /// No description provided for @settingsThresholdHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Score de mouvement de Frigate au-delà duquel l\'enregistrement compte comme un passage. L\'automatique suit le mouvement habituel de la caméra.'**
+  String get settingsThresholdHelp;
+
+  /// No description provided for @settingsThresholdAutoSwitch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Automatique'**
+  String get settingsThresholdAutoSwitch;
+
+  /// No description provided for @settingsThresholdNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actuellement {value}'**
+  String settingsThresholdNow(int value);
+
+  /// No description provided for @settingsThresholdField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuil'**
+  String get settingsThresholdField;
+
+  /// No description provided for @settingsThresholdInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un nombre entier supérieur à 0'**
+  String get settingsThresholdInvalid;
+
+  /// No description provided for @settingsLive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Direct'**
+  String get settingsLive;
+
+  /// No description provided for @settingsQuality.
+  ///
+  /// In fr, this message translates to:
+  /// **'Flux ouvert d\'abord'**
+  String get settingsQuality;
+
+  /// No description provided for @settingsQualityAuto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Automatique'**
+  String get settingsQualityAuto;
+
+  /// No description provided for @settingsQualityHigh.
+  ///
+  /// In fr, this message translates to:
+  /// **'Principal'**
+  String get settingsQualityHigh;
+
+  /// No description provided for @settingsQualityLight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Léger'**
+  String get settingsQualityLight;
+
+  /// No description provided for @settingsQualityAutoHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Flux principal en plein écran, flux léger dans la chronologie'**
+  String get settingsQualityAutoHelp;
+
+  /// No description provided for @settingsQualityHighHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Flux principal partout'**
+  String get settingsQualityHighHelp;
+
+  /// No description provided for @settingsQualityLightHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Flux léger partout : moins de données, lisible par tout téléphone'**
+  String get settingsQualityLightHelp;
+
+  /// No description provided for @settingsOtherStreams.
+  ///
+  /// In fr, this message translates to:
+  /// **'Essayer les autres flux'**
+  String get settingsOtherStreams;
+
+  /// No description provided for @settingsOtherStreamsHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un flux qui ne se lit pas passe seul au flux suivant de la caméra'**
+  String get settingsOtherStreamsHelp;
+
+  /// No description provided for @settingsTileSize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille des vignettes'**
+  String get settingsTileSize;
+
+  /// No description provided for @settingsTileSizeHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disposition automatique : plus grandes, moins de caméras par page'**
+  String get settingsTileSizeHelp;
+
+  /// No description provided for @settingsTileSmall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Petites'**
+  String get settingsTileSmall;
+
+  /// No description provided for @settingsTileMedium.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moyennes'**
+  String get settingsTileMedium;
+
+  /// No description provided for @settingsTileLarge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Grandes'**
+  String get settingsTileLarge;
+
+  /// No description provided for @settingsTimeline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chronologie'**
+  String get settingsTimeline;
+
+  /// No description provided for @settingsImageFallback.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture en images si la vidéo échoue'**
+  String get settingsImageFallback;
+
+  /// No description provided for @settingsImageFallbackHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrement illisible par le téléphone ou figé : images enregistrées à la place'**
+  String get settingsImageFallbackHelp;
+
+  /// No description provided for @settingsMinPassage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Durée minimale d\'un passage'**
+  String get settingsMinPassage;
+
+  /// No description provided for @settingsNoMinimum.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune'**
+  String get settingsNoMinimum;
+
+  /// No description provided for @settingsMergeGap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réunir les passages proches'**
+  String get settingsMergeGap;
+
+  /// No description provided for @settingsMergeGapHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Deux passages séparés de moins que cette durée n\'en font qu\'un'**
+  String get settingsMergeGapHelp;
+
+  /// No description provided for @settingsSeconds.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} s'**
+  String settingsSeconds(int count);
+
+  /// No description provided for @settingsMinutes.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} min'**
+  String settingsMinutes(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -14,11 +14,15 @@ class MoreScreen extends StatelessWidget {
   /// Update settings, built by the app shell (features stay independent).
   final Widget? updates;
 
+  /// Entry of the settings screen, built by the app shell.
+  final Widget? settings;
+
   const MoreScreen({
     super.key,
     required this.controller,
     this.appVersion,
     this.updates,
+    this.settings,
   });
 
   Future<void> _confirmDisconnect(BuildContext context) async {
@@ -209,6 +213,10 @@ class MoreScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
+            if (settings case final settings?) ...[
+              settings,
+              const SizedBox(height: 8),
+            ],
             if (updates case final updates?) ...[
               updates,
               const SizedBox(height: 8),

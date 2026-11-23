@@ -3,8 +3,8 @@ import 'dart:math';
 import '../../core/frigate/recordings.dart';
 
 /// How motion passages are found in a camera's segments. Defaults suit the
-/// cameras seen so far; per-camera settings come with the 0.2 settings
-/// screen (decision 0002).
+/// cameras seen so far; each can be changed in the settings (decision
+/// 0002).
 class PassageSettings {
   /// Lowest automatic threshold: below it, a still camera with sensor noise
   /// would turn every flicker into a passage.
@@ -23,13 +23,26 @@ class PassageSettings {
   /// Fixed threshold for the camera, instead of the automatic one.
   final int? threshold;
 
+  /// Fixed thresholds by camera, instead of the automatic one.
+  final Map<String, int> thresholds;
+
   const PassageSettings({
     this.floor = 10,
     this.spread = 1.5,
     this.mergeGap = const Duration(seconds: 30),
     this.minDuration = Duration.zero,
     this.threshold,
+    this.thresholds = const {},
   });
+
+  /// The settings of [camera], its own threshold included.
+  PassageSettings forCamera(String camera) => PassageSettings(
+    floor: floor,
+    spread: spread,
+    mergeGap: mergeGap,
+    minDuration: minDuration,
+    threshold: thresholds[camera] ?? threshold,
+  );
 }
 
 /// A stretch of a camera's recording with more motion than usual.

@@ -25,6 +25,12 @@ class CameraFullScreen extends StatefulWidget {
   final PhotoActions photoActions;
   final VoidCallback? onAuthError;
 
+  /// Opens each camera on its lightest stream rather than the main one.
+  final bool lightStreamFirst;
+
+  /// A failed stream hands over to the camera's next one.
+  final bool tryOtherStreams;
+
   const CameraFullScreen({
     super.key,
     required this.cameras,
@@ -33,6 +39,8 @@ class CameraFullScreen extends StatefulWidget {
     this.videoFactory,
     this.photoActions = const DevicePhotoActions(),
     this.onAuthError,
+    this.lightStreamFirst = false,
+    this.tryOtherStreams = LiveVideoDefaults.tryOtherStreams,
   });
 
   @override
@@ -57,7 +65,9 @@ class _CameraFullScreenState extends State<CameraFullScreen>
 
   CameraCapabilities get _camera => widget.cameras[_index];
 
-  int get _currentStream => _streamIndex[_camera.name] ?? 0;
+  int get _currentStream =>
+      _streamIndex[_camera.name] ??
+      (widget.lightStreamFirst ? _camera.liveStreams.length - 1 : 0);
 
   bool get _videoPlaying => _video?.status == LiveVideoStatus.playing;
 
@@ -132,7 +142,7 @@ class _CameraFullScreenState extends State<CameraFullScreen>
   /// The next stream of the camera not failed yet, when the automatic
   /// switch is on.
   int? _nextStream() {
-    if (!LiveVideoDefaults.tryOtherStreams) return null;
+    if (!widget.tryOtherStreams) return null;
     final count = _camera.liveStreams.length;
     for (var step = 1; step < count; step++) {
       final index = (_currentStream + step) % count;

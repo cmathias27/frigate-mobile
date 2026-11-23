@@ -15,7 +15,19 @@ class LiveSource {
   final LiveVideoFactory? videoFactory;
   final VoidCallback? onAuthError;
 
-  const LiveSource({required this.fetch, this.videoFactory, this.onAuthError});
+  /// Starts on the camera's lightest stream.
+  final bool lightStreamFirst;
+
+  /// A failed stream hands over to the camera's next one.
+  final bool tryOtherStreams;
+
+  const LiveSource({
+    required this.fetch,
+    this.videoFactory,
+    this.onAuthError,
+    this.lightStreamFirst = LivePaneDefaults.lightStreamFirst,
+    this.tryOtherStreams = LiveVideoDefaults.tryOtherStreams,
+  });
 }
 
 abstract final class LivePaneDefaults {
@@ -32,14 +44,12 @@ class LivePane extends StatefulWidget {
   final CameraCapabilities camera;
   final LiveSource source;
   final BoxFit fit;
-  final bool lightStreamFirst;
 
   const LivePane({
     super.key,
     required this.camera,
     required this.source,
     this.fit = BoxFit.contain,
-    this.lightStreamFirst = LivePaneDefaults.lightStreamFirst,
   });
 
   @override
@@ -71,7 +81,7 @@ class _LivePaneState extends State<LivePane> with WidgetsBindingObserver {
   void _open() {
     _close();
     _failed.clear();
-    _stream = widget.lightStreamFirst && _streams.isNotEmpty
+    _stream = widget.source.lightStreamFirst && _streams.isNotEmpty
         ? _streams.length - 1
         : 0;
     _feed = CameraFeed(
@@ -131,7 +141,7 @@ class _LivePaneState extends State<LivePane> with WidgetsBindingObserver {
   }
 
   int? _nextStream() {
-    if (!LiveVideoDefaults.tryOtherStreams) return null;
+    if (!widget.source.tryOtherStreams) return null;
     final count = _streams.length;
     for (var step = 1; step < count; step++) {
       final index = (_stream + step) % count;

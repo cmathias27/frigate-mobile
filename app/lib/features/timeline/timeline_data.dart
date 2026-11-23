@@ -50,7 +50,7 @@ typedef _Key = ({String camera, int index});
 class TimelineData extends ChangeNotifier {
   final List<String> cameras;
   final RecordingsFetcher _fetch;
-  final PassageSettings settings;
+  PassageSettings _settings;
   final DateTime Function() _now;
   final void Function()? onAuthError;
 
@@ -64,10 +64,19 @@ class TimelineData extends ChangeNotifier {
   TimelineData({
     required this.cameras,
     required this._fetch,
-    this.settings = const PassageSettings(),
+    this._settings = const PassageSettings(),
     DateTime Function()? clock,
     this.onAuthError,
   }) : _now = clock ?? DateTime.now;
+
+  PassageSettings get settings => _settings;
+
+  /// New passage settings: passages are found again in the hours fetched.
+  set settings(PassageSettings value) {
+    _settings = value;
+    _cache.clear();
+    if (!_disposed) notifyListeners();
+  }
 
   /// True while hours are being fetched.
   bool get loading => _inflight.isNotEmpty || _queue.isNotEmpty;
@@ -299,6 +308,7 @@ class _Derived {
         segments.add(s);
       }
     }
+    settings = settings.forCamera(camera);
     final threshold = passageThreshold(
       segments.map((s) => s.motion),
       settings,
