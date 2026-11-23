@@ -521,9 +521,10 @@ void main() {
       RecordingExport? export,
       Preferences? preferences,
       LiveSource? live,
+      Size size = const Size(1080, 2340),
     }) async {
       // Phone-sized screen, so every control is laid out.
-      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(
@@ -543,6 +544,13 @@ void main() {
       );
       await tester.pump();
     }
+
+    testWidgets('fits a phone held in landscape', (tester) async {
+      await pumpScreen(tester, size: const Size(2340, 1080));
+      expect(tester.takeException(), isNull);
+      // The controls below stay reachable.
+      expect(find.byTooltip('Jour précédent'), findsOneWidget);
+    });
 
     testWidgets('no clip nor photo without export', (tester) async {
       await pumpScreen(tester);

@@ -353,8 +353,14 @@ class _HomeShellState extends State<HomeShell> {
       cameras: reviewed,
       motion: (_) => _motionEvents(client, recorded),
       onOpen: (item) {
-        if (!recorded.any((c) => c.name == item.camera)) return;
-        _openReview(item);
+        if (recorded.any((c) => c.name == item.camera)) {
+          _openReview(item);
+          return;
+        }
+        final l = AppLocalizations.of(context);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.alertNoRecording)));
       },
     );
   }
@@ -421,7 +427,7 @@ class _HomeShellState extends State<HomeShell> {
       (l.tabEvents, Icons.notifications_none_rounded, l.eventsDescription),
       (l.tabMore, Icons.menu_rounded, l.moreDescription),
     ];
-    final (title, icon, description) = tabs[_index];
+    final (title, _, _) = tabs[_index];
 
     return Scaffold(
       appBar: AppBar(
@@ -465,10 +471,10 @@ class _HomeShellState extends State<HomeShell> {
               : UpdateSettings(update: widget.update!),
           settings: _settingsEntry(l, allCameras),
         ),
+        // Only between a lost session and the login screen.
         _ => _Placeholder(
-          icon: icon,
-          description: description,
-          version: '0.1',
+          icon: Icons.cloud_off_rounded,
+          description: l.serverNotConnected,
         ),
       },
       bottomNavigationBar: NavigationBar(
@@ -540,17 +546,11 @@ class _LayoutButton extends StatelessWidget {
 class _Placeholder extends StatelessWidget {
   final IconData icon;
   final String description;
-  final String? version;
 
-  const _Placeholder({
-    required this.icon,
-    required this.description,
-    this.version,
-  });
+  const _Placeholder({required this.icon, required this.description});
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     return Center(
       child: Padding(
@@ -565,11 +565,6 @@ class _Placeholder extends StatelessWidget {
               textAlign: TextAlign.center,
               style: text.bodyLarge,
             ),
-            if (version case final version?)
-              Text(
-                l.comingInVersion(version),
-                style: text.bodySmall?.copyWith(color: AppColors.textDim),
-              ),
           ],
         ),
       ),

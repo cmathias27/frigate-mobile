@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -24,6 +27,55 @@ enum SessionStatus {
   connectionError,
 }
 
+/// Why the session could not be opened or kept, shown translated by the
+/// screens; the technical cause goes to the logs only.
+enum SessionError {
+  /// The username or the password was refused at login.
+  badCredentials,
+
+  /// Frigate refuses logins for a while after too many failures.
+  tooManyAttempts,
+
+  /// Frigate answered the login with an unexpected status.
+  serverError,
+
+  /// No route to the server, connection refused or lost.
+  unreachable,
+
+  /// The server did not answer in time.
+  timeout,
+
+  /// The certificate was refused (self-signed on the remote address).
+  certificate,
+
+  /// The self-signed certificate of the local address is not confirmed
+  /// yet, or changed: logging in again shows its fingerprint.
+  certificateToConfirm,
+
+  /// The server answered something that is not Frigate's API.
+  invalidResponse,
+
+  /// The saved session is no longer accepted by Frigate.
+  sessionExpired,
+
+  /// Anything else.
+  unexpected;
+
+  /// The error for [e], raised during login when [login] is true.
+  static SessionError of(Object e, {bool login = false}) => switch (e) {
+    FrigateAuthException(statusCode: 401) =>
+      login ? badCredentials : sessionExpired,
+    FrigateAuthException(statusCode: 429) => tooManyAttempts,
+    FrigateAuthException() => login ? serverError : sessionExpired,
+    FrigateCertificateException() => certificateToConfirm,
+    FrigateUnreachableException(cause: TimeoutException()) => timeout,
+    FrigateUnreachableException(cause: HandshakeException()) => certificate,
+    FrigateUnreachableException() => unreachable,
+    FrigateNetworkException() => invalidResponse,
+    _ => unexpected,
+  };
+}
+
 /// Coordinates server connection, authentication state and capabilities.
 class SessionController extends ChangeNotifier {
   final SessionStorage _storage;
@@ -33,7 +85,7 @@ class SessionController extends ChangeNotifier {
   ServerConfig? _config;
   ServerCapabilities? _capabilities;
   FrigateClient? _client;
-  String? _errorMessage;
+  SessionError? _error;
   FrigateCertificateException? _pendingCertificate;
 
   SessionController({SessionStorage? storage, this.httpClient})
@@ -47,7 +99,14 @@ class SessionController extends ChangeNotifier {
   ServerConfig? get config => _config;
   ServerCapabilities? get capabilities => _capabilities;
   FrigateClient? get client => _client;
-  String? get errorMessage => _errorMessage;
+
+  /// Why the last login, start or refresh failed; `null` after a success.
+  SessionError? get error => _error;
+
+  void _fail(Object e, {bool login = false}) {
+    debugPrint('Session: $e');
+    _error = SessionError.of(e, login: login);
+  }
 
   bool get isAuthenticated => _status == SessionStatus.authenticated;
   bool get isLoading => _status == SessionStatus.loading;
@@ -81,21 +140,19 @@ class SessionController extends ChangeNotifier {
         await c.resolveAddress();
         _capabilities = await c.fetchCapabilities();
         _status = SessionStatus.authenticated;
-        _errorMessage = null;
+        _error = null;
       } on FrigateAuthException {
         // Token expired or invalidated on server.
-        await _storage.clearSession();
-        _client = null;
-        _status = SessionStatus.unauthenticated;
-        _errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+        await _expire();
       } on FrigateNetworkException catch (e) {
-        // Server unreachable: keep the client and notify error.
+        // Server unreachable: keep the client, the login screen offers to
+        // try again.
         _status = SessionStatus.connectionError;
-        _errorMessage = e.message;
+        _fail(e);
       }
     } catch (e) {
       _status = SessionStatus.unauthenticated;
-      _errorMessage = 'Erreur d\'initialisation: $e';
+      _fail(e);
     } finally {
       notifyListeners();
     }
@@ -107,7 +164,7 @@ class SessionController extends ChangeNotifier {
     required String password,
   }) async {
     _status = SessionStatus.loading;
-    _errorMessage = null;
+    _error = null;
     _pendingCertificate = null;
     notifyListeners();
 
@@ -118,22 +175,18 @@ class SessionController extends ChangeNotifier {
       c.onAddressChanged = _onAddressChanged;
       final caps = await c.fetchCapabilities();
 
+      // The client kept after a failed start is replaced.
+      _client?.close();
       _config = config;
       _client = c;
       _capabilities = caps;
       _status = SessionStatus.authenticated;
-      _errorMessage = null;
+      _error = null;
 
       await _storage.saveServerConfig(config);
       await _storage.saveToken(token);
       notifyListeners();
       return true;
-    } on FrigateAuthException catch (e) {
-      c.close();
-      _status = SessionStatus.unauthenticated;
-      _errorMessage = e.message;
-      notifyListeners();
-      return false;
     } on FrigateCertificateException catch (e) {
       // The login screen asks the user to confirm the fingerprint.
       c.close();
@@ -141,16 +194,10 @@ class SessionController extends ChangeNotifier {
       _pendingCertificate = e;
       notifyListeners();
       return false;
-    } on FrigateNetworkException catch (e) {
-      c.close();
-      _status = SessionStatus.unauthenticated;
-      _errorMessage = e.message;
-      notifyListeners();
-      return false;
     } catch (e) {
       c.close();
       _status = SessionStatus.unauthenticated;
-      _errorMessage = 'Erreur inattendue: $e';
+      _fail(e, login: true);
       notifyListeners();
       return false;
     }
@@ -161,24 +208,48 @@ class SessionController extends ChangeNotifier {
   /// Back from the background, possibly on another network: picks the
   /// local or the remote address again, and reloads after a failure.
   Future<void> resumed() async {
-    final c = _client;
-    if (c == null) return;
-    await c.resolveAddress();
-    if (_status == SessionStatus.connectionError) await refreshCapabilities();
+    if (_status == SessionStatus.connectionError) {
+      await retry();
+    } else {
+      await _client?.resolveAddress();
+    }
   }
 
-  /// Reloads server capabilities (e.g. after camera or settings update).
-  Future<void> refreshCapabilities() async {
+  /// After a failed start: tries the saved session again, on whichever
+  /// address answers now.
+  Future<bool> retry() async {
     final c = _client;
-    if (c == null) return;
+    if (c == null) return false;
+    _status = SessionStatus.loading;
+    notifyListeners();
+    await c.resolveAddress();
+    final ok = await refreshCapabilities();
+    if (!ok && _status == SessionStatus.loading) {
+      _status = SessionStatus.connectionError;
+      notifyListeners();
+    }
+    return ok;
+  }
+
+  /// Reloads server capabilities (e.g. after camera or settings update);
+  /// returns whether they could be read, [error] says why not.
+  Future<bool> refreshCapabilities() async {
+    final c = _client;
+    if (c == null) return false;
     try {
       _capabilities = await c.fetchCapabilities();
       _status = SessionStatus.authenticated;
-      _errorMessage = null;
+      _error = null;
       notifyListeners();
+      return true;
+    } on FrigateAuthException {
+      await _expire();
+      notifyListeners();
+      return false;
     } catch (e) {
-      _errorMessage = 'Impossible de rafraîchir les données: $e';
+      _fail(e);
       notifyListeners();
+      return false;
     }
   }
 
@@ -186,13 +257,18 @@ class SessionController extends ChangeNotifier {
   /// revoked): back to the login screen, keeping the server settings.
   Future<void> sessionExpired() async {
     if (_status != SessionStatus.authenticated) return;
+    await _expire();
+    notifyListeners();
+  }
+
+  /// Back to the login screen, saying why, the server settings kept.
+  Future<void> _expire() async {
     _client?.close();
     _client = null;
     _capabilities = null;
     _status = SessionStatus.unauthenticated;
-    _errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+    _error = SessionError.sessionExpired;
     await _storage.clearSession();
-    notifyListeners();
   }
 
   /// Disconnects the active session and clears the saved token.
@@ -201,7 +277,7 @@ class SessionController extends ChangeNotifier {
     _client = null;
     _capabilities = null;
     _status = SessionStatus.unauthenticated;
-    _errorMessage = null;
+    _error = null;
     await _storage.clearSession();
     notifyListeners();
   }
@@ -213,7 +289,7 @@ class SessionController extends ChangeNotifier {
     _capabilities = null;
     _config = null;
     _status = SessionStatus.unauthenticated;
-    _errorMessage = null;
+    _error = null;
     await _storage.clearAll();
     notifyListeners();
   }

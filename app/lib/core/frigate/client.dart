@@ -55,7 +55,7 @@ class FrigateCertificateException extends FrigateUnreachableException {
     this.fingerprint, {
     required this.changed,
     Object? cause,
-  }) : super('Certificat du serveur à confirmer.', cause);
+  }) : super('Server certificate to confirm.', cause);
 }
 
 abstract final class AddressDefaults {
@@ -260,39 +260,37 @@ class FrigateClient {
         } catch (_) {}
         throw const FrigateAuthException(
           'Login succeeded but no session token was returned by Frigate.',
+          statusCode: 200,
         );
       }
 
       if (response.statusCode == 401) {
-        throw const FrigateAuthException(
-          'Identifiant ou mot de passe incorrect.',
-          statusCode: 401,
-        );
+        throw const FrigateAuthException('Wrong username or password.');
       }
 
       throw FrigateAuthException(
-        'Erreur serveur lors de la connexion (${response.statusCode}).',
+        'Login refused (HTTP ${response.statusCode}).',
         statusCode: response.statusCode,
       );
     } on SocketException catch (e) {
       throw FrigateUnreachableException(
-        'Impossible de joindre le serveur à $base. Vérifiez l\'adresse et le réseau.',
+        'Cannot reach $base.',
         e,
       );
     } on HandshakeException catch (e) {
       throw _handshakeError(
         base,
         e,
-        'Erreur TLS/certificat à $base. Un certificat auto-signé n\'est accepté que sur l\'adresse locale.',
+        'TLS error at $base: a self-signed certificate is accepted on the local address only.',
       );
     } on http.ClientException catch (e) {
       throw FrigateUnreachableException(
-        'Impossible de joindre le serveur à $base.',
+        'Cannot reach $base.',
         e,
       );
     } on TimeoutException catch (e) {
       throw FrigateUnreachableException(
-        'Délai de connexion dépassé à $base.',
+        'Timed out connecting to $base.',
         e,
       );
     }
@@ -332,7 +330,7 @@ class FrigateClient {
       }
       return const {};
     } catch (e) {
-      throw FrigateNetworkException('Réponse invalide reçue de $path', e);
+      throw FrigateNetworkException('Invalid response from $path', e);
     }
   }
 
@@ -398,7 +396,7 @@ class FrigateClient {
       // Older go2rtc versions answer with the raw SDP.
       if (response.body.startsWith('v=')) return response.body;
     }
-    throw FrigateNetworkException('Réponse WebRTC invalide pour $stream');
+    throw FrigateNetworkException('Invalid WebRTC answer for $stream');
   }
 
   /// Reads the recorded segments of [camera] between [after] and [before]
@@ -419,7 +417,7 @@ class FrigateClient {
     try {
       return parseRecordings(jsonDecode(body));
     } on FormatException catch (e) {
-      throw FrigateNetworkException('Réponse invalide reçue de $path', e);
+      throw FrigateNetworkException('Invalid response from $path', e);
     }
   }
 
@@ -434,7 +432,7 @@ class FrigateClient {
     try {
       return parseRecordingHours(jsonDecode(body));
     } on FormatException catch (e) {
-      throw FrigateNetworkException('Réponse invalide reçue de $path', e);
+      throw FrigateNetworkException('Invalid response from $path', e);
     }
   }
 
@@ -463,7 +461,7 @@ class FrigateClient {
         ..sort((a, b) => b.start.compareTo(a.start));
       return items;
     } on FormatException catch (e) {
-      throw FrigateNetworkException('Réponse invalide reçue de $path', e);
+      throw FrigateNetworkException('Invalid response from $path', e);
     }
   }
 
@@ -510,17 +508,17 @@ class FrigateClient {
           .send(request)
           .timeout(const Duration(seconds: 15));
       if (response.statusCode == 401) {
-        throw const FrigateAuthException('Session expirée ou non autorisée.');
+        throw const FrigateAuthException('Session expired or not authorized.');
       }
       return response;
     } on SocketException catch (e) {
-      throw FrigateUnreachableException('Connexion interrompue.', e);
+      throw FrigateUnreachableException('Connection lost.', e);
     } on HandshakeException catch (e) {
-      throw _handshakeError(base, e, 'Certificat refusé.');
+      throw _handshakeError(base, e, 'Certificate refused.');
     } on http.ClientException catch (e) {
-      throw FrigateUnreachableException('Connexion interrompue.', e);
+      throw FrigateUnreachableException('Connection lost.', e);
     } on TimeoutException catch (e) {
-      throw FrigateUnreachableException('Délai dépassé pour $path', e);
+      throw FrigateUnreachableException('Timed out on $path', e);
     }
   }
 
@@ -566,20 +564,20 @@ class FrigateClient {
       }
 
       if (response.statusCode == 401) {
-        throw const FrigateAuthException('Session expirée ou non autorisée.');
+        throw const FrigateAuthException('Session expired or not authorized.');
       }
 
       throw FrigateNetworkException(
-        'Erreur HTTP ${response.statusCode} sur $path',
+        'HTTP ${response.statusCode} on $path',
       );
     } on SocketException catch (e) {
-      throw FrigateUnreachableException('Connexion interrompue.', e);
+      throw FrigateUnreachableException('Connection lost.', e);
     } on HandshakeException catch (e) {
-      throw _handshakeError(base, e, 'Certificat refusé.');
+      throw _handshakeError(base, e, 'Certificate refused.');
     } on http.ClientException catch (e) {
-      throw FrigateUnreachableException('Connexion interrompue.', e);
+      throw FrigateUnreachableException('Connection lost.', e);
     } on TimeoutException catch (e) {
-      throw FrigateUnreachableException('Délai dépassé pour $path', e);
+      throw FrigateUnreachableException('Timed out on $path', e);
     }
   }
 
