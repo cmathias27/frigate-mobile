@@ -7,6 +7,7 @@ import '../../app/theme.dart';
 import '../../core/frigate/capabilities.dart';
 import '../../core/storage/preferences.dart';
 import '../../l10n/app_localizations.dart';
+import '../live/live_pane.dart';
 import '../live/photo.dart';
 import 'calendar_sheet.dart';
 import 'clip_sheet.dart';
@@ -38,6 +39,13 @@ abstract final class TimelineScreenDefaults {
 
   /// Delay after a drag before the player opens the new time.
   static const settle = Duration(milliseconds: 350);
+
+  /// The timeline opens on the live of the camera, like DS cam, rather than
+  /// paused just behind it.
+  static const openLive = true;
+
+  /// Dragging or playing this close to the live edge goes live.
+  static const liveSnap = Duration(seconds: 2);
 }
 
 /// Timeline tab (mock-up screen 4): recordings of one camera played under
@@ -61,6 +69,10 @@ class TimelineScreen extends StatefulWidget {
   /// Keeps the passage navigation mode; not kept without it.
   final Preferences? preferences;
 
+  /// Live of the camera at the right end of the timeline; without it the
+  /// timeline stops just behind now.
+  final LiveSource? live;
+
   const TimelineScreen({
     super.key,
     required this.cameras,
@@ -71,6 +83,7 @@ class TimelineScreen extends StatefulWidget {
     this.openAt,
     this.export,
     this.preferences,
+    this.live,
   });
 
   @override
@@ -92,6 +105,10 @@ class _TimelineScreenState extends State<TimelineScreen>
   bool _seekAll = TimelineScreenDefaults.seekAllCameras;
   static const _keySeekAll = 'fm_timeline_seek_all';
   Timer? _settle;
+
+  /// The camera is shown live; the player stays closed meanwhile.
+  bool _live = false;
+  Timer? _liveTick;
 
   DateTime _now() => (widget.clock ?? DateTime.now)();
 
@@ -117,8 +134,13 @@ class _TimelineScreenState extends State<TimelineScreen>
         : _now().subtract(TimelineScreenDefaults.startBehindNow);
     _player = widget.playerFactory()..addListener(_onPlayer);
     widget.data.addListener(_onData);
-    _ensure();
-    _open(_playhead, play: known);
+    if (!known && TimelineScreenDefaults.openLive && widget.live != null) {
+      _startLive();
+      _ensure();
+    } else {
+      _ensure();
+      _open(_playhead, play: known);
+    }
     _readSeekMode();
   }
 
@@ -137,6 +159,7 @@ class _TimelineScreenState extends State<TimelineScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _settle?.cancel();
+    _liveTick?.cancel();
     widget.data.removeListener(_onData);
     _player
       ..removeListener(_onPlayer)
@@ -153,8 +176,40 @@ class _TimelineScreenState extends State<TimelineScreen>
     if (mounted) setState(() {});
   }
 
+  /// Shows the camera live, the playhead following now.
+  void _startLive() {
+    _live = true;
+    _atEnd = false;
+    _playhead = _now();
+    _liveTick?.cancel();
+    _liveTick = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _playhead = _now());
+    });
+  }
+
+  Future<void> _goLive() async {
+    if (widget.live == null) return;
+    setState(_startLive);
+    _ensure();
+    await _player.pause();
+  }
+
+  void _stopLive() {
+    if (!_live) return;
+    _live = false;
+    _liveTick?.cancel();
+    _liveTick = null;
+    if (_playhead.isAfter(_liveEdge)) _playhead = _liveEdge;
+  }
+
+  /// [time] is at the live edge, where the live takes over.
+  bool _atLive(DateTime time) =>
+      widget.live != null &&
+      !time.isBefore(_liveEdge.subtract(TimelineScreenDefaults.liveSnap));
+
   void _onPlayer() {
     if (!mounted) return;
+    if (_live) return setState(() {});
     final time = _player.time;
     if (!_scrubbing &&
         _player.camera == _camera &&
@@ -174,7 +229,11 @@ class _TimelineScreenState extends State<TimelineScreen>
   void _continueAfter(DateTime? end) {
     if (end == null || _player.status != PlayerStatus.ready) return;
     if (_liveEdge.difference(end) < TimelineScreenDefaults.jump) {
-      _atEnd = true;
+      if (widget.live != null) {
+        _goLive();
+      } else {
+        _atEnd = true;
+      }
       return;
     }
     _open(end, play: true);
@@ -190,6 +249,7 @@ class _TimelineScreenState extends State<TimelineScreen>
   }
 
   Future<void> _open(DateTime time, {bool play = false}) async {
+    _stopLive();
     final edge = _liveEdge;
     if (time.isAfter(edge)) time = edge;
     _playhead = time;
@@ -204,7 +264,8 @@ class _TimelineScreenState extends State<TimelineScreen>
 
   /// Moves the playhead to [time], seeking inside the range already open.
   Future<void> _goTo(DateTime time, {bool? play}) async {
-    final shouldPlay = play ?? _player.playing;
+    final shouldPlay = play ?? (_player.playing || _live);
+    _stopLive();
     final start = _player.start;
     final end = _player.end;
     if (time.isAfter(_liveEdge)) time = _liveEdge;
@@ -226,6 +287,7 @@ class _TimelineScreenState extends State<TimelineScreen>
   void _selectCamera(String camera, {DateTime? at}) {
     setState(() => _camera = camera);
     _ensure();
+    if (_live && at == null) return;
     _open(at ?? _playhead, play: _player.playing || at != null);
   }
 
@@ -263,6 +325,8 @@ class _TimelineScreenState extends State<TimelineScreen>
   }
 
   Future<void> _togglePlay() async {
+    // Pausing the live keeps the picture of now, from the recording.
+    if (_live) return _open(_liveEdge);
     if (_player.playing) return _player.pause();
     if (_player.status == PlayerStatus.ready && _player.camera == _camera) {
       if (_player.completed || _atEnd) {
@@ -275,8 +339,9 @@ class _TimelineScreenState extends State<TimelineScreen>
 
   void _onScrubStart() {
     _settle?.cancel();
-    _resumeAfterScrub = _player.playing || _resumeAfterScrub;
+    _resumeAfterScrub = _player.playing || _live || _resumeAfterScrub;
     _scrubbing = true;
+    setState(_stopLive);
     _player.pause();
   }
 
@@ -293,7 +358,11 @@ class _TimelineScreenState extends State<TimelineScreen>
       _scrubbing = false;
       final play = _resumeAfterScrub;
       _resumeAfterScrub = false;
-      _goTo(_playhead, play: play);
+      if (_atLive(_playhead)) {
+        _goLive();
+      } else {
+        _goTo(_playhead, play: play);
+      }
     });
   }
 
@@ -335,7 +404,7 @@ class _TimelineScreenState extends State<TimelineScreen>
       export: export,
       camera: _camera,
       label: _label(_camera),
-      playhead: _playhead,
+      playhead: _live ? _liveEdge : _playhead,
       liveEdge: _liveEdge,
       passage: _passageAt(_playhead),
     );
@@ -352,7 +421,7 @@ class _TimelineScreenState extends State<TimelineScreen>
     final l = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final camera = _camera;
-    final time = _playhead;
+    final time = _live ? _liveEdge : _playhead;
     setState(() => _takingPhoto = true);
     try {
       final jpeg = await export.frame(camera, time);
@@ -393,7 +462,7 @@ class _TimelineScreenState extends State<TimelineScreen>
     final locale = Localizations.localeOf(context).toString();
     final labels = {for (final c in widget.cameras) c.name: c.label};
     final now = _now();
-    final playing = _player.playing;
+    final playing = _player.playing || _live;
     final export = widget.export;
 
     return Column(
@@ -487,8 +556,10 @@ class _TimelineScreenState extends State<TimelineScreen>
                     tooltip: l.timelineForward(
                       TimelineScreenDefaults.jump.inSeconds,
                     ),
-                    onPressed: () =>
-                        _goTo(_playhead.add(TimelineScreenDefaults.jump)),
+                    onPressed: _live
+                        ? null
+                        : () =>
+                              _goTo(_playhead.add(TimelineScreenDefaults.jump)),
                   ),
                   _Transport(
                     icon: Icons.skip_next_rounded,
@@ -497,6 +568,14 @@ class _TimelineScreenState extends State<TimelineScreen>
                         ? null
                         : () => _seekPassage(forward: true),
                   ),
+                  if (widget.live != null)
+                    _Transport(
+                      icon: Icons.sensors_rounded,
+                      label: l.timelineLive,
+                      tooltip: l.timelineGoLive,
+                      color: _live ? AppColors.live : null,
+                      onPressed: _live ? null : _goLive,
+                    ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -626,6 +705,8 @@ class _TimelineScreenState extends State<TimelineScreen>
     String locale,
     Map<String, String> labels,
   ) {
+    final live = widget.live;
+    if (_live && live != null) return _liveView(l, locale, labels, live);
     final status = _player.camera == _camera
         ? _player.status
         : PlayerStatus.opening;
@@ -715,6 +796,55 @@ class _TimelineScreenState extends State<TimelineScreen>
     );
   }
 
+  Widget _liveView(
+    AppLocalizations l,
+    String locale,
+    Map<String, String> labels,
+    LiveSource live,
+  ) {
+    final camera = widget.cameras.firstWhere((c) => c.name == _camera);
+    return ColoredBox(
+      color: Colors.black,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          LivePane(camera: camera, source: live),
+          Positioned(
+            left: 8,
+            top: 8,
+            child: _Caption(
+              DateFormat('dd/MM HH:mm:ss', locale).format(_playhead),
+            ),
+          ),
+          Positioned(
+            left: 8,
+            bottom: 8,
+            child: _Caption(labels[_camera] ?? _camera),
+          ),
+          Positioned(
+            right: 8,
+            top: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.live,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                l.timelineLiveBadge,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Why the recording is shown as images, and a way to try the video again.
   Future<void> _explainImagePlayback(AppLocalizations l) async {
     final error = _player.videoError;
@@ -799,16 +929,21 @@ class _Transport extends StatelessWidget {
   final String? tooltip;
   final VoidCallback? onPressed;
 
+  /// Colour of a button that shows a state (the live on); dimmed when
+  /// disabled otherwise.
+  final Color? color;
+
   const _Transport({
     required this.icon,
     required this.label,
     required this.onPressed,
     this.tooltip,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = onPressed == null ? AppColors.textDim : null;
+    final color = this.color ?? (onPressed == null ? AppColors.textDim : null);
     return Expanded(
       child: Tooltip(
         message: tooltip ?? label,

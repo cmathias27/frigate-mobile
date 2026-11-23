@@ -298,5 +298,8 @@
   "objectBark": "Aboiement",
   "objectSpeech": "Parole",
   "objectScream": "Cri",
-  "objectFireAlarm": "Alarme incendie"
+  "objectFireAlarm": "Alarme incendie",
+  "timelineLive": "Direct",
+  "timelineGoLive": "Revenir au direct",
+  "timelineLiveBadge": "DIRECT"
 }

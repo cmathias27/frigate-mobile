@@ -247,5 +247,8 @@
   "objectBark": "Barking",
   "objectSpeech": "Speech",
   "objectScream": "Scream",
-  "objectFireAlarm": "Fire alarm"
+  "objectFireAlarm": "Fire alarm",
+  "timelineLive": "Live",
+  "timelineGoLive": "Back to live",
+  "timelineLiveBadge": "LIVE"
 }

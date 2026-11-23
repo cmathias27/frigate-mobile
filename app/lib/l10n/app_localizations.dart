@@ -1249,6 +1249,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Alarme incendie'**
   String get objectFireAlarm;
+
+  /// No description provided for @timelineLive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Direct'**
+  String get timelineLive;
+
+  /// No description provided for @timelineGoLive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Revenir au direct'**
+  String get timelineGoLive;
+
+  /// No description provided for @timelineLiveBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'DIRECT'**
+  String get timelineLiveBadge;
 }
 
 class _AppLocalizationsDelegate

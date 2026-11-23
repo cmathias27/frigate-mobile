@@ -693,4 +693,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get objectFireAlarm => 'Fire alarm';
+
+  @override
+  String get timelineLive => 'Live';
+
+  @override
+  String get timelineGoLive => 'Back to live';
+
+  @override
+  String get timelineLiveBadge => 'LIVE';
 }
