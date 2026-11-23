@@ -10,8 +10,18 @@ import 'package:frigate_mobile/main.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
-http.Client _createFakeServer() {
+/// A Frigate server; [down] makes it unreachable, [refuse] refuses logins.
+http.Client _createFakeServer({
+  bool Function()? down,
+  bool refuse = false,
+}) {
   return MockClient((request) async {
+    if (down?.call() ?? false) {
+      throw http.ClientException('Network unreachable');
+    }
+    if (refuse && request.url.path == '/api/login') {
+      return http.Response('{"message": "Login failed"}', 401);
+    }
     if (request.url.path == '/api/login') {
       return http.Response(
         '',
@@ -75,6 +85,75 @@ void main() {
 
     expect(find.text('Ajouter un serveur'), findsOneWidget);
     expect(find.text('Se connecter'), findsOneWidget);
+    // A name in the user's language; the address is the user's to type.
+    final fields = tester.widgetList<TextFormField>(find.byType(TextFormField));
+    expect(fields.first.controller!.text, 'Maison');
+    expect(fields.elementAt(1).controller!.text, isEmpty);
+  });
+
+  testWidgets('a refused login is said on the screen', (tester) async {
+    tester.platformDispatcher.localesTestValue = const [Locale('fr')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+    final session = SessionController(
+      storage: SessionStorage.inMemory(),
+      httpClient: _createFakeServer(refuse: true),
+    );
+    await session.init();
+    await tester.pumpWidget(FrigateMobileApp(session: session));
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(1), 'https://192.168.1.10:8971');
+    await tester.enterText(fields.at(3), 'admin');
+    await tester.enterText(fields.at(4), 'wrong');
+    await tester.tap(find.text('Se connecter'));
+    await tester.pumpAndSettle();
+    expect(find.text('Identifiant ou mot de passe incorrect.'), findsOneWidget);
+    expect(find.text('Réessayer'), findsNothing);
+  });
+
+  testWidgets('a server unreachable at start is said, and tried again', (
+    tester,
+  ) async {
+    tester.platformDispatcher.localesTestValue = const [Locale('fr')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+    final storage = SessionStorage.inMemory();
+    await storage.saveServerConfig(
+      const ServerConfig(
+        name: 'Maison',
+        localUrl: 'https://192.168.1.10:8971',
+        username: 'admin',
+      ),
+    );
+    await storage.saveToken('valid-jwt');
+    var down = true;
+    final session = SessionController(
+      storage: storage,
+      httpClient: _createFakeServer(down: () => down),
+    );
+    await session.init();
+    await tester.pumpWidget(FrigateMobileApp(session: session));
+    await tester.pumpAndSettle();
+
+    expect(session.status, SessionStatus.connectionError);
+    expect(
+      find.text('Serveur injoignable. Vérifiez l\'adresse et le réseau.'),
+      findsOneWidget,
+    );
+
+    // Still down: the message stays.
+    await tester.ensureVisible(find.text('Réessayer'));
+    await tester.tap(find.text('Réessayer'));
+    await tester.pumpAndSettle();
+    expect(session.status, SessionStatus.connectionError);
+
+    // Back: the saved session opens, no password asked.
+    down = false;
+    await tester.ensureVisible(find.text('Réessayer'));
+    await tester.tap(find.text('Réessayer'));
+    await tester.pumpAndSettle();
+    expect(session.status, SessionStatus.authenticated);
+    expect(find.text('2 caméras en ligne'), findsOneWidget);
   });
 
   testWidgets('successful login transitions to HomeShell with tabs', (
@@ -94,7 +173,11 @@ void main() {
     await tester.pumpWidget(FrigateMobileApp(session: session));
     await tester.pumpAndSettle();
 
-    // Fill username & password
+    // Fill address, username & password
+    await tester.enterText(
+      find.byType(TextFormField).at(1),
+      'https://192.168.1.10:8971',
+    );
     await tester.enterText(find.byType(TextFormField).at(3), 'admin');
     await tester.enterText(find.byType(TextFormField).at(4), 'secret');
     await tester.tap(find.text('Se connecter'));

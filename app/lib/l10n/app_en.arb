@@ -5,7 +5,6 @@
   "tabTimeline": "Timeline",
   "tabEvents": "Alerts",
   "tabMore": "More",
-  "comingInVersion": "Coming in version {version}.",
   "liveDescription": "All your cameras live, in a grid or one at a time.",
   "timelineDescription": "Recordings of every camera, with motion and detections, with no day limit.",
   "eventsDescription": "Motion passages, then alerts and detections when Frigate produces them.",
@@ -308,5 +307,19 @@
   "settingsGroupSave": "Save",
   "settingsGroupDelete": "Delete group",
   "liveGroupAll": "All",
-  "liveGroupEmpty": "No camera of this group is shown"
+  "liveGroupEmpty": "No camera of this group is shown",
+  "sessionErrorBadCredentials": "Wrong username or password.",
+  "sessionErrorTooManyAttempts": "Too many attempts: Frigate refuses logins for a while. Try again in a minute.",
+  "sessionErrorServer": "Frigate refused the login unexpectedly.",
+  "sessionErrorUnreachable": "Server unreachable. Check the address and the network.",
+  "sessionErrorTimeout": "The server does not answer in time.",
+  "sessionErrorCertificate": "Server certificate refused: it may have changed, or a self-signed certificate is used on the remote address.",
+  "sessionErrorInvalidResponse": "Unexpected answer: is this address really Frigate's?",
+  "sessionErrorExpired": "Session expired: please log in again.",
+  "sessionErrorUnexpected": "Unexpected error.",
+  "sessionRetry": "Try again",
+  "refreshFailed": "Could not refresh. {reason}",
+  "serverNotConnected": "Server not connected.",
+  "serverNameDefault": "Home",
+  "alertNoRecording": "This camera does not record: the alert cannot be played."
 }

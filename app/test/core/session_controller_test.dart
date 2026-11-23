@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frigate_mobile/core/frigate/client.dart';
 import 'package:frigate_mobile/core/frigate/server_config.dart';
 import 'package:frigate_mobile/core/session/session_controller.dart';
 import 'package:frigate_mobile/core/storage/session_storage.dart';
@@ -17,9 +20,10 @@ void main() {
   http.Client createMockServer({
     bool validAuth = true,
     bool networkError = false,
+    bool Function()? down,
   }) {
     return MockClient((request) async {
-      if (networkError) {
+      if (networkError || (down?.call() ?? false)) {
         throw http.ClientException('Network unreachable');
       }
       if (request.url.path == '/api/login') {
@@ -66,6 +70,65 @@ void main() {
       return http.Response('Not found', 404);
     });
   }
+
+  test('failures are told apart for the screens', () {
+    SessionError of(Object e, {bool login = false}) =>
+        SessionError.of(e, login: login);
+    const bad = FrigateAuthException('refused');
+    expect(of(bad, login: true), SessionError.badCredentials);
+    expect(of(bad), SessionError.sessionExpired);
+    expect(
+      of(const FrigateAuthException('later', statusCode: 429), login: true),
+      SessionError.tooManyAttempts,
+    );
+    expect(
+      of(const FrigateAuthException('no token', statusCode: 200), login: true),
+      SessionError.serverError,
+    );
+    expect(
+      of(FrigateUnreachableException('slow', TimeoutException(null))),
+      SessionError.timeout,
+    );
+    expect(
+      of(const FrigateUnreachableException('tls', HandshakeException())),
+      SessionError.certificate,
+    );
+    expect(
+      of(const FrigateCertificateException('AA', changed: true)),
+      SessionError.certificate,
+    );
+    expect(
+      of(const FrigateUnreachableException('no route')),
+      SessionError.unreachable,
+    );
+    expect(
+      of(const FrigateNetworkException('not json')),
+      SessionError.invalidResponse,
+    );
+    expect(of(StateError('?')), SessionError.unexpected);
+  });
+
+  test('a refresh says whether it worked', () async {
+    final storage = SessionStorage.inMemory();
+    await storage.saveServerConfig(testConfig);
+    await storage.saveToken('jwt-existing');
+    var down = false;
+    final controller = SessionController(
+      storage: storage,
+      httpClient: createMockServer(down: () => down),
+    );
+    await controller.init();
+    expect(controller.status, SessionStatus.authenticated);
+    expect(await controller.refreshCapabilities(), isTrue);
+    expect(controller.error, isNull);
+
+    down = true;
+    expect(await controller.refreshCapabilities(), isFalse);
+    expect(controller.error, SessionError.unreachable);
+    // Still connected: what was read stays usable.
+    expect(controller.status, SessionStatus.authenticated);
+    expect(controller.capabilities, isNotNull);
+  });
 
   test('init on empty storage sets status to unauthenticated', () async {
     final storage = SessionStorage.inMemory();
@@ -114,7 +177,7 @@ void main() {
     expect(controller.status, SessionStatus.unauthenticated);
     expect(controller.isAuthenticated, isFalse);
     expect(await storage.loadToken(), isNull);
-    expect(controller.errorMessage, contains('expirée'));
+    expect(controller.error, SessionError.sessionExpired);
   });
 
   test('login saves config and token on success', () async {
@@ -153,7 +216,7 @@ void main() {
     expect(success, isFalse);
     expect(controller.status, SessionStatus.unauthenticated);
     expect(controller.isAuthenticated, isFalse);
-    expect(controller.errorMessage, contains('incorrect'));
+    expect(controller.error, SessionError.badCredentials);
     expect(await storage.loadToken(), isNull);
   });
 
@@ -199,7 +262,7 @@ void main() {
 
     expect(controller.status, SessionStatus.unauthenticated);
     expect(controller.client, isNull);
-    expect(controller.errorMessage, contains('expirée'));
+    expect(controller.error, SessionError.sessionExpired);
     expect(await storage.loadToken(), isNull);
     expect(await storage.loadServerConfig(), isNotNull);
 

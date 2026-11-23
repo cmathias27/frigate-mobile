@@ -5,12 +5,6 @@
   "tabTimeline": "Chronologie",
   "tabEvents": "Alertes",
   "tabMore": "Plus",
-  "comingInVersion": "Arrive dans la version {version}.",
-  "@comingInVersion": {
-    "placeholders": {
-      "version": {"type": "String"}
-    }
-  },
   "liveDescription": "Toutes vos caméras en direct, en grille ou une par une.",
   "timelineDescription": "Les enregistrements de toutes les caméras, avec le mouvement et les détections, sans limite de jours.",
   "eventsDescription": "Les passages de mouvement, puis les alertes et détections quand Frigate les produit.",
@@ -368,5 +362,24 @@
   "settingsGroupSave": "Enregistrer",
   "settingsGroupDelete": "Supprimer le groupe",
   "liveGroupAll": "Toutes",
-  "liveGroupEmpty": "Aucune caméra de ce groupe n'est affichée"
+  "liveGroupEmpty": "Aucune caméra de ce groupe n'est affichée",
+  "sessionErrorBadCredentials": "Identifiant ou mot de passe incorrect.",
+  "sessionErrorTooManyAttempts": "Trop de tentatives : Frigate refuse les connexions un moment. Réessayez dans une minute.",
+  "sessionErrorServer": "Frigate a refusé la connexion de façon inattendue.",
+  "sessionErrorUnreachable": "Serveur injoignable. Vérifiez l'adresse et le réseau.",
+  "sessionErrorTimeout": "Le serveur ne répond pas à temps.",
+  "sessionErrorCertificate": "Certificat du serveur refusé : il a peut-être changé, ou un certificat auto-signé est utilisé sur l'adresse distante.",
+  "sessionErrorInvalidResponse": "Réponse inattendue : cette adresse est-elle bien celle de Frigate ?",
+  "sessionErrorExpired": "Session expirée : reconnectez-vous.",
+  "sessionErrorUnexpected": "Erreur inattendue.",
+  "sessionRetry": "Réessayer",
+  "refreshFailed": "Actualisation impossible. {reason}",
+  "@refreshFailed": {
+    "placeholders": {
+      "reason": {"type": "String"}
+    }
+  },
+  "serverNotConnected": "Serveur non connecté.",
+  "serverNameDefault": "Maison",
+  "alertNoRecording": "Cette caméra n'enregistre pas : l'alerte ne peut pas être lue."
 }

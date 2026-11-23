@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme.dart';
 import '../../core/session/session_controller.dart';
 import '../../l10n/app_localizations.dart';
+import '../login/session_error_text.dart';
 
 /// Screen for server details, settings, and disconnection (the "Plus" tab).
 class MoreScreen extends StatelessWidget {
@@ -174,12 +175,18 @@ class MoreScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 onTap: () async {
-                  await controller.refreshCapabilities();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l.refreshSuccess)),
-                    );
-                  }
+                  final messenger = ScaffoldMessenger.of(context);
+                  final ok = await controller.refreshCapabilities();
+                  final error = controller.error ?? SessionError.unexpected;
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        ok
+                            ? l.refreshSuccess
+                            : l.refreshFailed(sessionErrorText(l, error)),
+                      ),
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 8),

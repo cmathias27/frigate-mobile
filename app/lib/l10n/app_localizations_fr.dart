@@ -25,11 +25,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tabMore => 'Plus';
 
   @override
-  String comingInVersion(String version) {
-    return 'Arrive dans la version $version.';
-  }
-
-  @override
   String get liveDescription =>
       'Toutes vos caméras en direct, en grille ou une par une.';
 
@@ -944,4 +939,55 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get liveGroupEmpty => 'Aucune caméra de ce groupe n\'est affichée';
+
+  @override
+  String get sessionErrorBadCredentials =>
+      'Identifiant ou mot de passe incorrect.';
+
+  @override
+  String get sessionErrorTooManyAttempts =>
+      'Trop de tentatives : Frigate refuse les connexions un moment. Réessayez dans une minute.';
+
+  @override
+  String get sessionErrorServer =>
+      'Frigate a refusé la connexion de façon inattendue.';
+
+  @override
+  String get sessionErrorUnreachable =>
+      'Serveur injoignable. Vérifiez l\'adresse et le réseau.';
+
+  @override
+  String get sessionErrorTimeout => 'Le serveur ne répond pas à temps.';
+
+  @override
+  String get sessionErrorCertificate =>
+      'Certificat du serveur refusé : il a peut-être changé, ou un certificat auto-signé est utilisé sur l\'adresse distante.';
+
+  @override
+  String get sessionErrorInvalidResponse =>
+      'Réponse inattendue : cette adresse est-elle bien celle de Frigate ?';
+
+  @override
+  String get sessionErrorExpired => 'Session expirée : reconnectez-vous.';
+
+  @override
+  String get sessionErrorUnexpected => 'Erreur inattendue.';
+
+  @override
+  String get sessionRetry => 'Réessayer';
+
+  @override
+  String refreshFailed(String reason) {
+    return 'Actualisation impossible. $reason';
+  }
+
+  @override
+  String get serverNotConnected => 'Serveur non connecté.';
+
+  @override
+  String get serverNameDefault => 'Maison';
+
+  @override
+  String get alertNoRecording =>
+      'Cette caméra n\'enregistre pas : l\'alerte ne peut pas être lue.';
 }

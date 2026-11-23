@@ -128,12 +128,6 @@ abstract class AppLocalizations {
   /// **'Plus'**
   String get tabMore;
 
-  /// No description provided for @comingInVersion.
-  ///
-  /// In fr, this message translates to:
-  /// **'Arrive dans la version {version}.'**
-  String comingInVersion(String version);
-
   /// No description provided for @liveDescription.
   ///
   /// In fr, this message translates to:
@@ -1615,6 +1609,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aucune caméra de ce groupe n\'est affichée'**
   String get liveGroupEmpty;
+
+  /// No description provided for @sessionErrorBadCredentials.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant ou mot de passe incorrect.'**
+  String get sessionErrorBadCredentials;
+
+  /// No description provided for @sessionErrorTooManyAttempts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop de tentatives : Frigate refuse les connexions un moment. Réessayez dans une minute.'**
+  String get sessionErrorTooManyAttempts;
+
+  /// No description provided for @sessionErrorServer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frigate a refusé la connexion de façon inattendue.'**
+  String get sessionErrorServer;
+
+  /// No description provided for @sessionErrorUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Serveur injoignable. Vérifiez l\'adresse et le réseau.'**
+  String get sessionErrorUnreachable;
+
+  /// No description provided for @sessionErrorTimeout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le serveur ne répond pas à temps.'**
+  String get sessionErrorTimeout;
+
+  /// No description provided for @sessionErrorCertificate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certificat du serveur refusé : il a peut-être changé, ou un certificat auto-signé est utilisé sur l\'adresse distante.'**
+  String get sessionErrorCertificate;
+
+  /// No description provided for @sessionErrorInvalidResponse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse inattendue : cette adresse est-elle bien celle de Frigate ?'**
+  String get sessionErrorInvalidResponse;
+
+  /// No description provided for @sessionErrorExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Session expirée : reconnectez-vous.'**
+  String get sessionErrorExpired;
+
+  /// No description provided for @sessionErrorUnexpected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur inattendue.'**
+  String get sessionErrorUnexpected;
+
+  /// No description provided for @sessionRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get sessionRetry;
+
+  /// No description provided for @refreshFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actualisation impossible. {reason}'**
+  String refreshFailed(String reason);
+
+  /// No description provided for @serverNotConnected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Serveur non connecté.'**
+  String get serverNotConnected;
+
+  /// No description provided for @serverNameDefault.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maison'**
+  String get serverNameDefault;
+
+  /// No description provided for @alertNoRecording.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette caméra n\'enregistre pas : l\'alerte ne peut pas être lue.'**
+  String get alertNoRecording;
 }
 
 class _AppLocalizationsDelegate

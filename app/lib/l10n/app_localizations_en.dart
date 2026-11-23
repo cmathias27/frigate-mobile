@@ -25,11 +25,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabMore => 'More';
 
   @override
-  String comingInVersion(String version) {
-    return 'Coming in version $version.';
-  }
-
-  @override
   String get liveDescription =>
       'All your cameras live, in a grid or one at a time.';
 
@@ -921,4 +916,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get liveGroupEmpty => 'No camera of this group is shown';
+
+  @override
+  String get sessionErrorBadCredentials => 'Wrong username or password.';
+
+  @override
+  String get sessionErrorTooManyAttempts =>
+      'Too many attempts: Frigate refuses logins for a while. Try again in a minute.';
+
+  @override
+  String get sessionErrorServer => 'Frigate refused the login unexpectedly.';
+
+  @override
+  String get sessionErrorUnreachable =>
+      'Server unreachable. Check the address and the network.';
+
+  @override
+  String get sessionErrorTimeout => 'The server does not answer in time.';
+
+  @override
+  String get sessionErrorCertificate =>
+      'Server certificate refused: it may have changed, or a self-signed certificate is used on the remote address.';
+
+  @override
+  String get sessionErrorInvalidResponse =>
+      'Unexpected answer: is this address really Frigate\'s?';
+
+  @override
+  String get sessionErrorExpired => 'Session expired: please log in again.';
+
+  @override
+  String get sessionErrorUnexpected => 'Unexpected error.';
+
+  @override
+  String get sessionRetry => 'Try again';
+
+  @override
+  String refreshFailed(String reason) {
+    return 'Could not refresh. $reason';
+  }
+
+  @override
+  String get serverNotConnected => 'Server not connected.';
+
+  @override
+  String get serverNameDefault => 'Home';
+
+  @override
+  String get alertNoRecording =>
+      'This camera does not record: the alert cannot be played.';
 }

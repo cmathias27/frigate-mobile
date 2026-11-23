@@ -5,6 +5,7 @@ import '../../core/frigate/server_config.dart';
 import '../../core/session/session_controller.dart';
 import '../../l10n/app_localizations.dart';
 import 'certificate_dialog.dart';
+import 'session_error_text.dart';
 
 /// Screen 1 of mock-ups: connect to a Frigate server.
 class LoginScreen extends StatefulWidget {
@@ -32,12 +33,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     final existing = widget.controller.config;
-    _nameController = TextEditingController(
-      text: existing?.name ?? 'Maison',
-    );
-    _localUrlController = TextEditingController(
-      text: existing?.localUrl ?? 'https://192.168.1.10:8971',
-    );
+    // A first server gets a name in the user's language, set once the
+    // translations are known (didChangeDependencies).
+    _nameController = TextEditingController(text: existing?.name);
+    _localUrlController = TextEditingController(text: existing?.localUrl);
     _remoteUrlController = TextEditingController(
       text: existing?.remoteUrl ?? '',
     );
@@ -46,6 +45,14 @@ class _LoginScreenState extends State<LoginScreen> {
     );
     _passController = TextEditingController();
     _allowSelfSigned = existing?.allowSelfSignedCert ?? true;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.controller.config == null && _nameController.text.isEmpty) {
+      _nameController.text = AppLocalizations.of(context).serverNameDefault;
+    }
   }
 
   @override
@@ -88,16 +95,41 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!success && certificate != null && trusted == null) {
       final trust = await showCertificateDialog(context, certificate);
       if (trust && mounted) await _submit(trusted: certificate.fingerprint);
-      return;
     }
-    if (!success && widget.controller.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(widget.controller.errorMessage!),
-          backgroundColor: Theme.of(context).colorScheme.error,
+    // Any other failure is shown above the button (_error).
+  }
+
+  /// Why the last attempt, the start or the session failed; after a
+  /// failed start, the saved session can be tried again as is.
+  Widget _error(AppLocalizations l, TextTheme text) {
+    final controller = widget.controller;
+    final error = controller.error;
+    if (error == null || controller.isLoading) return const SizedBox.shrink();
+    final color = Theme.of(context).colorScheme.error;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(10),
         ),
-      );
-    }
+        child: Row(
+          spacing: 8,
+          children: [
+            Icon(Icons.error_outline_rounded, color: color, size: 20),
+            Expanded(
+              child: Text(sessionErrorText(l, error), style: text.bodyMedium),
+            ),
+            if (controller.status == SessionStatus.connectionError)
+              TextButton(
+                onPressed: controller.retry,
+                child: Text(l.sessionRetry),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -285,7 +317,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       listenable: widget.controller,
                       builder: (context, _) {
                         final loading = widget.controller.isLoading;
-                        return FilledButton(
+                        final button = FilledButton(
                           onPressed: loading ? null : _submit,
                           style: FilledButton.styleFrom(
                             backgroundColor: AppColors.accent,
@@ -311,6 +343,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     fontSize: 15,
                                   ),
                                 ),
+                        );
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [_error(l, text), button],
                         );
                       },
                     ),

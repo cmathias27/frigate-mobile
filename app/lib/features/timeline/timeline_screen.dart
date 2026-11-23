@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -54,6 +55,11 @@ abstract final class TimelineScreenDefaults {
 
 /// Timeline tab (mock-up screen 4): recordings of one camera played under
 /// two bands, every camera and the camera played, with a common playhead.
+abstract final class TimelineLayout {
+  /// Most of the screen height given to the video, the rest to the controls.
+  static const maxVideoShare = 0.6;
+}
+
 class TimelineScreen extends StatefulWidget {
   final List<CameraCapabilities> cameras;
   final TimelineData data;
@@ -484,217 +490,234 @@ class _TimelineScreenState extends State<TimelineScreen>
     final playing = _player.playing || _live;
     final export = widget.export;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        AspectRatio(aspectRatio: 16 / 9, child: _video(l, locale, labels)),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            children: [
-              _cameraRow(l, labels, text),
-              Row(
-                children: [
-                  IconButton(
-                    tooltip: l.timelinePreviousDay,
-                    icon: const Icon(Icons.chevron_left_rounded),
-                    onPressed: () => _shiftDay(-1),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: widget.loadHistory == null ? null : _openCalendar,
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: DateFormat.MMMEd(locale).format(_playhead),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextSpan(
-                              text:
-                                  ' · ${DateFormat.Hms(locale).format(_playhead)}',
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  if (widget.loadHistory != null)
+    return LayoutBuilder(
+      builder: (context, constraints) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // 16:9 across the width, but in landscape that would push the
+          // controls off the screen: the video keeps part of the height.
+          SizedBox(
+            height: min(
+              constraints.maxWidth * 9 / 16,
+              constraints.maxHeight * TimelineLayout.maxVideoShare,
+            ),
+            child: _video(l, locale, labels),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              children: [
+                _cameraRow(l, labels, text),
+                Row(
+                  children: [
                     IconButton(
-                      tooltip: l.timelineCalendar,
-                      icon: const Icon(Icons.calendar_month_rounded),
-                      onPressed: _openCalendar,
+                      tooltip: l.timelinePreviousDay,
+                      icon: const Icon(Icons.chevron_left_rounded),
+                      onPressed: () => _shiftDay(-1),
                     ),
-                  IconButton(
-                    tooltip: l.timelineNextDay,
-                    icon: const Icon(Icons.chevron_right_rounded),
-                    onPressed:
-                        _playhead.add(const Duration(days: 1)).isAfter(now)
-                        ? null
-                        : () => _shiftDay(1),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  _Transport(
-                    icon: Icons.skip_previous_rounded,
-                    label: l.timelinePreviousPassage,
-                    onPressed: _seeking
-                        ? null
-                        : () => _seekPassage(forward: false),
-                  ),
-                  _Transport(
-                    icon: Icons.replay_10_rounded,
-                    label: l.timelineSeconds(
-                      TimelineScreenDefaults.jump.inSeconds,
-                    ),
-                    tooltip: l.timelineBack(
-                      TimelineScreenDefaults.jump.inSeconds,
-                    ),
-                    onPressed: () =>
-                        _goTo(_playhead.subtract(TimelineScreenDefaults.jump)),
-                  ),
-                  IconButton.filled(
-                    iconSize: 34,
-                    tooltip: playing ? l.timelinePause : l.timelinePlay,
-                    onPressed: _togglePlay,
-                    icon: Icon(
-                      playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                    ),
-                  ),
-                  _Transport(
-                    icon: Icons.forward_10_rounded,
-                    label: l.timelineSeconds(
-                      TimelineScreenDefaults.jump.inSeconds,
-                    ),
-                    tooltip: l.timelineForward(
-                      TimelineScreenDefaults.jump.inSeconds,
-                    ),
-                    onPressed: _live
-                        ? null
-                        : () =>
-                              _goTo(_playhead.add(TimelineScreenDefaults.jump)),
-                  ),
-                  _Transport(
-                    icon: Icons.skip_next_rounded,
-                    label: l.timelineNextPassage,
-                    onPressed: _seeking
-                        ? null
-                        : () => _seekPassage(forward: true),
-                  ),
-                  if (widget.live != null)
-                    _Transport(
-                      icon: Icons.sensors_rounded,
-                      label: l.timelineLive,
-                      tooltip: l.timelineGoLive,
-                      color: _live ? AppColors.live : null,
-                      onPressed: _live ? null : _goLive,
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _bands(l, labels, now, locale),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: Wrap(
-                      spacing: 8,
-                      children: [
-                        for (var i = 0; i < timelineZooms.length; i++)
-                          ChoiceChip(
-                            label: Text(
-                              timelineZooms[i] == null
-                                  ? l.timelineZoomAll
-                                  : l.timelineZoomHours(
-                                      timelineZooms[i]!.inHours,
-                                    ),
-                            ),
-                            selected: i == _zoom,
-                            onSelected: (_) => _setZoom(i),
+                    Expanded(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: widget.loadHistory == null
+                            ? null
+                            : _openCalendar,
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: DateFormat.MMMEd(locale)
+                                    .format(_playhead),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    ' · ${DateFormat.Hms(locale).format(_playhead)}',
+                              ),
+                            ],
                           ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuButton<double>(
-                    tooltip: l.timelineSpeed,
-                    initialValue: _player.speed,
-                    onSelected: _setSpeed,
-                    itemBuilder: (_) => [
-                      for (final s in TimelineScreenDefaults.speeds)
-                        PopupMenuItem(value: s, child: Text(_speedText(s))),
-                    ],
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 2,
+                    ),
+                    if (widget.loadHistory != null)
+                      IconButton(
+                        tooltip: l.timelineCalendar,
+                        icon: const Icon(Icons.calendar_month_rounded),
+                        onPressed: _openCalendar,
+                      ),
+                    IconButton(
+                      tooltip: l.timelineNextDay,
+                      icon: const Icon(Icons.chevron_right_rounded),
+                      onPressed:
+                          _playhead.add(const Duration(days: 1)).isAfter(now)
+                          ? null
+                          : () => _shiftDay(1),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    _Transport(
+                      icon: Icons.skip_previous_rounded,
+                      label: l.timelinePreviousPassage,
+                      onPressed: _seeking
+                          ? null
+                          : () => _seekPassage(forward: false),
+                    ),
+                    _Transport(
+                      icon: Icons.replay_10_rounded,
+                      label: l.timelineSeconds(
+                        TimelineScreenDefaults.jump.inSeconds,
+                      ),
+                      tooltip: l.timelineBack(
+                        TimelineScreenDefaults.jump.inSeconds,
+                      ),
+                      onPressed: () => _goTo(
+                        _playhead.subtract(TimelineScreenDefaults.jump),
+                      ),
+                    ),
+                    IconButton.filled(
+                      iconSize: 34,
+                      tooltip: playing ? l.timelinePause : l.timelinePlay,
+                      onPressed: _togglePlay,
+                      icon: Icon(
+                        playing
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                      ),
+                    ),
+                    _Transport(
+                      icon: Icons.forward_10_rounded,
+                      label: l.timelineSeconds(
+                        TimelineScreenDefaults.jump.inSeconds,
+                      ),
+                      tooltip: l.timelineForward(
+                        TimelineScreenDefaults.jump.inSeconds,
+                      ),
+                      onPressed: _live
+                          ? null
+                          : () => _goTo(
+                              _playhead.add(TimelineScreenDefaults.jump),
+                            ),
+                    ),
+                    _Transport(
+                      icon: Icons.skip_next_rounded,
+                      label: l.timelineNextPassage,
+                      onPressed: _seeking
+                          ? null
+                          : () => _seekPassage(forward: true),
+                    ),
+                    if (widget.live != null)
+                      _Transport(
+                        icon: Icons.sensors_rounded,
+                        label: l.timelineLive,
+                        tooltip: l.timelineGoLive,
+                        color: _live ? AppColors.live : null,
+                        onPressed: _live ? null : _goLive,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _bands(l, labels, now, locale),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
                         children: [
-                          Icon(
-                            Icons.speed_rounded,
-                            size: 18,
-                            color: _player.speed == 1
-                                ? AppColors.textDim
-                                : AppColors.accent,
-                          ),
-                          Text(
-                            _speedText(_player.speed),
-                            style: text.labelMedium?.copyWith(
+                          for (var i = 0; i < timelineZooms.length; i++)
+                            ChoiceChip(
+                              label: Text(
+                                timelineZooms[i] == null
+                                    ? l.timelineZoomAll
+                                    : l.timelineZoomHours(
+                                        timelineZooms[i]!.inHours,
+                                      ),
+                              ),
+                              selected: i == _zoom,
+                              onSelected: (_) => _setZoom(i),
+                            ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuButton<double>(
+                      tooltip: l.timelineSpeed,
+                      initialValue: _player.speed,
+                      onSelected: _setSpeed,
+                      itemBuilder: (_) => [
+                        for (final s in TimelineScreenDefaults.speeds)
+                          PopupMenuItem(value: s, child: Text(_speedText(s))),
+                      ],
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 2,
+                          children: [
+                            Icon(
+                              Icons.speed_rounded,
+                              size: 18,
                               color: _player.speed == 1
                                   ? AppColors.textDim
                                   : AppColors.accent,
                             ),
-                          ),
-                        ],
+                            Text(
+                              _speedText(_player.speed),
+                              style: text.labelMedium?.copyWith(
+                                color: _player.speed == 1
+                                    ? AppColors.textDim
+                                    : AppColors.accent,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  if (widget.data.loading)
-                    Tooltip(
-                      message: l.timelineLoading,
-                      child: const SizedBox.square(
-                        dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                    if (widget.data.loading)
+                      Tooltip(
+                        message: l.timelineLoading,
+                        child: const SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
                       ),
-                    ),
-                ],
-              ),
-              if (export != null) ...[
-                const SizedBox(height: 8),
-                Row(
-                  spacing: 8,
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _exportClip(export),
-                        icon: const Icon(Icons.movie_creation_outlined),
-                        label: Text(l.timelineClip),
-                      ),
-                    ),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _takingPhoto
-                            ? null
-                            : () => _takePhoto(export),
-                        icon: const Icon(Icons.photo_camera_outlined),
-                        label: Text(l.timelinePhoto),
-                      ),
-                    ),
                   ],
                 ),
+                if (export != null) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _exportClip(export),
+                          icon: const Icon(Icons.movie_creation_outlined),
+                          label: Text(l.timelineClip),
+                        ),
+                      ),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _takingPhoto
+                              ? null
+                              : () => _takePhoto(export),
+                          icon: const Icon(Icons.photo_camera_outlined),
+                          label: Text(l.timelinePhoto),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
