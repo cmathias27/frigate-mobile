@@ -44,6 +44,10 @@ class ReviewList extends ChangeNotifier {
   bool _failed = false;
   bool _disposed = false;
 
+  /// Incremented by [refresh]: a page asked before belongs to a list
+  /// dropped since, and must neither be added nor end the loading.
+  int _generation = 0;
+
   ReviewList({
     required this._fetch,
     required this._mark,
@@ -110,6 +114,7 @@ class ReviewList extends ChangeNotifier {
   /// Reads the last day again, dropping what was read before.
   Future<void> refresh() async {
     final now = _clock();
+    _generation++;
     _byId.clear();
     _from = null;
     _readAt = now;
@@ -131,6 +136,7 @@ class ReviewList extends ChangeNotifier {
     DateTime before, {
     bool first = false,
   }) async {
+    final generation = _generation;
     _loading = true;
     _failed = false;
     _notify();
@@ -140,17 +146,16 @@ class ReviewList extends ChangeNotifier {
         before: before,
         cameras: cameras,
       );
-      if (_disposed) return;
+      if (_disposed || generation != _generation) return;
       for (final item in items) {
         if (cameras.contains(item.camera)) _byId[item.id] = item;
       }
       _from = after;
     } catch (_) {
-      if (_disposed) return;
+      if (_disposed || generation != _generation) return;
       _failed = true;
-    } finally {
-      _loading = false;
     }
+    _loading = false;
     _notify();
   }
 

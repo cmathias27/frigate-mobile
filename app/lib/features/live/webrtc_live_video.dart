@@ -20,6 +20,9 @@ class WebRtcLiveVideo extends LiveVideo {
   RTCPeerConnection? _pc;
   final _audioTracks = <MediaStreamTrack>[];
   MediaStreamTrack? _videoTrack;
+
+  /// Stream made here when the track came without one; freed on dispose.
+  MediaStream? _localStream;
   Timer? _timeout;
   Timer? _frameCheck;
   final _frames = FrameWatch();
@@ -71,7 +74,7 @@ class WebRtcLiveVideo extends LiveVideo {
         'sdpSemantics': 'unified-plan',
       });
       if (_disposed) {
-        await pc.close();
+        await _closePeer(pc);
         return;
       }
       _pc = pc;
@@ -135,6 +138,11 @@ class WebRtcLiveVideo extends LiveVideo {
       _renderer.srcObject = event.streams.first;
     } else {
       final media = await createLocalMediaStream('frigate-$stream');
+      if (_disposed) {
+        await media.dispose();
+        return;
+      }
+      _localStream = media;
       await media.addTrack(track);
       if (!_disposed) _renderer.srcObject = media;
     }
@@ -205,11 +213,27 @@ class WebRtcLiveVideo extends LiveVideo {
   }
 
   Future<void> _release(RTCPeerConnection? pc) async {
+    final media = _localStream;
+    _localStream = null;
+    // Each step on its own: a failed one must not keep the others allocated.
+    await _quietly('renderer', () async => _renderer.srcObject = null);
+    if (media != null) await _quietly('stream', media.dispose);
+    if (pc != null) await _closePeer(pc);
+    await _quietly('renderer', _renderer.dispose);
+  }
+
+  /// Closes the connection, then frees its native side: close alone leaves
+  /// the peer connection and its received tracks allocated.
+  Future<void> _closePeer(RTCPeerConnection pc) async {
+    await _quietly('close', pc.close);
+    await _quietly('dispose', pc.dispose);
+  }
+
+  Future<void> _quietly(String step, Future<void> Function() action) async {
     try {
-      await pc?.close();
-      await _renderer.dispose();
+      await action();
     } catch (e) {
-      debugPrint('WebRTC $stream release: $e');
+      debugPrint('WebRTC $stream $step: $e');
     }
   }
 }
