@@ -5,6 +5,37 @@ l'application affiche avant d'installer une mise à jour et dans
 « Nouveautés » après l'installation (décision 0003). Écrire pour
 l'utilisateur : ce qui change pour lui, pas comment c'est codé.
 
+## 0.2.1
+
+Corrections de sécurité et de fiabilité, après une revue complète de
+l'application.
+
+- Connexion : le certificat auto-signé de l'adresse locale n'est plus
+  accepté d'office. À la première connexion, l'application affiche son
+  empreinte SHA-256 et demande de la confirmer. Si le certificat change
+  ensuite, elle le signale et demande une nouvelle confirmation.
+  **Après la mise à jour, l'application demande de se reconnecter une
+  fois pour confirmer l'empreinte.**
+- Connexion : seules les adresses https sont acceptées, et le port 5000
+  de Frigate (sans authentification) est refusé. Le jeton de connexion
+  n'est plus inclus dans les sauvegardes Android.
+- Les erreurs s'affichent sur l'écran de connexion, dans la langue du
+  téléphone : identifiants refusés, serveur injoignable, certificat
+  refusé, session expirée… Quand le serveur est injoignable au
+  démarrage, le bouton « Réessayer » rouvre la session sans redemander
+  le mot de passe.
+- « Actualiser » (onglet Plus) indique si l'actualisation a échoué, et
+  pourquoi.
+- Chronologie : en paysage, les commandes ne débordent plus de l'écran.
+  Changer d'heure ou de caméra pendant le chargement ne laisse plus un
+  lecteur ouvert en arrière-plan, et ne fige plus la lecture en images.
+- Direct : la vidéo est entièrement libérée en quittant une caméra, ce
+  qui économise mémoire et batterie.
+- Alertes : une actualisation pendant le chargement des jours précédents
+  ne mélange plus les listes. Toucher l'alerte d'une caméra qui
+  n'enregistre pas l'indique, au lieu de ne rien faire.
+- Premier serveur : plus d'adresse préremplie.
+
 ## 0.2.0
 
 Fin de l'étape « liste et réglages fins ».
