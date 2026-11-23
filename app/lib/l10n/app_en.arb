@@ -21,8 +21,6 @@
   "passwordLabel": "Password",
   "selfSignedLabel": "Accept a self-signed certificate on the local address, once its fingerprint is confirmed",
   "connectButton": "Connect",
-  "connectingStatus": "Connecting…",
-  "connectedTitle": "Connected server",
   "serverInfoCameras": "{count, plural, =1{1 camera online} other{{count} cameras online}}",
   "detectionModeMotionOnly": "Motion-only mode (no object tracking)",
   "detectionModeObjects": "Object tracking active",
@@ -50,7 +48,7 @@
   "liveLayout": "{count} per page",
   "liveLayoutAuto": "Automatic layout: every camera, as large as possible",
   "livePage": "Page {current} of {total}",
-  "liveModeSnapshots": "Images · every {seconds} s",
+  "liveModeSnapshots": "{seconds, plural, =1{Images · every second} other{Images · every {seconds} s}}",
   "liveFullScreen": "Full screen",
   "liveModeVideo": "Live video",
   "liveVideoConnecting": "Connecting video…",
@@ -172,7 +170,7 @@
   "eventsYesterday": "Yesterday",
   "eventsPassageTitle": "Motion · {camera}",
   "@eventsPassageTitle": {"placeholders": {"camera": {"type": "String"}}},
-  "eventsLoadMore": "Show the previous {hours} hours",
+  "eventsLoadMore": "{hours, plural, =1{Show the previous hour} other{Show the previous {hours} hours}}",
   "@eventsLoadMore": {"placeholders": {"hours": {"type": "int"}}},
   "eventsLoadFailed": "The recordings could not be read.",
   "eventsHistoryStart": "Start of the recorded history.",
@@ -322,5 +320,6 @@
   "refreshFailed": "Could not refresh. {reason}",
   "serverNotConnected": "Server not connected.",
   "serverNameDefault": "Home",
-  "alertNoRecording": "This camera does not record: the alert cannot be played."
+  "alertNoRecording": "This camera does not record: the alert cannot be played.",
+  "eventsYesterdayAt": "yesterday {time}"
 }

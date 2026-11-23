@@ -357,7 +357,7 @@ void main() {
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
       expect(find.text('Version 0.2.0 disponible'), findsOneWidget);
-      expect(find.text('Version installée : 0.1.0'), findsOneWidget);
+      expect(find.text('Version installée\u00a0: 0.1.0'), findsOneWidget);
       expect(find.text('Calendrier.'), findsOneWidget);
 
       await tester.tap(find.text('Installer'));

@@ -220,7 +220,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.text("Enregistrements conservés jusqu'à 3 jours"),
+      find.text("Enregistrements conservés jusqu'à 3\u00a0jours"),
       findsOneWidget,
     );
     expect(find.text('Se déconnecter'), findsOneWidget);
@@ -229,7 +229,7 @@ void main() {
     await tester.tap(find.text('Se déconnecter'));
     await tester.pumpAndSettle();
     expect(
-      find.text('Voulez-vous vous déconnecter de ce serveur Frigate ?'),
+      find.text('Voulez-vous vous déconnecter de ce serveur Frigate\u00a0?'),
       findsOneWidget,
     );
 
