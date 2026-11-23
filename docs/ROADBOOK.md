@@ -31,6 +31,7 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 - [x] Vidéo figée ou impossible : bascule seule sur le flux suivant de la caméra (sous-flux lus par Frigate compris), puis images
 - [x] Chronologie : enregistrement illisible par le téléphone (image trop grande pour son décodeur) ou figé → lecture en images enregistrées, vidéo réessayable
 - [x] Direct en disposition automatique : toutes les caméras sur un écran tant qu'elles restent lisibles, vignettes à la taille de l'écran, debout ou couché (choix de disposition gardé)
+- [x] Chronologie qui s'ouvre sur le direct de la caméra (flux léger d'abord) ; glisser en arrière lit l'enregistrement, bouton « Direct » pour revenir
 - [ ] Réglages : seuils par caméra, groupes et ordre, qualité, cible de précédent / suivant
 
 ## 0.3 — À distance et notifications

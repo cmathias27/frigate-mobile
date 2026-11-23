@@ -10,6 +10,7 @@ import 'package:frigate_mobile/core/frigate/client.dart';
 import 'package:frigate_mobile/core/frigate/recordings.dart';
 import 'package:frigate_mobile/core/storage/preferences.dart';
 import 'package:frigate_mobile/features/live/photo.dart';
+import 'package:frigate_mobile/features/live/live_pane.dart';
 import 'package:frigate_mobile/features/timeline/clip_sheet.dart';
 import 'package:frigate_mobile/features/timeline/motion_passages.dart';
 import 'package:frigate_mobile/features/timeline/recording_history.dart';
@@ -511,6 +512,7 @@ void main() {
       MotionPassage? openAt,
       RecordingExport? export,
       Preferences? preferences,
+      LiveSource? live,
     }) async {
       // Phone-sized screen, so every control is laid out.
       tester.view.physicalSize = const Size(1080, 2340);
@@ -527,6 +529,7 @@ void main() {
             openAt: openAt,
             export: export,
             preferences: preferences,
+            live: live,
           ),
         ),
       );
@@ -737,6 +740,59 @@ void main() {
             .selected,
         isTrue,
       );
+    });
+
+    testWidgets('opens live; dragging back plays, Direct returns', (
+      tester,
+    ) async {
+      final asked = <String>[];
+      final live = LiveSource(
+        fetch: (camera, {height}) async {
+          asked.add(camera);
+          return Uint8List(0);
+        },
+      );
+      await pumpScreen(tester, live: live);
+      expect(find.text('DIRECT'), findsOneWidget);
+      expect(player.opened, isEmpty);
+      expect(asked, contains('cam_a'));
+
+      // Another camera stays live.
+      await tester.tap(find.text('Lecture · Entrée'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cour').last);
+      await tester.pump();
+      expect(find.text('DIRECT'), findsOneWidget);
+      expect(player.opened, isEmpty);
+      expect(asked, contains('cam_b'));
+
+      await tester.drag(find.byType(TimelineBands), const Offset(120, 0));
+      await tester.pump(TimelineScreenDefaults.settle);
+      await tester.pump();
+      expect(find.text('DIRECT'), findsNothing);
+      final (camera, start, _) = player.opened.single;
+      expect(camera, 'cam_b');
+      expect(
+        start.isBefore(_now.subtract(TimelineScreenDefaults.liveMargin)),
+        isTrue,
+      );
+      expect(player.playing, isTrue);
+
+      await tester.tap(find.byTooltip('Revenir au direct'));
+      await tester.pump();
+      expect(find.text('DIRECT'), findsOneWidget);
+      expect(player.playing, isFalse);
+
+      // Pausing the live shows the newest recorded second.
+      await tester.tap(find.byTooltip('Pause'));
+      await tester.pump();
+      expect(find.text('DIRECT'), findsNothing);
+      expect(
+        player.opened.last.$2,
+        _now.subtract(TimelineScreenDefaults.liveMargin),
+      );
+      expect(player.playing, isFalse);
+      await tester.pumpWidget(const SizedBox());
     });
 
     testWidgets('no calendar without a history to read', (tester) async {

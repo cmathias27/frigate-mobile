@@ -15,6 +15,7 @@ import '../features/events/motion_list.dart';
 import '../features/events/review_list.dart';
 import '../features/events/thumbnails.dart';
 import '../features/live/live_grid_screen.dart';
+import '../features/live/live_pane.dart';
 import '../features/live/webrtc_live_video.dart';
 import '../features/more/more_screen.dart';
 import '../features/timeline/clip_sheet.dart';
@@ -194,6 +195,12 @@ class _HomeShellState extends State<HomeShell> {
       loadHistory: () => _loadHistory(client, recorded),
       openAt: openAt,
       preferences: _preferences,
+      live: LiveSource(
+        fetch: client.fetchLatestImage,
+        videoFactory: (stream) =>
+            WebRtcLiveVideo(stream: stream, negotiate: client.negotiateWebRtc),
+        onAuthError: widget.controller.sessionExpired,
+      ),
       export: RecordingExport(
         open: client.openStream,
         frame: client.fetchRecordingImage,

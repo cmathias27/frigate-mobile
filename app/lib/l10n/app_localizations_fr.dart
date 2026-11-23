@@ -716,4 +716,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get objectFireAlarm => 'Alarme incendie';
+
+  @override
+  String get timelineLive => 'Direct';
+
+  @override
+  String get timelineGoLive => 'Revenir au direct';
+
+  @override
+  String get timelineLiveBadge => 'DIRECT';
 }
