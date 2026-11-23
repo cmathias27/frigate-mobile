@@ -121,7 +121,9 @@ class _LoginScreenState extends State<LoginScreen> {
             Expanded(
               child: Text(sessionErrorText(l, error), style: text.bodyMedium),
             ),
-            if (controller.status == SessionStatus.connectionError)
+            // Trying again cannot confirm a certificate: logging in does.
+            if (controller.status == SessionStatus.connectionError &&
+                error != SessionError.certificateToConfirm)
               TextButton(
                 onPressed: controller.retry,
                 child: Text(l.sessionRetry),

@@ -45,9 +45,12 @@ enum SessionError {
   /// The server did not answer in time.
   timeout,
 
-  /// The certificate was refused (changed, or self-signed on the remote
-  /// address).
+  /// The certificate was refused (self-signed on the remote address).
   certificate,
+
+  /// The self-signed certificate of the local address is not confirmed
+  /// yet, or changed: logging in again shows its fingerprint.
+  certificateToConfirm,
 
   /// The server answered something that is not Frigate's API.
   invalidResponse,
@@ -64,7 +67,7 @@ enum SessionError {
       login ? badCredentials : sessionExpired,
     FrigateAuthException(statusCode: 429) => tooManyAttempts,
     FrigateAuthException() => login ? serverError : sessionExpired,
-    FrigateCertificateException() => certificate,
+    FrigateCertificateException() => certificateToConfirm,
     FrigateUnreachableException(cause: TimeoutException()) => timeout,
     FrigateUnreachableException(cause: HandshakeException()) => certificate,
     FrigateUnreachableException() => unreachable,

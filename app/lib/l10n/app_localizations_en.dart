@@ -936,7 +936,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sessionErrorCertificate =>
-      'Server certificate refused: it may have changed, or a self-signed certificate is used on the remote address.';
+      'Server certificate refused: a self-signed certificate is accepted on the local address only.';
+
+  @override
+  String get sessionErrorCertificateToConfirm =>
+      'Server certificate to confirm: log in to check its fingerprint.';
 
   @override
   String get sessionErrorInvalidResponse =>

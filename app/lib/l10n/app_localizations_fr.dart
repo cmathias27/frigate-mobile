@@ -961,7 +961,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sessionErrorCertificate =>
-      'Certificat du serveur refusé : il a peut-être changé, ou un certificat auto-signé est utilisé sur l\'adresse distante.';
+      'Certificat du serveur refusé : un certificat auto-signé n\'est accepté que sur l\'adresse locale.';
+
+  @override
+  String get sessionErrorCertificateToConfirm =>
+      'Certificat du serveur à confirmer : connectez-vous pour vérifier son empreinte.';
 
   @override
   String get sessionErrorInvalidResponse =>

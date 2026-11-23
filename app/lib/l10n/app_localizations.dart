@@ -1643,8 +1643,14 @@ abstract class AppLocalizations {
   /// No description provided for @sessionErrorCertificate.
   ///
   /// In fr, this message translates to:
-  /// **'Certificat du serveur refusé : il a peut-être changé, ou un certificat auto-signé est utilisé sur l\'adresse distante.'**
+  /// **'Certificat du serveur refusé : un certificat auto-signé n\'est accepté que sur l\'adresse locale.'**
   String get sessionErrorCertificate;
+
+  /// No description provided for @sessionErrorCertificateToConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Certificat du serveur à confirmer : connectez-vous pour vérifier son empreinte.'**
+  String get sessionErrorCertificateToConfirm;
 
   /// No description provided for @sessionErrorInvalidResponse.
   ///

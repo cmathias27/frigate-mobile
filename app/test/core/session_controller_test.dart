@@ -95,7 +95,7 @@ void main() {
     );
     expect(
       of(const FrigateCertificateException('AA', changed: true)),
-      SessionError.certificate,
+      SessionError.certificateToConfirm,
     );
     expect(
       of(const FrigateUnreachableException('no route')),

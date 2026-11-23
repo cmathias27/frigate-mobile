@@ -10,6 +10,7 @@ String sessionErrorText(AppLocalizations l, SessionError error) =>
       SessionError.unreachable => l.sessionErrorUnreachable,
       SessionError.timeout => l.sessionErrorTimeout,
       SessionError.certificate => l.sessionErrorCertificate,
+      SessionError.certificateToConfirm => l.sessionErrorCertificateToConfirm,
       SessionError.invalidResponse => l.sessionErrorInvalidResponse,
       SessionError.sessionExpired => l.sessionErrorExpired,
       SessionError.unexpected => l.sessionErrorUnexpected,
