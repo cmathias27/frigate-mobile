@@ -46,6 +46,10 @@ abstract final class TimelineScreenDefaults {
 
   /// Dragging or playing this close to the live edge goes live.
   static const liveSnap = Duration(seconds: 2);
+
+  /// Playback speeds offered, and the one used when nothing was chosen.
+  static const speeds = [0.5, 1.0, 2.0, 4.0, 8.0];
+  static const speed = 1.0;
 }
 
 /// Timeline tab (mock-up screen 4): recordings of one camera played under
@@ -104,6 +108,7 @@ class _TimelineScreenState extends State<TimelineScreen>
   bool _takingPhoto = false;
   bool _seekAll = TimelineScreenDefaults.seekAllCameras;
   static const _keySeekAll = 'fm_timeline_seek_all';
+  static const _keySpeed = 'fm_timeline_speed';
   Timer? _settle;
 
   /// The camera is shown live; the player stays closed meanwhile.
@@ -146,8 +151,22 @@ class _TimelineScreenState extends State<TimelineScreen>
 
   Future<void> _readSeekMode() async {
     final stored = await widget.preferences?.read(_keySeekAll);
-    if (stored == null || !mounted) return;
-    setState(() => _seekAll = stored == 'true');
+    if (stored != null && mounted) setState(() => _seekAll = stored == 'true');
+    final speed = double.tryParse(
+      await widget.preferences?.read(_keySpeed) ?? '',
+    );
+    if (speed != null &&
+        mounted &&
+        TimelineScreenDefaults.speeds.contains(speed)) {
+      await _player.setSpeed(speed);
+    }
+  }
+
+  Future<void> _setSpeed(double speed) async {
+    unawaited(widget.preferences?.write(_keySpeed, '$speed'));
+    await _player.setSpeed(speed);
+    // The player does not rebuild the screen while live.
+    if (mounted) setState(() {});
   }
 
   void _setSeekAll(bool value) {
@@ -602,6 +621,42 @@ class _TimelineScreenState extends State<TimelineScreen>
                       ],
                     ),
                   ),
+                  PopupMenuButton<double>(
+                    tooltip: l.timelineSpeed,
+                    initialValue: _player.speed,
+                    onSelected: _setSpeed,
+                    itemBuilder: (_) => [
+                      for (final s in TimelineScreenDefaults.speeds)
+                        PopupMenuItem(value: s, child: Text(_speedText(s))),
+                    ],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 2,
+                        children: [
+                          Icon(
+                            Icons.speed_rounded,
+                            size: 18,
+                            color: _player.speed == 1
+                                ? AppColors.textDim
+                                : AppColors.accent,
+                          ),
+                          Text(
+                            _speedText(_player.speed),
+                            style: text.labelMedium?.copyWith(
+                              color: _player.speed == 1
+                                  ? AppColors.textDim
+                                  : AppColors.accent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   if (widget.data.loading)
                     Tooltip(
                       message: l.timelineLoading,
@@ -641,6 +696,12 @@ class _TimelineScreenState extends State<TimelineScreen>
         ),
       ],
     );
+  }
+
+  /// "×0,5", "×2" in the language of the app.
+  String _speedText(double speed) {
+    final locale = Localizations.localeOf(context).toString();
+    return '×${NumberFormat.decimalPattern(locale).format(speed)}';
   }
 
   Widget _cameraRow(

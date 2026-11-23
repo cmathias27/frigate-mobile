@@ -725,4 +725,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get timelineLiveBadge => 'DIRECT';
+
+  @override
+  String get timelineSpeed => 'Vitesse de lecture';
 }

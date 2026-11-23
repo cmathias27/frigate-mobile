@@ -301,5 +301,6 @@
   "objectFireAlarm": "Alarme incendie",
   "timelineLive": "Direct",
   "timelineGoLive": "Revenir au direct",
-  "timelineLiveBadge": "DIRECT"
+  "timelineLiveBadge": "DIRECT",
+  "timelineSpeed": "Vitesse de lecture"
 }

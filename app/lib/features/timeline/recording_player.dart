@@ -43,6 +43,10 @@ abstract class RecordingPlayer extends ChangeNotifier {
 
   /// Tries the video again after a fallback to images.
   Future<void> retryVideo() async {}
+
+  /// Playback speed, 1 for real time; kept across [open].
+  double get speed => 1;
+  Future<void> setSpeed(double speed) async {}
 }
 
 /// [RecordingPlayer] reading Frigate's HLS recordings through [VodProxy].
@@ -55,8 +59,22 @@ class HlsRecordingPlayer extends RecordingPlayer {
   DateTime? _end;
   int _generation = 0;
   String? _error;
+  double _speed = 1;
 
   HlsRecordingPlayer(this._proxy);
+
+  @override
+  double get speed => _speed;
+
+  @override
+  Future<void> setSpeed(double speed) async {
+    _speed = speed;
+    final controller = _controller;
+    if (controller != null && controller.value.isInitialized) {
+      await controller.setPlaybackSpeed(speed);
+    }
+    notifyListeners();
+  }
 
   @override
   PlayerStatus get status => _status;
@@ -103,6 +121,8 @@ class HlsRecordingPlayer extends RecordingPlayer {
       );
       _controller = controller;
       await controller.initialize();
+      if (generation != _generation) return;
+      if (_speed != 1) await controller.setPlaybackSpeed(_speed);
       if (generation != _generation) return;
       controller.addListener(_onController);
       _status = PlayerStatus.ready;

@@ -57,6 +57,7 @@ class ImageRecordingPlayer extends RecordingPlayer {
   bool _fetching = false;
   int _generation = 0;
   bool _disposed = false;
+  double _speed = 1;
 
   ImageRecordingPlayer(
     this._fetch, {
@@ -67,6 +68,8 @@ class ImageRecordingPlayer extends RecordingPlayer {
 
   @override
   bool get imagePlayback => true;
+  @override
+  double get speed => _speed;
   @override
   PlayerStatus get status => _status;
   @override
@@ -85,7 +88,7 @@ class ImageRecordingPlayer extends RecordingPlayer {
     final base = _base;
     final since = _playingSince;
     if (base == null || since == null) return base;
-    final t = base.add(_clock().difference(since));
+    final t = base.add(_clock().difference(since) * _speed);
     final end = _end;
     return end != null && t.isAfter(end) ? end : t;
   }
@@ -127,6 +130,17 @@ class ImageRecordingPlayer extends RecordingPlayer {
       Duration(milliseconds: 1000 ~/ maxRate),
       (_) => _tick(),
     );
+    _notify();
+  }
+
+  @override
+  Future<void> setSpeed(double speed) async {
+    // The time reached so far stays; the new speed counts from now.
+    if (playing) {
+      _base = time;
+      _playingSince = _clock();
+    }
+    _speed = speed;
     _notify();
   }
 
@@ -261,6 +275,16 @@ class FallbackRecordingPlayer extends RecordingPlayer {
   bool get imagePlayback => identical(_active, images);
   @override
   String? get videoError => _videoError ?? video.videoError;
+  @override
+  double get speed => _active.speed;
+
+  @override
+  Future<void> setSpeed(double speed) async {
+    // Both keep it, so a switch to images keeps the speed chosen.
+    await video.setSpeed(speed);
+    await images.setSpeed(speed);
+  }
+
   @override
   PlayerStatus get status => _switching ? PlayerStatus.opening : _active.status;
   @override
