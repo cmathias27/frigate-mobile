@@ -105,8 +105,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get detectionModeObjects => 'Détection d\'objets active';
 
   @override
-  String continuousDays(String days) {
-    return 'Rétention continu : $days jours';
+  String retentionDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours',
+      one: '1 jour',
+    );
+    return 'Enregistrements conservés jusqu\'à $_temp0';
   }
 
   @override

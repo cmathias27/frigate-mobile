@@ -24,6 +24,9 @@ Map<String, dynamic> _camera({
     'alerts': {
       'retain': {'days': 10.0},
     },
+    'detections': {
+      'retain': {'days': 14.0},
+    },
   },
   'audio': {'enabled': false},
   'onvif': {'host': onvifHost ?? '', 'port': 8000},
@@ -184,6 +187,9 @@ void main() {
     expect(door.continuousDays, 3);
     expect(door.motionDays, 3);
     expect(door.alertDays, 10);
+    expect(door.detectionDays, 14);
+    // Detections kept longest: the history goes back that far.
+    expect(door.retentionDays, 14);
   });
 
   test('disabled cameras are left out', () {

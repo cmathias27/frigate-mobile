@@ -27,7 +27,15 @@ class FrigateMobileApp extends StatelessWidget {
   final SessionController session;
   final UpdateController? update;
 
-  const FrigateMobileApp({super.key, required this.session, this.update});
+  /// Storage of the app settings; the device's secure storage by default.
+  final Preferences? preferences;
+
+  const FrigateMobileApp({
+    super.key,
+    required this.session,
+    this.update,
+    this.preferences,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +58,11 @@ class FrigateMobileApp extends StatelessWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             case SessionStatus.authenticated:
-              return HomeShell(controller: session, update: update);
+              return HomeShell(
+                controller: session,
+                update: update,
+                preferences: preferences,
+              );
             case SessionStatus.unauthenticated:
             case SessionStatus.loading:
             case SessionStatus.connectionError:

@@ -30,6 +30,7 @@ class UpdateController extends ChangeNotifier {
 
   String? _currentVersion;
   bool _autoCheck = true;
+  bool _autoCheckChosen = false;
   UpdateStatus _status = UpdateStatus.idle;
   AppRelease? _release;
   double? _progress;
@@ -54,13 +55,22 @@ class UpdateController extends ChangeNotifier {
   /// Code of the last failure ([UpdateException.code]).
   String? get error => _error;
 
-  Future<void> init() async {
+  Future<void>? _init;
+
+  /// Reads the version installed and the choice of automatic checks. The
+  /// startup steps wait for it, so calling it without waiting is safe.
+  Future<void> init() => _init ??= _load();
+
+  Future<void> _load() async {
     _currentVersion = await _platform.currentVersion();
-    _autoCheck = await _preferences.read(_keyAutoCheck) != 'false';
+    final stored = await _preferences.read(_keyAutoCheck);
+    // A choice made meanwhile wins over the one stored.
+    if (!_autoCheckChosen) _autoCheck = stored != 'false';
     notifyListeners();
   }
 
   Future<void> setAutoCheck(bool value) async {
+    _autoCheckChosen = true;
     _autoCheck = value;
     notifyListeners();
     await _preferences.write(_keyAutoCheck, value ? null : 'false');
@@ -69,6 +79,7 @@ class UpdateController extends ChangeNotifier {
   /// True once per new version installed over an older one: the app then
   /// shows its notes ("Nouveautés"). A first installation shows nothing.
   Future<bool> takeWhatsNew() async {
+    await init();
     final current = _currentVersion;
     if (current == null) return false;
     final seen = await _preferences.read(_keySeenVersion);
@@ -80,6 +91,7 @@ class UpdateController extends ChangeNotifier {
   /// The automatic check: when allowed and not done for a day. Returns the
   /// newer release found, if any; a failure stays silent.
   Future<AppRelease?> checkOnStartup() async {
+    await init();
     if (!_autoCheck) return null;
     final last = DateTime.tryParse(
       await _preferences.read(_keyLastCheck) ?? '',

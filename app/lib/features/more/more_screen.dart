@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
+import '../../core/frigate/capabilities.dart';
 import '../../core/session/session_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../login/session_error_text.dart';
@@ -67,9 +70,12 @@ class MoreScreen extends StatelessWidget {
         final client = controller.client;
 
         final cameraCount = caps?.cameras.length ?? 0;
-        final continuousDays = caps?.cameras.values.isNotEmpty == true
-            ? caps!.cameras.values.first.continuousDays
-            : 0.0;
+        // Longest kept among the cameras that record, whatever the kind of
+        // recording (continuous, motion, alerts, detections).
+        final retentionDays = [
+          for (final c in caps?.cameras.values ?? const <CameraCapabilities>[])
+            if (c.recording) c.retentionDays,
+        ].fold<double>(0, max);
 
         return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -153,13 +159,11 @@ class MoreScreen extends StatelessWidget {
                             ? l.detectionModeObjects
                             : l.detectionModeMotionOnly,
                       ),
-                      if (continuousDays > 0) ...[
+                      if (retentionDays > 0) ...[
                         const SizedBox(height: 8),
                         _InfoRow(
                           icon: Icons.history_rounded,
-                          label: l.continuousDays(
-                            continuousDays.toStringAsFixed(0),
-                          ),
+                          label: l.retentionDays(retentionDays.ceil()),
                         ),
                       ],
                     ],

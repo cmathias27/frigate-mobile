@@ -491,6 +491,94 @@ void main() {
     });
   });
 
+  // check.sh runs the tests in Europe/Paris: clocks go forward on
+  // 29 March 2026 and back on 25 October 2026.
+  group('days the clocks change', () {
+    List<DateTime> ticks(DateTime from, Duration span, Duration step) {
+      final end = from.add(span);
+      final all = <DateTime>[];
+      for (
+        var t = alignTick(from, step);
+        !t.isAfter(end);
+        t = nextTick(t, step)
+      ) {
+        all.add(t);
+      }
+      return all;
+    }
+
+    void expectSteady(List<DateTime> all, DateTime from, int minutes) {
+      expect(all.first.isBefore(from), isFalse);
+      for (var i = 1; i < all.length; i++) {
+        expect(all[i].isAfter(all[i - 1]), isTrue, reason: '${all[i]}');
+      }
+      for (final t in all) {
+        expect((t.hour * 60 + t.minute) % minutes, 0, reason: '$t');
+      }
+    }
+
+    test('hour ticks keep round hours', () {
+      for (final day in [DateTime(2026, 3, 29), DateTime(2026, 10, 25)]) {
+        final from = day.add(const Duration(minutes: 30));
+        final all = ticks(
+          from,
+          DateTime(day.year, day.month, day.day + 1, 0, 30).difference(from),
+          const Duration(hours: 4),
+        );
+        expect(all.map((t) => t.hour), [4, 8, 12, 16, 20, 0], reason: '$day');
+      }
+    });
+
+    test('minute ticks go through the change', () {
+      final spring = DateTime(2026, 3, 29, 1, 30);
+      expectSteady(
+        ticks(spring, const Duration(hours: 1), const Duration(minutes: 10)),
+        spring,
+        10,
+      );
+      final autumn = DateTime(2026, 10, 25, 1, 30);
+      final all = ticks(
+        autumn,
+        const Duration(hours: 3),
+        const Duration(minutes: 10),
+      );
+      expectSteady(all, autumn, 10);
+      expect(all.last.hour, 3);
+
+      // In the hour lived twice, from its second pass.
+      final again = DateTime.utc(2026, 10, 25, 1, 15).toLocal();
+      expectSteady(
+        ticks(again, const Duration(hours: 1), const Duration(minutes: 10)),
+        again,
+        10,
+      );
+    });
+
+    test('day ticks fall at midnight', () {
+      final all = ticks(
+        DateTime(2026, 3, 27, 9),
+        const Duration(days: 4),
+        const Duration(days: 1),
+      );
+      expect(all.map((t) => (t.day, t.hour)), [
+        (28, 0),
+        (29, 0),
+        (30, 0),
+        (31, 0),
+      ]);
+    });
+
+    test('a day later is the same time on the clock', () {
+      final before = DateTime(2026, 3, 28, 12);
+      expect(shiftDay(before, 1), DateTime(2026, 3, 29, 12));
+      expect(shiftDay(DateTime(2026, 3, 29, 12), -1), before);
+      expect(
+        shiftDay(DateTime(2026, 10, 24, 22, 15), 1),
+        DateTime(2026, 10, 25, 22, 15),
+      );
+    });
+  });
+
   group('TimelineScreen', () {
     late _FakeRecordings server;
     late TimelineData data;

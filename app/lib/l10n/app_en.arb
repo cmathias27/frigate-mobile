@@ -26,7 +26,7 @@
   "serverInfoCameras": "{count, plural, =1{1 camera online} other{{count} cameras online}}",
   "detectionModeMotionOnly": "Motion-only mode (no object tracking)",
   "detectionModeObjects": "Object tracking active",
-  "continuousDays": "Continuous retention: {days} days",
+  "retentionDays": "Recordings kept up to {days, plural, =1{1 day} other{{days} days}}",
   "disconnectButton": "Disconnect",
   "disconnectConfirmTitle": "Disconnect",
   "disconnectConfirmMessage": "Do you want to disconnect from this Frigate server?",

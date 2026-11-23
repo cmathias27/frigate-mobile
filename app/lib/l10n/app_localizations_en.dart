@@ -102,8 +102,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detectionModeObjects => 'Object tracking active';
 
   @override
-  String continuousDays(String days) {
-    return 'Continuous retention: $days days';
+  String retentionDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return 'Recordings kept up to $_temp0';
   }
 
   @override
