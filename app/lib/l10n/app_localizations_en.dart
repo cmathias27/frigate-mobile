@@ -702,4 +702,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timelineLiveBadge => 'LIVE';
+
+  @override
+  String get timelineSpeed => 'Playback speed';
 }

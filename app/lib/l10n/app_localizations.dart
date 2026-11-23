@@ -1267,6 +1267,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'DIRECT'**
   String get timelineLiveBadge;
+
+  /// No description provided for @timelineSpeed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vitesse de lecture'**
+  String get timelineSpeed;
 }
 
 class _AppLocalizationsDelegate

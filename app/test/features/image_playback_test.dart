@@ -37,6 +37,11 @@ class _Video extends RecordingPlayer {
   bool completed = false;
   @override
   String? videoError;
+  @override
+  double speed = 1;
+
+  @override
+  Future<void> setSpeed(double speed) async => this.speed = speed;
 
   @override
   Future<void> open(String camera, DateTime start, DateTime end) async {
@@ -118,6 +123,28 @@ void main() {
       player.dispose();
     });
 
+    testWidgets('plays faster or slower from the time reached', (
+      tester,
+    ) async {
+      final player = ImageRecordingPlayer(_Frames().fetch, clock: clock);
+      await player.open('cam_a', start, end);
+      await player.setSpeed(4);
+      expect(player.speed, 4);
+      await player.play();
+      now = now.add(const Duration(seconds: 2));
+      expect(player.time, start.add(const Duration(seconds: 8)));
+
+      // Slowing down keeps the 8 s reached.
+      await player.setSpeed(0.5);
+      now = now.add(const Duration(seconds: 4));
+      expect(player.time, start.add(const Duration(seconds: 10)));
+
+      // Kept across an opening.
+      await player.open('cam_b', start, end);
+      expect(player.speed, 0.5);
+      player.dispose();
+    });
+
     testWidgets('a frame that cannot be read fails the opening', (
       tester,
     ) async {
@@ -172,6 +199,19 @@ void main() {
       await player.retryVideo();
       expect(player.imagePlayback, isFalse);
       expect(video.opened.last, 'cam_a');
+    });
+
+    testWidgets('the speed goes to the video and to the images', (
+      tester,
+    ) async {
+      await player.setSpeed(2);
+      expect(video.speed, 2);
+      expect(player.speed, 2);
+      video.failOpen = true;
+      await player.open('cam_a', start, end);
+      await tester.pump();
+      expect(player.imagePlayback, isTrue);
+      expect(player.speed, 2);
     });
 
     testWidgets('a frozen video switches to images where it stopped', (

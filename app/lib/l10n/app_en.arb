@@ -250,5 +250,6 @@
   "objectFireAlarm": "Fire alarm",
   "timelineLive": "Live",
   "timelineGoLive": "Back to live",
-  "timelineLiveBadge": "LIVE"
+  "timelineLiveBadge": "LIVE",
+  "timelineSpeed": "Playback speed"
 }

@@ -86,6 +86,14 @@ class _FakePlayer extends RecordingPlayer {
   @override
   String? videoError;
   int videoRetries = 0;
+  @override
+  double speed = 1;
+
+  @override
+  Future<void> setSpeed(double speed) async {
+    this.speed = speed;
+    notifyListeners();
+  }
 
   @override
   Future<void> retryVideo() async {
@@ -705,6 +713,22 @@ void main() {
       await tester.tap(find.text('Passage préc.'));
       await tester.pumpAndSettle();
       expect(player.opened.last.$1, 'cam_b');
+    });
+
+    testWidgets('playback speed is chosen and kept', (tester) async {
+      final preferences = Preferences.inMemory({'fm_timeline_speed': '2.0'});
+      await pumpScreen(tester, preferences: preferences);
+      await tester.pumpAndSettle();
+      expect(player.speed, 2);
+      expect(find.text('×2'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Vitesse de lecture'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('×0,5').last);
+      await tester.pumpAndSettle();
+      expect(player.speed, 0.5);
+      expect(find.text('×0,5'), findsOneWidget);
+      expect(preferences.read('fm_timeline_speed'), completion('0.5'));
     });
 
     testWidgets('no passage shows a message', (tester) async {
