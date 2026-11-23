@@ -3,7 +3,7 @@ description: "Application mobile pour Frigate NVR."
 publish_to: 'none'
 
 # Version shown in the app and compared by the in-app update (decision 0003).
-version: 0.2.1+6
+version: 0.2.2+7
 
 environment:
   sdk: ^3.13.7
