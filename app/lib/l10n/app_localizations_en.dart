@@ -705,4 +705,140 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timelineSpeed => 'Playback speed';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsSubtitle => 'Cameras, live, timeline';
+
+  @override
+  String get settingsCameras => 'Cameras';
+
+  @override
+  String settingsCamerasSummary(int shown, int total) {
+    return '$shown shown out of $total';
+  }
+
+  @override
+  String get settingsCamerasHelp =>
+      'Drag the handle to change the order. A hidden camera leaves the live view, the timeline and the alerts. Tap a camera to set its motion threshold.';
+
+  @override
+  String get settingsThresholdAuto => 'Motion threshold: automatic';
+
+  @override
+  String settingsThresholdAutoValue(int value) {
+    return 'Motion threshold: automatic ($value)';
+  }
+
+  @override
+  String settingsThresholdFixed(int value) {
+    return 'Motion threshold: $value';
+  }
+
+  @override
+  String settingsThresholdTitle(String camera) {
+    return 'Motion threshold · $camera';
+  }
+
+  @override
+  String get settingsThresholdHelp =>
+      'Frigate motion score above which the recording counts as a passage. Automatic follows the camera\'s usual motion.';
+
+  @override
+  String get settingsThresholdAutoSwitch => 'Automatic';
+
+  @override
+  String settingsThresholdNow(int value) {
+    return 'Currently $value';
+  }
+
+  @override
+  String get settingsThresholdField => 'Threshold';
+
+  @override
+  String get settingsThresholdInvalid => 'A whole number above 0';
+
+  @override
+  String get settingsLive => 'Live';
+
+  @override
+  String get settingsQuality => 'Stream opened first';
+
+  @override
+  String get settingsQualityAuto => 'Automatic';
+
+  @override
+  String get settingsQualityHigh => 'Main';
+
+  @override
+  String get settingsQualityLight => 'Light';
+
+  @override
+  String get settingsQualityAutoHelp =>
+      'Main stream in full screen, light stream in the timeline';
+
+  @override
+  String get settingsQualityHighHelp => 'Main stream everywhere';
+
+  @override
+  String get settingsQualityLightHelp =>
+      'Light stream everywhere: less data, any phone plays it';
+
+  @override
+  String get settingsOtherStreams => 'Try the other streams';
+
+  @override
+  String get settingsOtherStreamsHelp =>
+      'A stream that does not play hands over to the camera\'s next one';
+
+  @override
+  String get settingsTileSize => 'Tile size';
+
+  @override
+  String get settingsTileSizeHelp =>
+      'Automatic layout: larger means fewer cameras per page';
+
+  @override
+  String get settingsTileSmall => 'Small';
+
+  @override
+  String get settingsTileMedium => 'Medium';
+
+  @override
+  String get settingsTileLarge => 'Large';
+
+  @override
+  String get settingsTimeline => 'Timeline';
+
+  @override
+  String get settingsImageFallback => 'Play as images if the video fails';
+
+  @override
+  String get settingsImageFallbackHelp =>
+      'Recording the phone cannot play, or frozen: recorded images instead';
+
+  @override
+  String get settingsMinPassage => 'Shortest passage';
+
+  @override
+  String get settingsNoMinimum => 'None';
+
+  @override
+  String get settingsMergeGap => 'Join close passages';
+
+  @override
+  String get settingsMergeGapHelp =>
+      'Two passages less than this apart make one';
+
+  @override
+  String settingsSeconds(int count) {
+    return '$count s';
+  }
+
+  @override
+  String settingsMinutes(int count) {
+    return '$count min';
+  }
 }

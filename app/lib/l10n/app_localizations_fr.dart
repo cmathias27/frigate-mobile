@@ -728,4 +728,140 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get timelineSpeed => 'Vitesse de lecture';
+
+  @override
+  String get settingsTitle => 'Réglages';
+
+  @override
+  String get settingsSubtitle => 'Caméras, direct, chronologie';
+
+  @override
+  String get settingsCameras => 'Caméras';
+
+  @override
+  String settingsCamerasSummary(int shown, int total) {
+    return '$shown affichées sur $total';
+  }
+
+  @override
+  String get settingsCamerasHelp =>
+      'Glisser la poignée pour changer l\'ordre. Une caméra masquée disparaît du direct, de la chronologie et des alertes. Toucher une caméra pour régler son seuil de mouvement.';
+
+  @override
+  String get settingsThresholdAuto => 'Seuil de mouvement : automatique';
+
+  @override
+  String settingsThresholdAutoValue(int value) {
+    return 'Seuil de mouvement : automatique ($value)';
+  }
+
+  @override
+  String settingsThresholdFixed(int value) {
+    return 'Seuil de mouvement : $value';
+  }
+
+  @override
+  String settingsThresholdTitle(String camera) {
+    return 'Seuil de mouvement · $camera';
+  }
+
+  @override
+  String get settingsThresholdHelp =>
+      'Score de mouvement de Frigate au-delà duquel l\'enregistrement compte comme un passage. L\'automatique suit le mouvement habituel de la caméra.';
+
+  @override
+  String get settingsThresholdAutoSwitch => 'Automatique';
+
+  @override
+  String settingsThresholdNow(int value) {
+    return 'Actuellement $value';
+  }
+
+  @override
+  String get settingsThresholdField => 'Seuil';
+
+  @override
+  String get settingsThresholdInvalid => 'Un nombre entier supérieur à 0';
+
+  @override
+  String get settingsLive => 'Direct';
+
+  @override
+  String get settingsQuality => 'Flux ouvert d\'abord';
+
+  @override
+  String get settingsQualityAuto => 'Automatique';
+
+  @override
+  String get settingsQualityHigh => 'Principal';
+
+  @override
+  String get settingsQualityLight => 'Léger';
+
+  @override
+  String get settingsQualityAutoHelp =>
+      'Flux principal en plein écran, flux léger dans la chronologie';
+
+  @override
+  String get settingsQualityHighHelp => 'Flux principal partout';
+
+  @override
+  String get settingsQualityLightHelp =>
+      'Flux léger partout : moins de données, lisible par tout téléphone';
+
+  @override
+  String get settingsOtherStreams => 'Essayer les autres flux';
+
+  @override
+  String get settingsOtherStreamsHelp =>
+      'Un flux qui ne se lit pas passe seul au flux suivant de la caméra';
+
+  @override
+  String get settingsTileSize => 'Taille des vignettes';
+
+  @override
+  String get settingsTileSizeHelp =>
+      'Disposition automatique : plus grandes, moins de caméras par page';
+
+  @override
+  String get settingsTileSmall => 'Petites';
+
+  @override
+  String get settingsTileMedium => 'Moyennes';
+
+  @override
+  String get settingsTileLarge => 'Grandes';
+
+  @override
+  String get settingsTimeline => 'Chronologie';
+
+  @override
+  String get settingsImageFallback => 'Lecture en images si la vidéo échoue';
+
+  @override
+  String get settingsImageFallbackHelp =>
+      'Enregistrement illisible par le téléphone ou figé : images enregistrées à la place';
+
+  @override
+  String get settingsMinPassage => 'Durée minimale d\'un passage';
+
+  @override
+  String get settingsNoMinimum => 'Aucune';
+
+  @override
+  String get settingsMergeGap => 'Réunir les passages proches';
+
+  @override
+  String get settingsMergeGapHelp =>
+      'Deux passages séparés de moins que cette durée n\'en font qu\'un';
+
+  @override
+  String settingsSeconds(int count) {
+    return '$count s';
+  }
+
+  @override
+  String settingsMinutes(int count) {
+    return '$count min';
+  }
 }

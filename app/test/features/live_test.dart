@@ -378,18 +378,24 @@ void main() {
       return video;
     }
 
-    Future<void> open(WidgetTester tester, List<CameraCapabilities> cams) =>
-        tester.pumpWidget(
-          _app(
-            CameraFullScreen(
-              cameras: cams,
-              initialCamera: cams.first.name,
-              fetch: server.fetch,
-              videoFactory: factory,
-              photoActions: photos,
-            ),
-          ),
-        );
+    Future<void> open(
+      WidgetTester tester,
+      List<CameraCapabilities> cams, {
+      bool lightStreamFirst = false,
+      bool tryOtherStreams = true,
+    }) => tester.pumpWidget(
+      _app(
+        CameraFullScreen(
+          cameras: cams,
+          initialCamera: cams.first.name,
+          fetch: server.fetch,
+          videoFactory: factory,
+          photoActions: photos,
+          lightStreamFirst: lightStreamFirst,
+          tryOtherStreams: tryOtherStreams,
+        ),
+      ),
+    );
 
     setUp(() {
       server = _FakeServer();
@@ -506,6 +512,24 @@ void main() {
       expect(videos.last.stream, 'cam_g_3');
       expect(videos.last.started, isTrue);
 
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('light stream first; no other stream when switched off', (
+      tester,
+    ) async {
+      await open(
+        tester,
+        [
+          _camera('cam_g', streams: ['cam_g_1', 'cam_g_2']),
+        ],
+        lightStreamFirst: true,
+        tryOtherStreams: false,
+      );
+      expect(videos.single.stream, 'cam_g_2');
+      videos.single.fail();
+      await tester.pump();
+      expect(videos, hasLength(1));
       await tester.pumpWidget(const SizedBox());
     });
 

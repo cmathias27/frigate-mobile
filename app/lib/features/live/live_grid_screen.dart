@@ -33,6 +33,13 @@ class LiveGridScreen extends StatefulWidget {
   final int layout;
   final VoidCallback? onAuthError;
 
+  /// Narrowest tile of the automatic layout.
+  final double minTileWidth;
+
+  /// Passed on to the full screen.
+  final bool lightStreamFirst;
+  final bool tryOtherStreams;
+
   const LiveGridScreen({
     super.key,
     required this.cameras,
@@ -40,6 +47,9 @@ class LiveGridScreen extends StatefulWidget {
     this.videoFactory,
     this.layout = liveLayoutDefault,
     this.onAuthError,
+    this.minTileWidth = GridFitDefaults.minTileWidth,
+    this.lightStreamFirst = false,
+    this.tryOtherStreams = LiveVideoDefaults.tryOtherStreams,
   });
 
   @override
@@ -150,7 +160,7 @@ class _LiveGridScreenState extends State<LiveGridScreen>
         math.max(0, size.height - 2 * GridFitDefaults.padding - bottom),
       );
       return widget.layout == liveLayoutAuto
-          ? fitAuto(count, area)
+          ? fitAuto(count, area, minTileWidth: widget.minTileWidth)
           : fitFixed(math.min(widget.layout, count), area);
     }
 
@@ -191,6 +201,8 @@ class _LiveGridScreenState extends State<LiveGridScreen>
           fetch: widget.fetch,
           videoFactory: widget.videoFactory,
           onAuthError: widget.onAuthError,
+          lightStreamFirst: widget.lightStreamFirst,
+          tryOtherStreams: widget.tryOtherStreams,
         ),
       ),
     );

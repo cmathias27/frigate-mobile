@@ -33,7 +33,8 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 - [x] Direct en disposition automatique : toutes les caméras sur un écran tant qu'elles restent lisibles, vignettes à la taille de l'écran, debout ou couché (choix de disposition gardé)
 - [x] Chronologie qui s'ouvre sur le direct de la caméra (flux léger d'abord) ; glisser en arrière lit l'enregistrement, bouton « Direct » pour revenir
 - [x] Vitesse de lecture des enregistrements dans la chronologie (×0,5 à ×8), gardée d'une ouverture à l'autre
-- [ ] Réglages : seuils par caméra, groupes et ordre, qualité, cible de précédent / suivant
+- [x] Réglages : ordre et caméras masquées, seuil de mouvement par caméra, flux ouvert d'abord, autres flux, taille des vignettes, lecture en images, durée et regroupement des passages (cible de précédent / suivant : choix gardé dans la chronologie)
+- [ ] Groupes de caméras dans le direct
 
 ## 0.3 — À distance et notifications
 

@@ -18,6 +18,7 @@ import '../features/live/live_grid_screen.dart';
 import '../features/live/live_pane.dart';
 import '../features/live/webrtc_live_video.dart';
 import '../features/more/more_screen.dart';
+import '../features/more/settings_screen.dart';
 import '../features/timeline/clip_sheet.dart';
 import '../features/timeline/image_playback.dart';
 import '../features/timeline/motion_passages.dart';
@@ -28,6 +29,7 @@ import '../features/timeline/timeline_screen.dart';
 import '../features/update/update_controller.dart';
 import '../features/update/update_widgets.dart';
 import '../l10n/app_localizations.dart';
+import 'app_settings.dart';
 import 'theme.dart';
 
 /// The four tabs of the mock-ups.
@@ -66,6 +68,11 @@ class _HomeShellState extends State<HomeShell> {
   ReviewList? _reviewList;
   ReviewThumbnails? _reviewThumbnails;
   late final Preferences _preferences = widget.preferences ?? Preferences();
+  late final AppSettings _settings = AppSettings(_preferences);
+
+  /// Cameras the recordings and the reviews were prepared for.
+  String? _timelineCameras;
+  String? _reviewCameras;
 
   /// Passage opened from the Alerts tab, played once by the timeline.
   MotionPassage? _openAt;
@@ -74,6 +81,8 @@ class _HomeShellState extends State<HomeShell> {
   void initState() {
     super.initState();
     _readLiveLayout();
+    _settings.addListener(_onSettings);
+    unawaited(_settings.load());
     final update = widget.update;
     if (update != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -95,10 +104,24 @@ class _HomeShellState extends State<HomeShell> {
     _preferences.write(_keyLiveLayout, '$layout');
   }
 
+  void _onSettings() {
+    _timelineData?.settings = _settings.passages;
+    if (mounted) setState(() {});
+  }
+
+  /// Automatic motion threshold of [camera] among the recordings fetched.
+  int? _autoThreshold(String camera) {
+    final segments = _timelineData?.segments(camera) ?? const [];
+    if (segments.isEmpty) return null;
+    return passageThreshold(segments.map((s) => s.motion));
+  }
+
   @override
   void dispose() {
     _releaseTimeline();
     _releaseReviews();
+    _settings.removeListener(_onSettings);
+    _settings.dispose();
     super.dispose();
   }
 
@@ -111,6 +134,7 @@ class _HomeShellState extends State<HomeShell> {
     _timelineData = null;
     _vodProxy = null;
     _timelineClient = null;
+    _timelineCameras = null;
   }
 
   void _releaseReviews() {
@@ -118,6 +142,7 @@ class _HomeShellState extends State<HomeShell> {
     _reviewList = null;
     _reviewThumbnails = null;
     _reviewClient = null;
+    _reviewCameras = null;
   }
 
   /// Alerts and detections of the session, kept across tab changes.
@@ -125,9 +150,11 @@ class _HomeShellState extends State<HomeShell> {
     FrigateClient client,
     List<CameraCapabilities> reviewed,
   ) {
-    if (identical(client, _reviewClient)) return;
+    final names = reviewed.map((c) => c.name).join(',');
+    if (identical(client, _reviewClient) && names == _reviewCameras) return;
     _releaseReviews();
     _reviewClient = client;
+    _reviewCameras = names;
     _reviewList = ReviewList(
       fetch: client.fetchReviews,
       mark: client.markReviewed,
@@ -145,12 +172,17 @@ class _HomeShellState extends State<HomeShell> {
     FrigateClient client,
     List<CameraCapabilities> recorded,
   ) {
-    if (identical(client, _timelineClient)) return;
+    final names = recorded.map((c) => c.name).join(',');
+    if (identical(client, _timelineClient) && names == _timelineCameras) {
+      return;
+    }
     _releaseTimeline();
     _timelineClient = client;
+    _timelineCameras = names;
     final data = _timelineData = TimelineData(
       cameras: [for (final c in recorded) c.name],
       fetch: client.fetchRecordings,
+      settings: _settings.passages,
       onAuthError: widget.controller.sessionExpired,
     );
     _vodProxy = VodProxy(
@@ -173,6 +205,27 @@ class _HomeShellState extends State<HomeShell> {
     );
   }
 
+  Widget _settingsEntry(
+    AppLocalizations l,
+    List<CameraCapabilities> cameras,
+  ) => ListTile(
+    leading: const Icon(Icons.tune_rounded),
+    title: Text(l.settingsTitle),
+    subtitle: Text(l.settingsSubtitle),
+    trailing: const Icon(Icons.chevron_right_rounded),
+    tileColor: AppColors.surface,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    onTap: () => Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SettingsScreen(
+          settings: _settings,
+          cameras: cameras,
+          autoThreshold: _autoThreshold,
+        ),
+      ),
+    ),
+  );
+
   Widget _noRecording() => _Placeholder(
     icon: Icons.videocam_off_outlined,
     description: AppLocalizations.of(context).timelineNoRecordingCamera,
@@ -191,6 +244,7 @@ class _HomeShellState extends State<HomeShell> {
       playerFactory: () => FallbackRecordingPlayer(
         video: HlsRecordingPlayer(proxy),
         images: ImageRecordingPlayer(client.fetchRecordingImage),
+        enabled: _settings.imageFallback,
       ),
       loadHistory: () => _loadHistory(client, recorded),
       openAt: openAt,
@@ -200,6 +254,8 @@ class _HomeShellState extends State<HomeShell> {
         videoFactory: (stream) =>
             WebRtcLiveVideo(stream: stream, negotiate: client.negotiateWebRtc),
         onAuthError: widget.controller.sessionExpired,
+        lightStreamFirst: _settings.timelineLightFirst,
+        tryOtherStreams: _settings.tryOtherStreams,
       ),
       export: RecordingExport(
         open: client.openStream,
@@ -279,8 +335,10 @@ class _HomeShellState extends State<HomeShell> {
     final l = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     final serverName = widget.controller.config?.name ?? l.appTitle;
-    final cameras =
+    final allCameras =
         widget.controller.capabilities?.cameras.values.toList() ?? const [];
+    // In the order chosen, hidden ones left out (settings).
+    final cameras = _settings.arrange(allCameras);
     final cameraCount = cameras.length;
     final client = widget.controller.client;
 
@@ -332,6 +390,9 @@ class _HomeShellState extends State<HomeShell> {
           ),
           layout: _liveLayout,
           onAuthError: widget.controller.sessionExpired,
+          minTileWidth: _settings.tileSize.width,
+          lightStreamFirst: _settings.fullScreenLightFirst,
+          tryOtherStreams: _settings.tryOtherStreams,
         ),
         1 when client != null => _timeline(client, cameras),
         2 when client != null => _events(client, cameras),
@@ -341,6 +402,7 @@ class _HomeShellState extends State<HomeShell> {
           updates: widget.update == null
               ? null
               : UpdateSettings(update: widget.update!),
+          settings: _settingsEntry(l, allCameras),
         ),
         _ => _Placeholder(
           icon: icon,
