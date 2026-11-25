@@ -5,6 +5,26 @@ l'application affiche avant d'installer une mise à jour et dans
 « Nouveautés » après l'installation (décision 0003). Écrire pour
 l'utilisateur : ce qui change pour lui, pas comment c'est codé.
 
+## 0.3.0
+
+Parler aux caméras, les orienter, et une version pour Windows.
+
+- Plein écran : bouton « Parler » sur les caméras qui ont un
+  haut-parleur (un portier par exemple). Le micro s'ouvre en le
+  touchant, un second appui le coupe. Android demande l'accès au micro
+  la première fois. Si la caméra refuse le son envoyé, l'application le
+  dit. Réglages › Direct › « Bouton Parler » : désactivable en général
+  ou caméra par caméra.
+- Plein écran : bouton « Orienter » sur les caméras que Frigate pilote
+  en ONVIF. La caméra tourne tant qu'une flèche est appuyée et s'arrête
+  au relâchement ; zoom et positions enregistrées quand la caméra les
+  propose.
+- Version Windows sans installation : l'archive
+  frigate-mobile-0.3.0-windows.zip est jointe à cette version. La
+  décompresser où l'on veut et lancer frigate_mobile.exe. Pour les
+  mises à jour suivantes, l'application ouvre le téléchargement de la
+  nouvelle archive dans le navigateur.
+
 ## 0.2.3
 
 Deux nouveautés pour le direct et la chronologie.
