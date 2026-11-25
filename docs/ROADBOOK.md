@@ -36,11 +36,9 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 - [x] Réglages : ordre et caméras masquées, seuil de mouvement par caméra, flux ouvert d'abord, autres flux, taille des vignettes, lecture en images, durée et regroupement des passages (cible de précédent / suivant : choix gardé dans la chronologie)
 - [x] Groupes de caméras dans le direct (créés dans les réglages, choisis en haut du direct, choix gardé)
 
-## 0.3 — À distance et notifications
+## 0.3 — À distance et confort de lecture
 
-- [ ] Accès distant par proxy HTTPS (Caddy), bascule automatique local / distant
-- [ ] Relais de notifications (conteneur optionnel) et notifications avec image
-- [ ] Mode maison
+- [ ] Accès distant par l'adresse externe de l'utilisateur, bascule automatique local / distant (prête dans l'application depuis 0.1 ; à confirmer sur téléphone hors du réseau local)
 - [x] Alertes et détections de Frigate comme cible de préc. / suiv. dans la chronologie (bouton à côté de la caméra, choix gardé ; seulement quand Frigate en produit)
 - [x] Mode de direct forcé : automatique, vidéo seulement (bouton Réessayer, jamais d'images) ou images seulement (aucune connexion vidéo), plein écran et chronologie
 
@@ -49,3 +47,7 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 - [ ] Écouter et **Parler** sur toutes les caméras qui le permettent (réglage général et par caméra)
 - [ ] Widgets Android
 - [ ] PTZ, visages, plaques, recherche : seulement quand Frigate les active
+
+## Abandonné
+
+- Relais de notifications et mode maison (retirés le 25/11/2026 à la demande de l'utilisateur)
