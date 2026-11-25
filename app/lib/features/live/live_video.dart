@@ -7,7 +7,10 @@ typedef WebRtcNegotiator = Future<String> Function(String stream, String offer);
 
 /// Opens a live video of a go2rtc stream. Screens take it as optional:
 /// without one, or when the video fails, they show images.
-typedef LiveVideoFactory = LiveVideo Function(String stream);
+///
+/// With [talk], the connection also sends the microphone to the camera
+/// (go2rtc backchannel), microphone on from the start.
+typedef LiveVideoFactory = LiveVideo Function(String stream, {bool talk});
 
 enum LiveVideoStatus { connecting, playing, failed }
 
@@ -32,6 +35,20 @@ abstract class LiveVideo extends ChangeNotifier {
   /// when no frame can be captured (the caller then uses an image).
   Future<Uint8List?> captureFrame();
 
+  /// Opened with the microphone: the camera may hear the phone.
+  bool get withTalk => false;
+
+  /// The server takes the sound sent (its answer receives audio); known
+  /// once the connection is negotiated.
+  bool get canTalk => false;
+
+  /// The microphone could not be opened (permission refused, no device).
+  bool get microphoneFailed => false;
+
+  /// The microphone is sent; only meaningful [withTalk].
+  bool get talking => false;
+  set talking(bool value) {}
+
   /// Starts connecting; [status] then moves to playing or failed.
   Future<void> start();
 
@@ -52,6 +69,10 @@ abstract final class LiveVideoDefaults {
   /// Sound starts muted, like DS cam: no surprise noise when opening a
   /// camera.
   static const startMuted = true;
+
+  /// Talking shows the "Talk" button on the cameras that accept sound
+  /// (a setting can hide it, for all cameras or one).
+  static const talk = true;
 
   /// How often the frames decoded are counted once the video plays.
   static const frameCheck = Duration(seconds: 2);
@@ -93,6 +114,29 @@ class FrameWatch {
     final rate = (frames - first) / (elapsed.inMilliseconds / 1000);
     return rate < minFrameRate;
   }
+}
+
+/// True when the SDP [answer] takes the sound the phone sends: an
+/// `m=audio` section with a non-zero port that receives (`recvonly` or
+/// `sendrecv`, the default when no direction is given).
+bool sdpReceivesAudio(String answer) {
+  var inAudio = false;
+  var open = false;
+  var receives = true;
+  bool done() => inAudio && open && receives;
+  for (final raw in answer.split('\n')) {
+    final line = raw.trim();
+    if (line.startsWith('m=')) {
+      if (done()) return true;
+      final parts = line.substring(2).split(' ');
+      inAudio = parts.first == 'audio';
+      open = inAudio && parts.length > 1 && parts[1] != '0';
+      receives = true;
+    } else if (inAudio && (line == 'a=sendonly' || line == 'a=inactive')) {
+      receives = false;
+    }
+  }
+  return done();
 }
 
 /// True when the SDP [answer] carries a sound track: an `m=audio` section

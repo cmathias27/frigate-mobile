@@ -99,6 +99,10 @@ class CameraCapabilities {
   /// The camera accepts audio sent to it (go2rtc backchannel): "Talk".
   final bool talk;
 
+  /// The live stream that carries the backchannel, when [talk]; null means
+  /// the first live stream.
+  final String? talkStream;
+
   /// The camera has a sound track that can be listened to.
   final bool sound;
 
@@ -120,6 +124,7 @@ class CameraCapabilities {
     required this.audioDetection,
     required this.ptz,
     required this.talk,
+    this.talkStream,
     required this.sound,
     required this.liveStreams,
   });
@@ -142,6 +147,13 @@ class CameraCapabilities {
     final medias = [
       for (final stream in liveStreams) ..._medias(streams[stream]),
     ];
+    String? talkStream;
+    for (final stream in liveStreams) {
+      if (_medias(streams[stream]).any(_isTalkMedia)) {
+        talkStream = stream;
+        break;
+      }
+    }
     for (final stream in _restreams(cam, streams)) {
       if (!liveStreams.contains(stream)) liveStreams.add(stream);
     }
@@ -166,7 +178,8 @@ class CameraCapabilities {
       ),
       audioDetection: _enabled(cam['audio']),
       ptz: '${_map(cam['onvif'])['host'] ?? ''}'.trim().isNotEmpty,
-      talk: medias.any(_isTalkMedia),
+      talk: talkStream != null,
+      talkStream: talkStream,
       sound: medias.any(_isSoundMedia),
       liveStreams: List.unmodifiable(liveStreams),
     );

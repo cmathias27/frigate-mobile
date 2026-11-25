@@ -6,7 +6,8 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import 'live_video.dart';
 
-/// Live video from go2rtc over WebRTC, receive only.
+/// Live video from go2rtc over WebRTC: receive only, or with the
+/// microphone sent to the camera when opened [withTalk] (backchannel).
 ///
 /// Signalling goes through Frigate's authenticated port (decision 0004);
 /// media then flows straight from go2rtc's WebRTC port (8555 by default)
@@ -23,6 +24,15 @@ class WebRtcLiveVideo extends LiveVideo {
 
   /// Stream made here when the track came without one; freed on dispose.
   MediaStream? _localStream;
+
+  @override
+  final bool withTalk;
+
+  /// The microphone, when [withTalk].
+  MediaStream? _microphone;
+  bool _microphoneFailed = false;
+  bool _canTalk = false;
+  bool _talking = false;
   Timer? _timeout;
   Timer? _frameCheck;
   final _frames = FrameWatch();
@@ -32,7 +42,30 @@ class WebRtcLiveVideo extends LiveVideo {
   bool _muted = LiveVideoDefaults.startMuted;
   bool _disposed = false;
 
-  WebRtcLiveVideo({required this.stream, required this._negotiate});
+  WebRtcLiveVideo({
+    required this.stream,
+    required this._negotiate,
+    this.withTalk = false,
+  });
+
+  @override
+  bool get canTalk => _canTalk;
+
+  @override
+  bool get microphoneFailed => _microphoneFailed;
+
+  @override
+  bool get talking => _talking;
+
+  @override
+  set talking(bool value) {
+    if (_talking == value || !withTalk) return;
+    _talking = value;
+    for (final track in [...?_microphone?.getAudioTracks()]) {
+      track.enabled = value;
+    }
+    notifyListeners();
+  }
 
   @override
   LiveVideoStatus get status => _status;
@@ -59,10 +92,18 @@ class WebRtcLiveVideo extends LiveVideo {
       if (_status == LiveVideoStatus.connecting) _fail('timeout');
     });
     try {
-      // Sound of a camera is media, played on the loudspeaker, not a call.
-      await Helper.setAndroidAudioConfiguration(
-        AndroidAudioConfiguration.media,
-      ).catchError((Object _) {});
+      // Sound of a camera is media, played on the loudspeaker, not a call;
+      // talking is a call, with echo cancellation, on the loudspeaker too.
+      await _quietly(
+        'audio',
+        () => Helper.setAndroidAudioConfiguration(
+          withTalk
+              ? AndroidAudioConfiguration.communication
+              : AndroidAudioConfiguration.media,
+        ),
+      );
+      if (withTalk) await _openMicrophone();
+      if (_disposed) return;
       await _renderer.initialize();
       _renderer.onFirstFrameRendered = () {
         _setStatus(LiveVideoStatus.playing);
@@ -87,12 +128,25 @@ class WebRtcLiveVideo extends LiveVideo {
         }
       };
 
-      for (final kind in [
-        RTCRtpMediaType.RTCRtpMediaTypeVideo,
-        RTCRtpMediaType.RTCRtpMediaTypeAudio,
-      ]) {
+      await pc.addTransceiver(
+        kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
+        init: RTCRtpTransceiverInit(direction: TransceiverDirection.RecvOnly),
+      );
+      final microphone = _microphone;
+      final voice = microphone?.getAudioTracks().firstOrNull;
+      if (microphone != null && voice != null) {
+        // One audio section both ways: the camera's sound comes back on it.
         await pc.addTransceiver(
-          kind: kind,
+          track: voice,
+          kind: RTCRtpMediaType.RTCRtpMediaTypeAudio,
+          init: RTCRtpTransceiverInit(
+            direction: TransceiverDirection.SendRecv,
+            streams: [microphone],
+          ),
+        );
+      } else {
+        await pc.addTransceiver(
+          kind: RTCRtpMediaType.RTCRtpMediaTypeAudio,
           init: RTCRtpTransceiverInit(direction: TransceiverDirection.RecvOnly),
         );
       }
@@ -117,10 +171,36 @@ class WebRtcLiveVideo extends LiveVideo {
       final answer = await _negotiate(stream, offer!.sdp!);
       if (_disposed) return;
       _hasAudio = sdpHasAudio(answer);
+      _canTalk = _microphone != null && sdpReceivesAudio(answer);
       await pc.setRemoteDescription(RTCSessionDescription(answer, 'answer'));
       notifyListeners();
     } catch (e) {
       _fail(e);
+    }
+  }
+
+  /// Opens the microphone, on from the start: the user asked to talk.
+  Future<void> _openMicrophone() async {
+    try {
+      final microphone = await navigator.mediaDevices.getUserMedia({
+        'audio': {
+          'echoCancellation': true,
+          'noiseSuppression': true,
+          'autoGainControl': true,
+        },
+        'video': false,
+      });
+      if (_disposed) {
+        await _quietly('microphone', microphone.dispose);
+        return;
+      }
+      _microphone = microphone;
+      _talking = true;
+      await _quietly('speaker', () => Helper.setSpeakerphoneOn(true));
+    } catch (e) {
+      // The video still opens, without the microphone.
+      debugPrint('WebRTC $stream microphone: $e');
+      _microphoneFailed = true;
     }
   }
 
@@ -215,11 +295,27 @@ class WebRtcLiveVideo extends LiveVideo {
   Future<void> _release(RTCPeerConnection? pc) async {
     final media = _localStream;
     _localStream = null;
+    final microphone = _microphone;
+    _microphone = null;
+    if (microphone != null) {
+      for (final track in microphone.getAudioTracks()) {
+        await _quietly('microphone', track.stop);
+      }
+      await _quietly('microphone', microphone.dispose);
+    }
     // Each step on its own: a failed one must not keep the others allocated.
     await _quietly('renderer', () async => _renderer.srcObject = null);
     if (media != null) await _quietly('stream', media.dispose);
     if (pc != null) await _closePeer(pc);
     await _quietly('renderer', _renderer.dispose);
+    if (withTalk) {
+      await _quietly(
+        'audio',
+        () => Helper.setAndroidAudioConfiguration(
+          AndroidAudioConfiguration.media,
+        ),
+      );
+    }
   }
 
   /// Closes the connection, then frees its native side: close alone leaves

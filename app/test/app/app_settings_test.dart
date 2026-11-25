@@ -17,6 +17,7 @@ CameraCapabilities _camera(
   String name,
   String label, {
   bool recording = true,
+  bool talk = false,
 }) => CameraCapabilities(
   name: name,
   label: label,
@@ -28,7 +29,7 @@ CameraCapabilities _camera(
   alertDays: 0,
   audioDetection: false,
   ptz: false,
-  talk: false,
+  talk: talk,
   sound: false,
   liveStreams: [name, '${name}_sub'],
 );
@@ -68,6 +69,8 @@ void main() {
       expect(settings.tryOtherStreams, isTrue);
       expect(settings.imageFallback, isTrue);
       expect(settings.tileSize, TileSize.medium);
+      expect(settings.talk, isTrue);
+      expect(settings.talkAllowed('cam_door'), isTrue);
       expect(_names(settings.arrange(_cameras)), [
         'cam_a',
         'cam_b',
@@ -88,11 +91,17 @@ void main() {
         ..mergeGap = const Duration(minutes: 1)
         ..reorder(['cam_b', 'cam_a'])
         ..setHidden('cam_door', true)
-        ..setThreshold('cam_a', 80);
+        ..setThreshold('cam_a', 80)
+        ..setCameraTalk('cam_door', false);
       await Future<void>.delayed(Duration.zero);
 
       final read = AppSettings(preferences);
       await read.load();
+      expect(read.talk, isTrue);
+      expect(read.talkAllowed('cam_door'), isFalse);
+      expect(read.talkAllowed('cam_a'), isTrue);
+      read.talk = false;
+      expect(read.talkAllowed('cam_a'), isFalse);
       expect(read.quality, LiveQuality.light);
       expect(read.fullScreenLightFirst, isTrue);
       expect(read.liveMode, LiveMode.video);
@@ -247,6 +256,49 @@ void main() {
       await tester.tap(find.text('2\u00a0min').last);
       await tester.pumpAndSettle();
       expect(settings.mergeGap, const Duration(minutes: 2));
+    });
+
+    testWidgets('talk: everywhere, then camera by camera', (tester) async {
+      final settings = AppSettings(Preferences.inMemory());
+      final cameras = [
+        _camera('cam_a', 'Entrée', talk: true),
+        _camera('cam_b', 'Cour'),
+        _camera('cam_door', 'Portail', talk: true),
+      ];
+      await tester.pumpWidget(
+        _app(SettingsScreen(settings: settings, cameras: cameras)),
+      );
+      const talk = 'Bouton «\u00a0Parler\u00a0»';
+      await tester.scrollUntilVisible(find.text(talk), 100);
+      expect(find.text(talk), findsOneWidget);
+      // Only the cameras with a loudspeaker.
+      await tester.scrollUntilVisible(find.text('Portail'), 100);
+      expect(find.text('Portail'), findsOneWidget);
+      expect(find.text('Cour'), findsNothing);
+      await tester.tap(find.text('Portail'));
+      await tester.pump();
+      expect(settings.talkAllowed('cam_door'), isFalse);
+      expect(settings.talkAllowed('cam_a'), isTrue);
+
+      await tester.tap(find.text(talk));
+      await tester.pump();
+      expect(settings.talk, isFalse);
+      expect(find.text('Portail'), findsNothing);
+
+      // Images only: no video connection, no talk.
+      settings.liveMode = LiveMode.images;
+      await tester.pump();
+      expect(find.text(talk), findsNothing);
+    });
+
+    testWidgets('no talk setting without a camera that accepts sound', (
+      tester,
+    ) async {
+      final settings = AppSettings(Preferences.inMemory());
+      await tester.pumpWidget(
+        _app(SettingsScreen(settings: settings, cameras: _cameras)),
+      );
+      expect(find.text('Bouton «\u00a0Parler\u00a0»'), findsNothing);
     });
 
     testWidgets('groups: create, rename, delete', (tester) async {

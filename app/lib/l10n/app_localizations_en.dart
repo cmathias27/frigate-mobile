@@ -249,6 +249,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get liveSound => 'Sound';
 
   @override
+  String get liveTalk => 'Talk';
+
+  @override
+  String get liveTalkStart => 'Talk to the camera';
+
+  @override
+  String get liveTalkStop => 'Turn the microphone off';
+
+  @override
+  String get liveTalkMicrophoneFailed =>
+      'Microphone unavailable: allow microphone access to talk.';
+
+  @override
+  String get liveTalkRefused => 'The camera did not accept the sound sent.';
+
+  @override
   String timelinePlaying(String camera) {
     return 'Playing · $camera';
   }
@@ -864,6 +880,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsOtherStreamsHelp =>
       'A stream that does not play hands over to the camera\'s next one';
+
+  @override
+  String get settingsTalk => '“Talk” button';
+
+  @override
+  String get settingsTalkHelp =>
+      'On cameras that have a loudspeaker. The microphone only opens when you tap the button.';
 
   @override
   String get settingsTileSize => 'Tile size';

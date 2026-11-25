@@ -168,9 +168,10 @@ class _HomeShellState extends State<HomeShell> {
                   fetch: client.fetchLatestImage,
                   videoFactory: _settings.liveMode == LiveMode.images
                       ? null
-                      : (stream) => WebRtcLiveVideo(
+                      : (stream, {talk = false}) => WebRtcLiveVideo(
                           stream: stream,
                           negotiate: client.negotiateWebRtc,
+                          withTalk: talk,
                         ),
                   layout: _liveLayout,
                   onAuthError: widget.controller.sessionExpired,
@@ -178,6 +179,7 @@ class _HomeShellState extends State<HomeShell> {
                   lightStreamFirst: _settings.fullScreenLightFirst,
                   tryOtherStreams: _settings.tryOtherStreams,
                   videoOnly: _settings.liveMode == LiveMode.video,
+                  talkAllowed: _settings.talkAllowed,
                 ),
         ),
       ],
@@ -338,9 +340,10 @@ class _HomeShellState extends State<HomeShell> {
         fetch: client.fetchLatestImage,
         videoFactory: _settings.liveMode == LiveMode.images
             ? null
-            : (stream) => WebRtcLiveVideo(
+            : (stream, {talk = false}) => WebRtcLiveVideo(
                 stream: stream,
                 negotiate: client.negotiateWebRtc,
+                withTalk: talk,
               ),
         onAuthError: widget.controller.sessionExpired,
         lightStreamFirst: _settings.timelineLightFirst,

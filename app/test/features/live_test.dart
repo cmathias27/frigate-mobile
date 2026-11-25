@@ -25,22 +25,26 @@ final _pixel = Uint8List.fromList(const [
   0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
 ]);
 
-CameraCapabilities _camera(String name, {List<String>? streams}) =>
-    CameraCapabilities(
-      name: name,
-      label: CameraCapabilities.defaultLabel(name),
-      objectDetection: false,
-      trackedObjects: const [],
-      recording: true,
-      continuousDays: 3,
-      motionDays: 0,
-      alertDays: 0,
-      audioDetection: false,
-      ptz: false,
-      talk: false,
-      sound: false,
-      liveStreams: streams ?? [name],
-    );
+CameraCapabilities _camera(
+  String name, {
+  List<String>? streams,
+  String? talkStream,
+}) => CameraCapabilities(
+  name: name,
+  label: CameraCapabilities.defaultLabel(name),
+  objectDetection: false,
+  trackedObjects: const [],
+  recording: true,
+  continuousDays: 3,
+  motionDays: 0,
+  alertDays: 0,
+  audioDetection: false,
+  ptz: false,
+  talk: talkStream != null,
+  talkStream: talkStream,
+  sound: false,
+  liveStreams: streams ?? [name],
+);
 
 /// Records every frame request; fails for cameras listed in [failing].
 class _FakeServer {
@@ -72,7 +76,24 @@ class _FakeVideo extends LiveVideo {
   bool started = false;
   bool disposed = false;
 
-  _FakeVideo(this.stream, {this.hasAudio = false});
+  @override
+  final bool withTalk;
+  @override
+  bool canTalk = false;
+  @override
+  bool microphoneFailed = false;
+  bool _talking;
+
+  _FakeVideo(this.stream, {this.hasAudio = false, this.withTalk = false})
+    : _talking = withTalk;
+
+  @override
+  bool get talking => _talking;
+  @override
+  set talking(bool value) {
+    _talking = value;
+    notifyListeners();
+  }
 
   @override
   bool get muted => _muted;
@@ -373,8 +394,8 @@ void main() {
     late _FakePhotos photos;
     var withAudio = false;
 
-    LiveVideo factory(String stream) {
-      final video = _FakeVideo(stream, hasAudio: withAudio);
+    LiveVideo factory(String stream, {bool talk = false}) {
+      final video = _FakeVideo(stream, hasAudio: withAudio, withTalk: talk);
       videos.add(video);
       return video;
     }
@@ -385,6 +406,7 @@ void main() {
       bool lightStreamFirst = false,
       bool tryOtherStreams = true,
       bool videoOnly = false,
+      bool Function(String camera)? talkAllowed,
     }) => tester.pumpWidget(
       _app(
         CameraFullScreen(
@@ -396,6 +418,7 @@ void main() {
           lightStreamFirst: lightStreamFirst,
           tryOtherStreams: tryOtherStreams,
           videoOnly: videoOnly,
+          talkAllowed: talkAllowed,
         ),
       ),
     );
@@ -440,6 +463,80 @@ void main() {
 
       await tester.pumpWidget(const SizedBox());
       expect(videos.single.disposed, isTrue);
+    });
+
+    group('talk', () {
+      final door = _camera(
+        'cam_door',
+        streams: ['cam_door_sub', 'cam_door'],
+        talkStream: 'cam_door',
+      );
+
+      testWidgets('the first press reopens the talk stream with the '
+          'microphone, the next ones turn it off and on', (tester) async {
+        await open(tester, [door], talkAllowed: (_) => true);
+        videos.single.play();
+        await tester.pump();
+        expect(videos.single.withTalk, isFalse);
+
+        await tester.tap(find.byTooltip('Parler à la caméra'));
+        await tester.pump();
+        expect(videos, hasLength(2));
+        expect(videos.first.disposed, isTrue);
+        final talking = videos.last;
+        expect(talking.stream, 'cam_door');
+        expect(talking.withTalk, isTrue);
+        talking
+          ..canTalk = true
+          ..play();
+        await tester.pump();
+        expect(find.byTooltip('Couper le micro'), findsOneWidget);
+        expect(find.byType(SnackBar), findsNothing);
+
+        await tester.tap(find.byTooltip('Couper le micro'));
+        await tester.pump();
+        expect(talking.talking, isFalse);
+        await tester.tap(find.byTooltip('Parler à la caméra'));
+        await tester.pump();
+        expect(talking.talking, isTrue);
+        // Same connection: no reopening.
+        expect(videos, hasLength(2));
+
+        await tester.pumpWidget(const SizedBox());
+        expect(talking.disposed, isTrue);
+      });
+
+      testWidgets('a refused microphone or sound says so', (tester) async {
+        await open(tester, [door], talkAllowed: (_) => true);
+        await tester.tap(find.byTooltip('Parler à la caméra'));
+        await tester.pump();
+        videos.last
+          ..microphoneFailed = true
+          ..talking = false
+          ..play();
+        await tester.pump();
+        expect(find.textContaining('autorisez'), findsOneWidget);
+
+        // A new press tries again.
+        await tester.tap(find.byTooltip('Parler à la caméra'));
+        await tester.pump();
+        expect(videos, hasLength(3));
+        videos.last.play();
+        await tester.pump();
+        expect(find.textContaining("n'a pas accepté"), findsOneWidget);
+        await tester.pumpWidget(const SizedBox());
+      });
+
+      testWidgets('no button when not allowed or the camera has no '
+          'loudspeaker', (tester) async {
+        await open(tester, [door], talkAllowed: (_) => false);
+        expect(find.byTooltip('Parler à la caméra'), findsNothing);
+        await open(tester, [door]);
+        expect(find.byTooltip('Parler à la caméra'), findsNothing);
+        await open(tester, cameras, talkAllowed: (_) => true);
+        expect(find.byTooltip('Parler à la caméra'), findsNothing);
+        await tester.pumpWidget(const SizedBox());
+      });
     });
 
     testWidgets('no sound button when the stream has no sound', (
@@ -687,7 +784,7 @@ void main() {
             camera: _camera('cam_g', streams: ['cam_g_1']),
             source: LiveSource(
               fetch: server.fetch,
-              videoFactory: (stream) {
+              videoFactory: (stream, {talk = false}) {
                 final video = _FakeVideo(stream);
                 videos.add(video);
                 return video;
@@ -750,6 +847,24 @@ void main() {
         frozen = watch.frozen(at(s), frames);
       }
       expect(frozen, isTrue);
+    });
+  });
+
+  group('sdpReceivesAudio', () {
+    const video = 'm=video 9 UDP/TLS/RTP/SAVPF 96\r\na=sendonly\r\n';
+    String audio(String direction, {int port = 9}) =>
+        'v=0\r\n${video}m=audio $port UDP/TLS/RTP/SAVPF 8\r\n'
+        'a=rtpmap:8 PCMA/8000\r\n$direction';
+    test('the server takes the phone sound', () {
+      expect(sdpReceivesAudio(audio('a=sendrecv\r\n')), isTrue);
+      expect(sdpReceivesAudio(audio('a=recvonly\r\n')), isTrue);
+      expect(sdpReceivesAudio(audio('')), isTrue);
+    });
+    test('send only, inactive, rejected or missing audio', () {
+      expect(sdpReceivesAudio(audio('a=sendonly\r\n')), isFalse);
+      expect(sdpReceivesAudio(audio('a=inactive\r\n')), isFalse);
+      expect(sdpReceivesAudio(audio('a=sendrecv\r\n', port: 0)), isFalse);
+      expect(sdpReceivesAudio('v=0\r\n$video'), isFalse);
     });
   });
 
