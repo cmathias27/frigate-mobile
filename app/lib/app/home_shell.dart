@@ -165,15 +165,18 @@ class _HomeShellState extends State<HomeShell> {
                   key: ValueKey(group?.name),
                   cameras: shown,
                   fetch: client.fetchLatestImage,
-                  videoFactory: (stream) => WebRtcLiveVideo(
-                    stream: stream,
-                    negotiate: client.negotiateWebRtc,
-                  ),
+                  videoFactory: _settings.liveMode == LiveMode.images
+                      ? null
+                      : (stream) => WebRtcLiveVideo(
+                          stream: stream,
+                          negotiate: client.negotiateWebRtc,
+                        ),
                   layout: _liveLayout,
                   onAuthError: widget.controller.sessionExpired,
                   minTileWidth: _settings.tileSize.width,
                   lightStreamFirst: _settings.fullScreenLightFirst,
                   tryOtherStreams: _settings.tryOtherStreams,
+                  videoOnly: _settings.liveMode == LiveMode.video,
                 ),
         ),
       ],
@@ -332,11 +335,16 @@ class _HomeShellState extends State<HomeShell> {
       preferences: _preferences,
       live: LiveSource(
         fetch: client.fetchLatestImage,
-        videoFactory: (stream) =>
-            WebRtcLiveVideo(stream: stream, negotiate: client.negotiateWebRtc),
+        videoFactory: _settings.liveMode == LiveMode.images
+            ? null
+            : (stream) => WebRtcLiveVideo(
+                stream: stream,
+                negotiate: client.negotiateWebRtc,
+              ),
         onAuthError: widget.controller.sessionExpired,
         lightStreamFirst: _settings.timelineLightFirst,
         tryOtherStreams: _settings.tryOtherStreams,
+        videoOnly: _settings.liveMode == LiveMode.video,
       ),
       export: RecordingExport(
         open: client.openStream,

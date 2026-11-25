@@ -36,6 +36,9 @@ class SettingsScreen extends StatelessWidget {
         builder: (context, _) {
           final shown = cameras.where((c) => !settings.hidden(c.name)).length;
           final recorded = cameras.any((c) => c.recording);
+          final video = cameras.any((c) => c.liveStreams.isNotEmpty);
+          // Stream choices only matter when a video opens.
+          final streams = video && settings.liveMode != LiveMode.images;
           return ListView(
             padding: const EdgeInsets.symmetric(vertical: 8),
             children: [
@@ -73,28 +76,47 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
               _Header(l.settingsLive),
-              _Choice<LiveQuality>(
-                title: l.settingsQuality,
-                help: switch (settings.quality) {
-                  LiveQuality.auto => l.settingsQualityAutoHelp,
-                  LiveQuality.high => l.settingsQualityHighHelp,
-                  LiveQuality.light => l.settingsQualityLightHelp,
-                },
-                value: settings.quality,
-                values: LiveQuality.values,
-                label: (q) => switch (q) {
-                  LiveQuality.auto => l.settingsQualityAuto,
-                  LiveQuality.high => l.settingsQualityHigh,
-                  LiveQuality.light => l.settingsQualityLight,
-                },
-                onChanged: (q) => settings.quality = q,
-              ),
-              SwitchListTile(
-                title: Text(l.settingsOtherStreams),
-                subtitle: Text(l.settingsOtherStreamsHelp),
-                value: settings.tryOtherStreams,
-                onChanged: (v) => settings.tryOtherStreams = v,
-              ),
+              if (video)
+                _Choice<LiveMode>(
+                  title: l.settingsLiveMode,
+                  help: switch (settings.liveMode) {
+                    LiveMode.auto => l.settingsLiveModeAutoHelp,
+                    LiveMode.video => l.settingsLiveModeVideoHelp,
+                    LiveMode.images => l.settingsLiveModeImagesHelp,
+                  },
+                  value: settings.liveMode,
+                  values: LiveMode.values,
+                  label: (m) => switch (m) {
+                    LiveMode.auto => l.settingsLiveModeAuto,
+                    LiveMode.video => l.settingsLiveModeVideo,
+                    LiveMode.images => l.settingsLiveModeImages,
+                  },
+                  onChanged: (m) => settings.liveMode = m,
+                ),
+              if (streams) ...[
+                _Choice<LiveQuality>(
+                  title: l.settingsQuality,
+                  help: switch (settings.quality) {
+                    LiveQuality.auto => l.settingsQualityAutoHelp,
+                    LiveQuality.high => l.settingsQualityHighHelp,
+                    LiveQuality.light => l.settingsQualityLightHelp,
+                  },
+                  value: settings.quality,
+                  values: LiveQuality.values,
+                  label: (q) => switch (q) {
+                    LiveQuality.auto => l.settingsQualityAuto,
+                    LiveQuality.high => l.settingsQualityHigh,
+                    LiveQuality.light => l.settingsQualityLight,
+                  },
+                  onChanged: (q) => settings.quality = q,
+                ),
+                SwitchListTile(
+                  title: Text(l.settingsOtherStreams),
+                  subtitle: Text(l.settingsOtherStreamsHelp),
+                  value: settings.tryOtherStreams,
+                  onChanged: (v) => settings.tryOtherStreams = v,
+                ),
+              ],
               _Choice<TileSize>(
                 title: l.settingsTileSize,
                 help: l.settingsTileSizeHelp,

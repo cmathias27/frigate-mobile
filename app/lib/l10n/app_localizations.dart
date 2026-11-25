@@ -1388,6 +1388,48 @@ abstract class AppLocalizations {
   /// **'Direct'**
   String get settingsLive;
 
+  /// No description provided for @settingsLiveMode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Affichage du direct'**
+  String get settingsLiveMode;
+
+  /// No description provided for @settingsLiveModeAuto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Automatique'**
+  String get settingsLiveModeAuto;
+
+  /// No description provided for @settingsLiveModeVideo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vidéo seulement'**
+  String get settingsLiveModeVideo;
+
+  /// No description provided for @settingsLiveModeImages.
+  ///
+  /// In fr, this message translates to:
+  /// **'Images seulement'**
+  String get settingsLiveModeImages;
+
+  /// No description provided for @settingsLiveModeAutoHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Images tout de suite, vidéo dès qu\'elle arrive, images si elle échoue'**
+  String get settingsLiveModeAutoHelp;
+
+  /// No description provided for @settingsLiveModeVideoHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jamais d\'images : la vidéo, ou un bouton pour la réessayer'**
+  String get settingsLiveModeVideoHelp;
+
+  /// No description provided for @settingsLiveModeImagesHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une image chaque seconde, sans vidéo : moins de données'**
+  String get settingsLiveModeImagesHelp;
+
   /// No description provided for @settingsQuality.
   ///
   /// In fr, this message translates to:
