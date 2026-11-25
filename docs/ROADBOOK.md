@@ -48,7 +48,7 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 - [ ] Widgets Android
 - [x] PTZ : orientation maintenue tant que le bouton est appuyé, zoom et positions enregistrées, en plein écran, seulement pour les caméras que Frigate pilote en ONVIF
 - [ ] Visages, plaques, recherche : seulement quand Frigate les active
-- [ ] Version Windows portable (sans installation, archive zip jointe à chaque version)
+- [x] Version Windows portable (sans installation, archive zip jointe à chaque version, décision 0005)
 
 ## Abandonné
 

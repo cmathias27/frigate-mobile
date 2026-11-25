@@ -812,6 +812,18 @@ abstract class AppLocalizations {
   /// **'Installer'**
   String get updateInstall;
 
+  /// No description provided for @updateDownload.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get updateDownload;
+
+  /// No description provided for @updateWindowsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le navigateur télécharge la nouvelle archive. Fermez Frigate Mobile, puis décompressez-la à la place de l\'ancien dossier : la connexion et les réglages sont conservés.'**
+  String get updateWindowsHint;
+
   /// No description provided for @updateLater.
   ///
   /// In fr, this message translates to:
@@ -869,7 +881,7 @@ abstract class AppLocalizations {
   /// No description provided for @updateErrorUnsupported.
   ///
   /// In fr, this message translates to:
-  /// **'Cette version ne propose pas d\'APK à installer.'**
+  /// **'Cette version ne propose pas de fichier à installer sur cet appareil.'**
   String get updateErrorUnsupported;
 
   /// No description provided for @updateErrorPackage.

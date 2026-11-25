@@ -433,6 +433,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateInstall => 'Install';
 
   @override
+  String get updateDownload => 'Download';
+
+  @override
+  String get updateWindowsHint =>
+      'Your browser downloads the new archive. Close Frigate Mobile, then unzip it in place of the old folder: the connection and settings are kept.';
+
+  @override
   String get updateLater => 'Later';
 
   @override
@@ -463,7 +470,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateErrorFolder => 'Couldn\'t save the update on the phone.';
 
   @override
-  String get updateErrorUnsupported => 'This version has no APK to install.';
+  String get updateErrorUnsupported =>
+      'This version has no file to install on this device.';
 
   @override
   String get updateErrorPackage =>

@@ -3,8 +3,8 @@ on:
   pull_request:
   push:
     branches: [main]
-    # A version tag (v0.1.0) publishes the signed APK as a GitHub release,
-    # which the in-app update reads (decision 0003).
+    # A version tag (v0.1.0) publishes the signed APK and the Windows zip as
+    # a GitHub release, which the in-app update reads (decisions 0003, 0005).
     tags: ['v*.*.*']
 permissions:
   contents: read
@@ -81,10 +81,47 @@ jobs:
           path: dist/*.apk
           retention-days: 30
 
+  # Portable version (decision 0005): the build folder, zipped, no installer.
+  windows:
+    name: Application Windows (zip)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      # app/assets/CHANGELOG.md is a symbolic link, checked out by Git on
+      # Windows as a plain text file: the real notes take its place.
+      - name: Notes de version embarquées
+        shell: bash
+        run: |
+          rm app/assets/CHANGELOG.md
+          cp CHANGELOG.md app/assets/CHANGELOG.md
+      - run: flutter pub get
+        working-directory: app
+      - name: Compilation
+        working-directory: app
+        run: flutter build windows --release
+      - name: Archive
+        shell: bash
+        run: |
+          version=$(sed -n 's/^version: \([0-9.]*\).*/\1/p' app/pubspec.yaml)
+          mkdir -p dist "staging/Frigate Mobile"
+          cp -r app/build/windows/x64/runner/Release/. "staging/Frigate Mobile/"
+          cp LICENSE "staging/Frigate Mobile/LICENSE.txt"
+          cd staging
+          7z a -tzip "../dist/frigate-mobile-$version-windows.zip" "Frigate Mobile" > /dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frigate-mobile-windows
+          path: dist/*.zip
+          retention-days: 30
+
   release:
     name: Publication de la version
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [check, android]
+    needs: [check, android, windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -101,7 +138,8 @@ jobs:
         run: ./tool/release_notes.sh "$GITHUB_REF_NAME" > notes.md
       - uses: actions/download-artifact@v4
         with:
-          name: frigate-mobile-android
+          pattern: frigate-mobile-*
+          merge-multiple: true
           path: dist
       - name: Empreintes
         working-directory: dist

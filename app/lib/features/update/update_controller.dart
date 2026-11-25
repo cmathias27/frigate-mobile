@@ -167,6 +167,22 @@ class UpdateController extends ChangeNotifier {
 
   Future<void> openInstallSettings() => _platform.openInstallSettings();
 
+  /// Installed by the app (Android) or downloaded by the browser (Windows).
+  bool get installsInApp => _platform.installsInApp;
+
+  /// Hands the download of the new version to the browser.
+  Future<void> openDownload() async {
+    final release = _release;
+    if (release == null) return;
+    _error = null;
+    try {
+      await _platform.openDownload(release);
+    } on UpdateException catch (e) {
+      _fail(e.code);
+    }
+    notifyListeners();
+  }
+
   void _fail(String code) {
     _status = UpdateStatus.failed;
     _error = code;

@@ -125,6 +125,14 @@ class _UpdateSheet extends StatelessWidget {
     if (open == true) await update.openInstallSettings();
   }
 
+  /// Windows: the browser downloads the archive, the sheet closes.
+  Future<void> _download(BuildContext context) async {
+    await update.openDownload();
+    if (context.mounted && update.status != UpdateStatus.failed) {
+      Navigator.of(context).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -135,6 +143,8 @@ class _UpdateSheet extends StatelessWidget {
         final release = update.release;
         if (release == null) return const SizedBox.shrink();
         final downloading = update.status == UpdateStatus.downloading;
+        final inApp = update.installsInApp;
+        final ready = inApp ? release.installable : release.windowsZip != null;
         return SafeArea(
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -178,8 +188,10 @@ class _UpdateSheet extends StatelessWidget {
                         color: Theme.of(context).colorScheme.error,
                       ),
                     ),
-                  if (!release.installable)
-                    Text(l.updateErrorUnsupported, style: text.bodySmall),
+                  if (!ready)
+                    Text(l.updateErrorUnsupported, style: text.bodySmall)
+                  else if (!inApp)
+                    Text(l.updateWindowsHint, style: text.bodySmall),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -190,10 +202,14 @@ class _UpdateSheet extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       FilledButton(
-                        onPressed: downloading || !release.installable
+                        onPressed: downloading || !ready
                             ? null
-                            : () => _install(context),
-                        child: Text(l.updateInstall),
+                            : inApp
+                            ? () => _install(context)
+                            : () => _download(context),
+                        child: Text(
+                          inApp ? l.updateInstall : l.updateDownload,
+                        ),
                       ),
                     ],
                   ),
