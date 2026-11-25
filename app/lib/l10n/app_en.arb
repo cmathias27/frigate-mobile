@@ -69,6 +69,17 @@
   "liveTalkStop": "Turn the microphone off",
   "liveTalkMicrophoneFailed": "Microphone unavailable: allow microphone access to talk.",
   "liveTalkRefused": "The camera did not accept the sound sent.",
+  "ptz": "Move",
+  "ptzShow": "Show the pan and tilt controls",
+  "ptzHide": "Hide the pan and tilt controls",
+  "ptzUp": "Up",
+  "ptzDown": "Down",
+  "ptzLeft": "Left",
+  "ptzRight": "Right",
+  "ptzZoomIn": "Zoom in",
+  "ptzZoomOut": "Zoom out",
+  "ptzPresets": "Saved positions",
+  "ptzFailed": "The camera did not receive the move command.",
   "timelinePlaying": "Playing · {camera}",
   "@timelinePlaying": {
     "placeholders": {

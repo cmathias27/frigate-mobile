@@ -265,6 +265,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get liveTalkRefused => 'The camera did not accept the sound sent.';
 
   @override
+  String get ptz => 'Move';
+
+  @override
+  String get ptzShow => 'Show the pan and tilt controls';
+
+  @override
+  String get ptzHide => 'Hide the pan and tilt controls';
+
+  @override
+  String get ptzUp => 'Up';
+
+  @override
+  String get ptzDown => 'Down';
+
+  @override
+  String get ptzLeft => 'Left';
+
+  @override
+  String get ptzRight => 'Right';
+
+  @override
+  String get ptzZoomIn => 'Zoom in';
+
+  @override
+  String get ptzZoomOut => 'Zoom out';
+
+  @override
+  String get ptzPresets => 'Saved positions';
+
+  @override
+  String get ptzFailed => 'The camera did not receive the move command.';
+
+  @override
   String timelinePlaying(String camera) {
     return 'Playing · $camera';
   }

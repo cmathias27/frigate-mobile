@@ -268,6 +268,39 @@ class AppLocalizationsFr extends AppLocalizations {
   String get liveTalkRefused => 'La caméra n\'a pas accepté le son envoyé.';
 
   @override
+  String get ptz => 'Orienter';
+
+  @override
+  String get ptzShow => 'Afficher les commandes d\'orientation';
+
+  @override
+  String get ptzHide => 'Masquer les commandes d\'orientation';
+
+  @override
+  String get ptzUp => 'Monter';
+
+  @override
+  String get ptzDown => 'Descendre';
+
+  @override
+  String get ptzLeft => 'À gauche';
+
+  @override
+  String get ptzRight => 'À droite';
+
+  @override
+  String get ptzZoomIn => 'Zoom avant';
+
+  @override
+  String get ptzZoomOut => 'Zoom arrière';
+
+  @override
+  String get ptzPresets => 'Positions enregistrées';
+
+  @override
+  String get ptzFailed => 'La caméra n\'a pas reçu la commande d\'orientation.';
+
+  @override
   String timelinePlaying(String camera) {
     return 'Lecture · $camera';
   }

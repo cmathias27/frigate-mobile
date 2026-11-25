@@ -512,6 +512,72 @@ abstract class AppLocalizations {
   /// **'La caméra n\'a pas accepté le son envoyé.'**
   String get liveTalkRefused;
 
+  /// No description provided for @ptz.
+  ///
+  /// In fr, this message translates to:
+  /// **'Orienter'**
+  String get ptz;
+
+  /// No description provided for @ptzShow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les commandes d\'orientation'**
+  String get ptzShow;
+
+  /// No description provided for @ptzHide.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer les commandes d\'orientation'**
+  String get ptzHide;
+
+  /// No description provided for @ptzUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Monter'**
+  String get ptzUp;
+
+  /// No description provided for @ptzDown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Descendre'**
+  String get ptzDown;
+
+  /// No description provided for @ptzLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'À gauche'**
+  String get ptzLeft;
+
+  /// No description provided for @ptzRight.
+  ///
+  /// In fr, this message translates to:
+  /// **'À droite'**
+  String get ptzRight;
+
+  /// No description provided for @ptzZoomIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zoom avant'**
+  String get ptzZoomIn;
+
+  /// No description provided for @ptzZoomOut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zoom arrière'**
+  String get ptzZoomOut;
+
+  /// No description provided for @ptzPresets.
+  ///
+  /// In fr, this message translates to:
+  /// **'Positions enregistrées'**
+  String get ptzPresets;
+
+  /// No description provided for @ptzFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La caméra n\'a pas reçu la commande d\'orientation.'**
+  String get ptzFailed;
+
   /// No description provided for @timelinePlaying.
   ///
   /// In fr, this message translates to:

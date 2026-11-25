@@ -9,6 +9,7 @@ import 'package:http/io_client.dart';
 
 import 'capabilities.dart';
 import 'certificate_guard.dart';
+import 'ptz.dart';
 import 'recordings.dart';
 import 'reviews.dart';
 import 'server_config.dart';
@@ -211,9 +212,101 @@ class FrigateClient {
 
   /// Closes the underlying HTTP client.
   void close() {
+    _closeSocket();
     if (_ownsClient) {
       _client.close();
     }
+  }
+
+  /// Frigate's WebSocket, opened on the first command and kept for the next
+  /// ones (pan and tilt send a move, then a stop).
+  WebSocket? _socket;
+  Future<WebSocket>? _connecting;
+
+  /// Opens a WebSocket on [url] with [headers]; tests replace it.
+  @visibleForTesting
+  Future<WebSocket> Function(Uri url, Map<String, String> headers)?
+  connectSocket;
+
+  /// What the ONVIF camera [camera] can do (`GET /api/<camera>/ptz/info`).
+  Future<PtzInfo> fetchPtzInfo(String camera) async => PtzInfo.fromJson(
+    await _getJson('/api/${Uri.encodeComponent(camera)}/ptz/info'),
+  );
+
+  /// Sends [payload] (`MOVE_UP`, `STOP`, `preset_<name>`…) to the camera's
+  /// ONVIF control through Frigate's WebSocket.
+  Future<void> sendPtz(String camera, String payload) async {
+    final message = jsonEncode({'topic': '$camera/ptz', 'payload': payload});
+    try {
+      (await _openSocket()).add(message);
+    } on StateError {
+      // Closed between opening and sending: once more on a new one.
+      _closeSocket();
+      (await _openSocket()).add(message);
+    }
+  }
+
+  Future<WebSocket> _openSocket() {
+    final open = _socket;
+    if (open != null && open.readyState == WebSocket.open) {
+      return Future.value(open);
+    }
+    return _connecting ??= _connectSocket().whenComplete(
+      () => _connecting = null,
+    );
+  }
+
+  Future<WebSocket> _connectSocket() async {
+    final base = Uri.parse(_activeBaseUrl);
+    final url = base.replace(
+      scheme: base.scheme == 'https' ? 'wss' : 'ws',
+      path: '${base.path.replaceAll(RegExp(r'/+$'), '')}/ws',
+    );
+    final headers = _buildAuthHeaders()..remove('Accept');
+    final WebSocket socket;
+    try {
+      socket = await (connectSocket ?? _defaultSocket)(
+        url,
+        headers,
+      ).timeout(const Duration(seconds: 10));
+    } on TimeoutException catch (e) {
+      throw FrigateUnreachableException('Timed out on /ws', e);
+    } on WebSocketException catch (e) {
+      throw FrigateNetworkException('WebSocket refused.', e);
+    } on SocketException catch (e) {
+      throw FrigateUnreachableException('Connection lost.', e);
+    } on HandshakeException catch (e) {
+      throw _handshakeError(_activeBaseUrl, e, 'Certificate refused.');
+    }
+    // Frigate pushes its state to every client: read and dropped.
+    socket.listen(
+      (_) {},
+      onDone: () {
+        if (identical(_socket, socket)) _socket = null;
+      },
+      onError: (Object _) {},
+      cancelOnError: true,
+    );
+    _socket = socket;
+    return socket;
+  }
+
+  Future<WebSocket> _defaultSocket(Uri url, Map<String, String> headers) {
+    final httpClient = HttpClient()
+      ..connectionTimeout = const Duration(seconds: 10)
+      ..badCertificateCallback = (cert, host, port) =>
+          _certificates.accepts(cert.der, host, port);
+    return WebSocket.connect(
+      url.toString(),
+      headers: headers,
+      customClient: httpClient,
+    );
+  }
+
+  void _closeSocket() {
+    final socket = _socket;
+    _socket = null;
+    unawaited(socket?.close());
   }
 
   /// Authenticates with the server via `POST /api/login`.
