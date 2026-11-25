@@ -46,7 +46,12 @@ class CameraFullScreen extends StatefulWidget {
     this.lightStreamFirst = false,
     this.tryOtherStreams = LiveVideoDefaults.tryOtherStreams,
     this.videoOnly = false,
+    this.talkAllowed,
   });
+
+  /// Whether the "Talk" button may show for a camera that accepts sound
+  /// (settings); null hides it everywhere.
+  final bool Function(String camera)? talkAllowed;
 
   @override
   State<CameraFullScreen> createState() => _CameraFullScreenState();
@@ -64,6 +69,12 @@ class _CameraFullScreenState extends State<CameraFullScreen>
   /// Chosen go2rtc stream per camera, by index in its live streams.
   final _streamIndex = <String, int>{};
 
+  /// The next video opens with the microphone ("Talk" pressed).
+  bool _talk = false;
+
+  /// The video whose microphone problem was already told.
+  LiveVideo? _talkWarned;
+
   /// Streams of the current camera that failed since it was opened, so the
   /// automatic switch tries each one once.
   final _failedStreams = <int>{};
@@ -80,6 +91,12 @@ class _CameraFullScreenState extends State<CameraFullScreen>
       widget.videoOnly &&
       widget.videoFactory != null &&
       _camera.liveStreams.isNotEmpty;
+
+  bool get _talkShown =>
+      widget.videoFactory != null &&
+      _camera.talk &&
+      _camera.liveStreams.isNotEmpty &&
+      (widget.talkAllowed?.call(_camera.name) ?? false);
 
   /// Images refresh while the video does not play, unless video only.
   void _startImages() {
@@ -99,6 +116,7 @@ class _CameraFullScreenState extends State<CameraFullScreen>
   /// (Re)opens images and video for the current camera.
   void _open() {
     _close();
+    _talk = false;
     _failedStreams.clear();
     _feed = CameraFeed(
       camera: _camera.name,
@@ -115,7 +133,7 @@ class _CameraFullScreenState extends State<CameraFullScreen>
     final streams = _camera.liveStreams;
     if (factory == null || streams.isEmpty) return;
     final stream = streams[_currentStream.clamp(0, streams.length - 1)];
-    final video = factory(stream)..addListener(_onVideoChanged);
+    final video = factory(stream, talk: _talk)..addListener(_onVideoChanged);
     _video = video;
     video.start();
   }
@@ -152,7 +170,49 @@ class _CameraFullScreenState extends State<CameraFullScreen>
     } else {
       _startImages();
     }
+    if (video != null) _warnTalk(video);
     setState(() {});
+  }
+
+  /// Tells once per video why talking does not work.
+  void _warnTalk(LiveVideo video) {
+    if (!video.withTalk || identical(_talkWarned, video)) return;
+    final l = AppLocalizations.of(context);
+    final String message;
+    if (video.microphoneFailed) {
+      message = l.liveTalkMicrophoneFailed;
+    } else if (video.status == LiveVideoStatus.playing && !video.canTalk) {
+      message = l.liveTalkRefused;
+    } else {
+      return;
+    }
+    _talkWarned = video;
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Turns the microphone on or off; the first press reopens the video on
+  /// the stream that carries the backchannel, with the microphone.
+  void _toggleTalk() {
+    final video = _video;
+    if (video != null &&
+        video.withTalk &&
+        !video.microphoneFailed &&
+        video.status != LiveVideoStatus.failed) {
+      video.talking = !video.talking;
+      return;
+    }
+    final streams = _camera.liveStreams;
+    final index = streams.indexOf(_camera.talkStream ?? streams.first);
+    setState(() {
+      _talk = true;
+      _failedStreams.clear();
+      _streamIndex[_camera.name] = index < 0 ? 0 : index;
+      _closeVideo();
+      _startImages();
+      _openVideo();
+    });
   }
 
   /// The next stream of the camera not failed yet, when the automatic
@@ -167,8 +227,10 @@ class _CameraFullScreenState extends State<CameraFullScreen>
     return null;
   }
 
+  /// Another stream has no backchannel: talking stops.
   void _switchStream(int index) {
     setState(() {
+      _talk = false;
       _streamIndex[_camera.name] = index;
       _closeVideo();
       _startImages();
@@ -422,6 +484,23 @@ class _CameraFullScreenState extends State<CameraFullScreen>
                                       : l.liveSoundOff,
                                   active: !video.muted,
                                   onPressed: () => video.muted = !video.muted,
+                                ),
+                              if (_talkShown)
+                                _ControlButton(
+                                  icon: video?.talking ?? false
+                                      ? Icons.mic_rounded
+                                      : Icons.mic_none_rounded,
+                                  label: l.liveTalk,
+                                  tooltip: video?.talking ?? false
+                                      ? l.liveTalkStop
+                                      : l.liveTalkStart,
+                                  active: video?.talking ?? false,
+                                  busy:
+                                      video != null &&
+                                      video.withTalk &&
+                                      video.status ==
+                                          LiveVideoStatus.connecting,
+                                  onPressed: _toggleTalk,
                                 ),
                             ],
                           ),

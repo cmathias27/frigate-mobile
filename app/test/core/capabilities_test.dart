@@ -100,6 +100,7 @@ void main() {
     expect(caps.cameras['cam_door']!.talk, isTrue);
     expect(caps.cameras['cam_door']!.sound, isTrue);
     expect(caps.cameras['cam_garden']!.talk, isFalse);
+    expect(caps.cameras['cam_garden']!.talkStream, isNull);
     expect(caps.cameras['cam_garden']!.sound, isTrue);
   });
 
@@ -114,6 +115,8 @@ void main() {
     final garage = caps.cameras['cam_cour']!;
     expect(garage.liveStreams, ['cam_cour_1', 'cam_door']);
     expect(garage.talk, isTrue);
+    // Talk opens the stream that carries the backchannel.
+    expect(garage.talkStream, 'cam_door');
   });
 
   test('a camera without live streams uses its own name as stream', () {

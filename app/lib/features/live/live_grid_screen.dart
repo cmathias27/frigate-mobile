@@ -41,6 +41,9 @@ class LiveGridScreen extends StatefulWidget {
   final bool tryOtherStreams;
   final bool videoOnly;
 
+  /// Passed on to the full screen: "Talk" allowed on a camera.
+  final bool Function(String camera)? talkAllowed;
+
   const LiveGridScreen({
     super.key,
     required this.cameras,
@@ -52,6 +55,7 @@ class LiveGridScreen extends StatefulWidget {
     this.lightStreamFirst = false,
     this.tryOtherStreams = LiveVideoDefaults.tryOtherStreams,
     this.videoOnly = false,
+    this.talkAllowed,
   });
 
   @override
@@ -215,6 +219,7 @@ class _LiveGridScreenState extends State<LiveGridScreen>
           lightStreamFirst: widget.lightStreamFirst,
           tryOtherStreams: widget.tryOtherStreams,
           videoOnly: widget.videoOnly,
+          talkAllowed: widget.talkAllowed,
         ),
       ),
     );

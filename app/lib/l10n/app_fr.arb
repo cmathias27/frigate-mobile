@@ -110,6 +110,11 @@
   "livePhotoShare": "Partager",
   "livePhotoFailed": "Impossible d'enregistrer la photo",
   "liveSound": "Son",
+  "liveTalk": "Parler",
+  "liveTalkStart": "Parler à la caméra",
+  "liveTalkStop": "Couper le micro",
+  "liveTalkMicrophoneFailed": "Micro indisponible : autorisez l'accès au micro pour parler.",
+  "liveTalkRefused": "La caméra n'a pas accepté le son envoyé.",
   "timelinePlaying": "Lecture · {camera}",
   "@timelinePlaying": {
     "placeholders": {
@@ -349,6 +354,8 @@
   "settingsQualityLightHelp": "Flux léger partout : moins de données, lisible par tout téléphone",
   "settingsOtherStreams": "Essayer les autres flux",
   "settingsOtherStreamsHelp": "Un flux qui ne se lit pas passe seul au flux suivant de la caméra",
+  "settingsTalk": "Bouton « Parler »",
+  "settingsTalkHelp": "Sur les caméras qui ont un haut-parleur. Le micro ne s'ouvre qu'en touchant le bouton.",
   "settingsTileSize": "Taille des vignettes",
   "settingsTileSizeHelp": "Disposition automatique : plus grandes, moins de caméras par page",
   "settingsTileSmall": "Petites",

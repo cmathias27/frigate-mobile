@@ -39,6 +39,10 @@ class SettingsScreen extends StatelessWidget {
           final video = cameras.any((c) => c.liveStreams.isNotEmpty);
           // Stream choices only matter when a video opens.
           final streams = video && settings.liveMode != LiveMode.images;
+          // "Talk" needs the video connection.
+          final talkers = settings.liveMode == LiveMode.images
+              ? const <CameraCapabilities>[]
+              : settings.arrange(cameras).where((c) => c.talk).toList();
           return ListView(
             padding: const EdgeInsets.symmetric(vertical: 8),
             children: [
@@ -116,6 +120,26 @@ class SettingsScreen extends StatelessWidget {
                   value: settings.tryOtherStreams,
                   onChanged: (v) => settings.tryOtherStreams = v,
                 ),
+              ],
+              if (talkers.isNotEmpty) ...[
+                SwitchListTile(
+                  title: Text(l.settingsTalk),
+                  subtitle: Text(l.settingsTalkHelp),
+                  value: settings.talk,
+                  onChanged: (v) => settings.talk = v,
+                ),
+                // One switch per camera once there is a choice to make.
+                if (settings.talk && talkers.length > 1)
+                  for (final camera in talkers)
+                    SwitchListTile(
+                      contentPadding: const EdgeInsets.only(
+                        left: 32,
+                        right: 16,
+                      ),
+                      title: Text(camera.label),
+                      value: settings.talkAllowed(camera.name),
+                      onChanged: (v) => settings.setCameraTalk(camera.name, v),
+                    ),
               ],
               _Choice<TileSize>(
                 title: l.settingsTileSize,

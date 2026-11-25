@@ -64,6 +64,11 @@
   "livePhotoShare": "Share",
   "livePhotoFailed": "Could not save the photo",
   "liveSound": "Sound",
+  "liveTalk": "Talk",
+  "liveTalkStart": "Talk to the camera",
+  "liveTalkStop": "Turn the microphone off",
+  "liveTalkMicrophoneFailed": "Microphone unavailable: allow microphone access to talk.",
+  "liveTalkRefused": "The camera did not accept the sound sent.",
   "timelinePlaying": "Playing · {camera}",
   "@timelinePlaying": {
     "placeholders": {
@@ -298,6 +303,8 @@
   "settingsQualityLightHelp": "Light stream everywhere: less data, any phone plays it",
   "settingsOtherStreams": "Try the other streams",
   "settingsOtherStreamsHelp": "A stream that does not play hands over to the camera's next one",
+  "settingsTalk": "“Talk” button",
+  "settingsTalkHelp": "On cameras that have a loudspeaker. The microphone only opens when you tap the button.",
   "settingsTileSize": "Tile size",
   "settingsTileSizeHelp": "Automatic layout: larger means fewer cameras per page",
   "settingsTileSmall": "Small",

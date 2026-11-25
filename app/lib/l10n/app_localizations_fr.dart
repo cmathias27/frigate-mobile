@@ -252,6 +252,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get liveSound => 'Son';
 
   @override
+  String get liveTalk => 'Parler';
+
+  @override
+  String get liveTalkStart => 'Parler à la caméra';
+
+  @override
+  String get liveTalkStop => 'Couper le micro';
+
+  @override
+  String get liveTalkMicrophoneFailed =>
+      'Micro indisponible : autorisez l\'accès au micro pour parler.';
+
+  @override
+  String get liveTalkRefused => 'La caméra n\'a pas accepté le son envoyé.';
+
+  @override
   String timelinePlaying(String camera) {
     return 'Lecture · $camera';
   }
@@ -887,6 +903,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get settingsOtherStreamsHelp =>
       'Un flux qui ne se lit pas passe seul au flux suivant de la caméra';
+
+  @override
+  String get settingsTalk => 'Bouton « Parler »';
+
+  @override
+  String get settingsTalkHelp =>
+      'Sur les caméras qui ont un haut-parleur. Le micro ne s\'ouvre qu\'en touchant le bouton.';
 
   @override
   String get settingsTileSize => 'Taille des vignettes';

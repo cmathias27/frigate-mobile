@@ -482,6 +482,36 @@ abstract class AppLocalizations {
   /// **'Son'**
   String get liveSound;
 
+  /// No description provided for @liveTalk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parler'**
+  String get liveTalk;
+
+  /// No description provided for @liveTalkStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parler à la caméra'**
+  String get liveTalkStart;
+
+  /// No description provided for @liveTalkStop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couper le micro'**
+  String get liveTalkStop;
+
+  /// No description provided for @liveTalkMicrophoneFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Micro indisponible : autorisez l\'accès au micro pour parler.'**
+  String get liveTalkMicrophoneFailed;
+
+  /// No description provided for @liveTalkRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'La caméra n\'a pas accepté le son envoyé.'**
+  String get liveTalkRefused;
+
   /// No description provided for @timelinePlaying.
   ///
   /// In fr, this message translates to:
@@ -1507,6 +1537,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Un flux qui ne se lit pas passe seul au flux suivant de la caméra'**
   String get settingsOtherStreamsHelp;
+
+  /// No description provided for @settingsTalk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bouton « Parler »'**
+  String get settingsTalk;
+
+  /// No description provided for @settingsTalkHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur les caméras qui ont un haut-parleur. Le micro ne s\'ouvre qu\'en touchant le bouton.'**
+  String get settingsTalkHelp;
 
   /// No description provided for @settingsTileSize.
   ///

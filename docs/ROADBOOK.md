@@ -44,7 +44,7 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 
 ## 0.4 — Son et confort
 
-- [ ] Écouter et **Parler** sur toutes les caméras qui le permettent (réglage général et par caméra)
+- [x] Écouter et **Parler** sur toutes les caméras qui le permettent (réglage général et par caméra; plein écran, micro ouvert seulement en touchant « Parler »)
 - [ ] Widgets Android
 - [ ] PTZ, visages, plaques, recherche : seulement quand Frigate les active
 

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import '../core/frigate/capabilities.dart';
 import '../core/storage/preferences.dart';
+import '../features/live/live_video.dart';
 import '../features/timeline/motion_passages.dart';
 
 /// Stream a live video opens first.
@@ -67,6 +68,7 @@ abstract final class SettingsDefaults {
   static const liveMode = LiveMode.auto;
   static const tryOtherStreams = true;
   static const imageFallback = true;
+  static const talk = LiveVideoDefaults.talk;
   static const tileSize = TileSize.medium;
   static const minPassage = Duration.zero;
   static const mergeGap = Duration(seconds: 30);
@@ -102,6 +104,8 @@ class AppSettings extends ChangeNotifier {
   LiveMode _liveMode = SettingsDefaults.liveMode;
   bool _tryOtherStreams = SettingsDefaults.tryOtherStreams;
   bool _imageFallback = SettingsDefaults.imageFallback;
+  bool _talk = SettingsDefaults.talk;
+  Set<String> _noTalk = const {};
   TileSize _tileSize = SettingsDefaults.tileSize;
   Duration _minPassage = SettingsDefaults.minPassage;
   Duration _mergeGap = SettingsDefaults.mergeGap;
@@ -149,6 +153,8 @@ class AppSettings extends ChangeNotifier {
     _tileSize = named(TileSize.values, 'tileSize') ?? _tileSize;
     _tryOtherStreams = pick<bool>('tryOtherStreams') ?? _tryOtherStreams;
     _imageFallback = pick<bool>('imageFallback') ?? _imageFallback;
+    _talk = pick<bool>('talk') ?? _talk;
+    _noTalk = {...?pick<List<Object?>>('noTalk')?.whereType<String>()};
     final minPassage = pick<int>('minPassage');
     if (minPassage != null && minPassage >= 0) {
       _minPassage = Duration(seconds: minPassage);
@@ -172,6 +178,18 @@ class AppSettings extends ChangeNotifier {
   set liveMode(LiveMode value) => _change(() => _liveMode = value);
   set tryOtherStreams(bool value) => _change(() => _tryOtherStreams = value);
   set imageFallback(bool value) => _change(() => _imageFallback = value);
+
+  /// "Talk" shows on the cameras that accept sound.
+  bool get talk => _talk;
+  set talk(bool value) => _change(() => _talk = value);
+
+  /// "Talk" shows on [camera] (when it accepts sound).
+  bool talkAllowed(String camera) => _talk && !_noTalk.contains(camera);
+
+  /// Hides or shows "Talk" on one camera only.
+  void setCameraTalk(String camera, bool allowed) => _change(() {
+    _noTalk = allowed ? ({..._noTalk}..remove(camera)) : {..._noTalk, camera};
+  });
   set tileSize(TileSize value) => _change(() => _tileSize = value);
   set minPassage(Duration value) => _change(() => _minPassage = value);
   set mergeGap(Duration value) => _change(() => _mergeGap = value);
@@ -266,6 +284,8 @@ class AppSettings extends ChangeNotifier {
     'liveMode': _liveMode.name,
     'tryOtherStreams': _tryOtherStreams,
     'imageFallback': _imageFallback,
+    'talk': _talk,
+    'noTalk': _noTalk.toList(),
     'tileSize': _tileSize.name,
     'minPassage': _minPassage.inSeconds,
     'mergeGap': _mergeGap.inSeconds,
