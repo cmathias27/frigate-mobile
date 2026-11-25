@@ -16,6 +16,7 @@ import '../features/events/review_list.dart';
 import '../features/events/thumbnails.dart';
 import '../features/live/live_grid_screen.dart';
 import '../features/live/live_pane.dart';
+import '../features/live/ptz_pad.dart';
 import '../features/live/webrtc_live_video.dart';
 import '../features/more/more_screen.dart';
 import '../features/more/settings_screen.dart';
@@ -180,6 +181,10 @@ class _HomeShellState extends State<HomeShell> {
                   tryOtherStreams: _settings.tryOtherStreams,
                   videoOnly: _settings.liveMode == LiveMode.video,
                   talkAllowed: _settings.talkAllowed,
+                  ptz: PtzSource(
+                    info: client.fetchPtzInfo,
+                    send: client.sendPtz,
+                  ),
                 ),
         ),
       ],

@@ -10,6 +10,7 @@ import 'camera_full_screen.dart';
 import 'feed_tile.dart';
 import 'grid_fit.dart';
 import 'live_video.dart';
+import 'ptz_pad.dart';
 
 /// Automatic layout: as many cameras per page as the screen shows well.
 const liveLayoutAuto = 0;
@@ -44,6 +45,9 @@ class LiveGridScreen extends StatefulWidget {
   /// Passed on to the full screen: "Talk" allowed on a camera.
   final bool Function(String camera)? talkAllowed;
 
+  /// Pan, tilt and zoom in full screen; null hides them.
+  final PtzSource? ptz;
+
   const LiveGridScreen({
     super.key,
     required this.cameras,
@@ -56,6 +60,7 @@ class LiveGridScreen extends StatefulWidget {
     this.tryOtherStreams = LiveVideoDefaults.tryOtherStreams,
     this.videoOnly = false,
     this.talkAllowed,
+    this.ptz,
   });
 
   @override
@@ -220,6 +225,7 @@ class _LiveGridScreenState extends State<LiveGridScreen>
           tryOtherStreams: widget.tryOtherStreams,
           videoOnly: widget.videoOnly,
           talkAllowed: widget.talkAllowed,
+          ptz: widget.ptz,
         ),
       ),
     );

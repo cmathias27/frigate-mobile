@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frigate_mobile/core/frigate/client.dart';
+import 'package:frigate_mobile/core/frigate/ptz.dart';
 import 'package:frigate_mobile/core/frigate/server_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -362,6 +365,98 @@ void main() {
       client.openStream('/vod/x'),
       throwsA(isA<FrigateAuthException>()),
     );
+  });
+
+  group('PTZ', () {
+    test('info: features and presets of the camera', () async {
+      late Uri asked;
+      final client = FrigateClient(
+        config: config,
+        token: 'jwt',
+        client: MockClient((request) async {
+          asked = request.url;
+          return http.Response(
+            jsonEncode({
+              'name': 'cam_entree',
+              'features': ['pt', 'zoom', 'zoom-r'],
+              'presets': ['porte', 'allee', ''],
+            }),
+            200,
+          );
+        }),
+      );
+      final info = await client.fetchPtzInfo('cam_entree');
+      expect(asked.path, '/api/cam_entree/ptz/info');
+      expect(info.panTilt, isTrue);
+      expect(info.zoom, isTrue);
+      expect(info.presets, ['porte', 'allee']);
+      expect(PtzInfo.fromJson(const {}).any, isFalse);
+      expect(PtzInfo.fromJson(const {'features': []}).any, isFalse);
+    });
+
+    test('commands go through one authenticated WebSocket', () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final messages = <Object?>[];
+      final authorizations = <String?>[];
+      final received = StreamController<void>.broadcast();
+      server.listen((request) async {
+        authorizations.add(request.headers.value('authorization'));
+        final socket = await WebSocketTransformer.upgrade(request);
+        // Frigate pushes its own state; the client must not mind.
+        socket.add(jsonEncode({'topic': 'camera_activity', 'payload': '{}'}));
+        socket.listen((m) {
+          messages.add(jsonDecode(m as String));
+          received.add(null);
+        });
+      });
+      final urls = <Uri>[];
+      final client =
+          FrigateClient(
+              config: config,
+              token: 'jwt-ptz',
+              client: MockClient((_) async => http.Response('', 404)),
+            )
+            ..connectSocket = (url, headers) {
+              urls.add(url);
+              return WebSocket.connect(
+                'ws://127.0.0.1:${server.port}/ws',
+                headers: headers,
+              );
+            };
+
+      await client.sendPtz('cam_entree', PtzMove.up.payload);
+      await client.sendPtz('cam_entree', PtzMove.stop.payload);
+      await client.sendPtz('cam_entree', ptzPresetPayload('porte'));
+      while (messages.length < 3) {
+        await received.stream.first;
+      }
+
+      expect(urls, [Uri.parse('wss://192.168.1.10:8971/ws')]);
+      expect(authorizations, ['Bearer jwt-ptz']);
+      expect(messages, [
+        {'topic': 'cam_entree/ptz', 'payload': 'MOVE_UP'},
+        {'topic': 'cam_entree/ptz', 'payload': 'STOP'},
+        {'topic': 'cam_entree/ptz', 'payload': 'preset_porte'},
+      ]);
+      client.close();
+      await server.close(force: true);
+      await received.close();
+    });
+
+    test('a refused WebSocket is a network error', () async {
+      final client =
+          FrigateClient(
+              config: config,
+              token: 'jwt',
+              client: MockClient((_) async => http.Response('', 404)),
+            )
+            ..connectSocket = (url, headers) =>
+                Future.error(const WebSocketException('not upgraded'));
+      await expectLater(
+        client.sendPtz('cam_entree', PtzMove.left.payload),
+        throwsA(isA<FrigateNetworkException>()),
+      );
+    });
   });
 
   group('session cookie', () {

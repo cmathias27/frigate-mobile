@@ -4,11 +4,13 @@ import 'package:intl/intl.dart';
 
 import '../../app/theme.dart';
 import '../../core/frigate/capabilities.dart';
+import '../../core/frigate/ptz.dart';
 import '../../l10n/app_localizations.dart';
 import 'camera_feed.dart';
 import 'feed_tile.dart';
 import 'live_video.dart';
 import 'photo.dart';
+import 'ptz_pad.dart';
 
 /// One camera in full screen (mock-up screen 3): live video when
 /// [videoFactory] is given and the server answers, otherwise full-resolution
@@ -47,11 +49,16 @@ class CameraFullScreen extends StatefulWidget {
     this.tryOtherStreams = LiveVideoDefaults.tryOtherStreams,
     this.videoOnly = false,
     this.talkAllowed,
+    this.ptz,
   });
 
   /// Whether the "Talk" button may show for a camera that accepts sound
   /// (settings); null hides it everywhere.
   final bool Function(String camera)? talkAllowed;
+
+  /// Pan, tilt and zoom of the cameras Frigate controls over ONVIF; null
+  /// hides the controls.
+  final PtzSource? ptz;
 
   @override
   State<CameraFullScreen> createState() => _CameraFullScreenState();
@@ -75,6 +82,12 @@ class _CameraFullScreenState extends State<CameraFullScreen>
   /// The video whose microphone problem was already told.
   LiveVideo? _talkWarned;
 
+  /// What each camera's ONVIF control offers, read once per screen.
+  final _ptzInfos = <String, PtzInfo>{};
+
+  /// Pan and tilt controls shown over the picture.
+  bool _ptzOpen = false;
+
   /// Streams of the current camera that failed since it was opened, so the
   /// automatic switch tries each one once.
   final _failedStreams = <int>{};
@@ -91,6 +104,9 @@ class _CameraFullScreenState extends State<CameraFullScreen>
       widget.videoOnly &&
       widget.videoFactory != null &&
       _camera.liveStreams.isNotEmpty;
+
+  PtzInfo? get _ptzInfo =>
+      widget.ptz != null && _camera.ptz ? _ptzInfos[_camera.name] : null;
 
   bool get _talkShown =>
       widget.videoFactory != null &&
@@ -117,7 +133,9 @@ class _CameraFullScreenState extends State<CameraFullScreen>
   void _open() {
     _close();
     _talk = false;
+    _ptzOpen = false;
     _failedStreams.clear();
+    _loadPtz();
     _feed = CameraFeed(
       camera: _camera.name,
       fetch: widget.fetch,
@@ -126,6 +144,33 @@ class _CameraFullScreenState extends State<CameraFullScreen>
     );
     _startImages();
     _openVideo();
+  }
+
+  /// Reads the camera's controls once; a failure hides them until the
+  /// camera is opened again.
+  Future<void> _loadPtz() async {
+    final source = widget.ptz;
+    final camera = _camera.name;
+    if (source == null || !_camera.ptz || _ptzInfos.containsKey(camera)) {
+      return;
+    }
+    PtzInfo info;
+    try {
+      info = await source.info(camera);
+    } catch (e) {
+      debugPrint('PTZ info $camera: $e');
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _ptzInfos[camera] = info);
+  }
+
+  void _ptzFailed() {
+    if (!mounted) return;
+    final l = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(l.ptzFailed)));
   }
 
   void _openVideo() {
@@ -334,6 +379,7 @@ class _CameraFullScreenState extends State<CameraFullScreen>
     final video = _video;
     final streams = _camera.liveStreams;
 
+    final ptzInfo = _ptzInfo;
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
@@ -462,6 +508,16 @@ class _CameraFullScreenState extends State<CameraFullScreen>
                                 ),
                             ],
                           ),
+                          if (_ptzOpen && ptzInfo != null && ptzInfo.any)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: PtzPad(
+                                camera: _camera.name,
+                                info: ptzInfo,
+                                source: widget.ptz!,
+                                onError: _ptzFailed,
+                              ),
+                            ),
                           _Controls(
                             children: [
                               _ControlButton(
@@ -501,6 +557,15 @@ class _CameraFullScreenState extends State<CameraFullScreen>
                                       video.status ==
                                           LiveVideoStatus.connecting,
                                   onPressed: _toggleTalk,
+                                ),
+                              if (ptzInfo != null && ptzInfo.any)
+                                _ControlButton(
+                                  icon: Icons.open_with_rounded,
+                                  label: l.ptz,
+                                  tooltip: _ptzOpen ? l.ptzHide : l.ptzShow,
+                                  active: _ptzOpen,
+                                  onPressed: () =>
+                                      setState(() => _ptzOpen = !_ptzOpen),
                                 ),
                             ],
                           ),
