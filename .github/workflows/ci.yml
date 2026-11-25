@@ -91,6 +91,13 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+      # app/assets/CHANGELOG.md is a symbolic link, checked out by Git on
+      # Windows as a plain text file: the real notes take its place.
+      - name: Notes de version embarquées
+        shell: bash
+        run: |
+          rm app/assets/CHANGELOG.md
+          cp CHANGELOG.md app/assets/CHANGELOG.md
       - run: flutter pub get
         working-directory: app
       - name: Compilation
