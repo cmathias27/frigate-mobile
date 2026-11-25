@@ -364,6 +364,33 @@ void main() {
     );
   });
 
+  group('session cookie', () {
+    const jwt = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ2aWV3ZXIifQ.c2lnbmF0dXJl';
+
+    test("Frigate's default name, even after another cookie", () {
+      expect(
+        sessionCookie('csrf_token=abc; Path=/, frigate_token=$jwt; Path=/'),
+        ('frigate_token', jwt),
+      );
+    });
+
+    test('a renamed cookie is taken only when it holds a JWT', () {
+      expect(
+        sessionCookie(
+          'session=xyz; Expires=Wed, 21 Oct 2026 07:28:00 GMT, '
+          'nvr_token=$jwt; HttpOnly',
+        ),
+        ('nvr_token', jwt),
+      );
+      expect(sessionCookie('csrf_token=abc123; Path=/'), isNull);
+      expect(sessionCookie('my_token=; Path=/'), isNull);
+    });
+
+    test('two JWTs and no default name: none is guessed', () {
+      expect(sessionCookie('a=$jwt, b=$jwt'), isNull);
+    });
+  });
+
   group('local and remote addresses', () {
     const both = ServerConfig(
       name: 'Maison',
