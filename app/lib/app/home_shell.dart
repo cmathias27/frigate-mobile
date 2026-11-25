@@ -24,6 +24,7 @@ import '../features/timeline/image_playback.dart';
 import '../features/timeline/motion_passages.dart';
 import '../features/timeline/recording_history.dart';
 import '../features/timeline/recording_player.dart';
+import '../features/timeline/review_seek.dart';
 import '../features/timeline/timeline_data.dart';
 import '../features/timeline/timeline_screen.dart';
 import '../features/update/update_controller.dart';
@@ -346,6 +347,15 @@ class _HomeShellState extends State<HomeShell> {
         tryOtherStreams: _settings.tryOtherStreams,
         videoOnly: _settings.liveMode == LiveMode.video,
       ),
+      reviews: recorded.any((c) => c.objectDetection || c.audioDetection)
+          ? ReviewSeeker(
+              client.fetchReviews,
+              cameras: [
+                for (final c in recorded)
+                  if (c.objectDetection || c.audioDetection) c.name,
+              ],
+            )
+          : null,
       export: RecordingExport(
         open: client.openStream,
         frame: client.fetchRecordingImage,

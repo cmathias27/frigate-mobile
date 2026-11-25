@@ -15,6 +15,7 @@ import 'clip_sheet.dart';
 import 'motion_passages.dart';
 import 'recording_history.dart';
 import 'recording_player.dart';
+import 'review_seek.dart';
 import 'timeline_bands.dart';
 import 'timeline_data.dart';
 
@@ -46,6 +47,10 @@ abstract final class TimelineScreenDefaults {
   /// Previous and next passage look at every camera rather than only the
   /// camera played (a setting kept on the phone).
   static const seekAllCameras = false;
+
+  /// Previous and next go to Frigate's alerts and detections rather than
+  /// to motion, when the server has them (a setting kept on the phone).
+  static const seekReviews = false;
 
   /// Zoom chosen when the screen opens (index in [timelineZooms]).
   static const zoom = 1;
@@ -95,6 +100,9 @@ class TimelineScreen extends StatefulWidget {
   /// timeline stops just behind now.
   final LiveSource? live;
 
+  /// Alerts and detections for previous and next; motion only without it.
+  final ReviewSeeker? reviews;
+
   const TimelineScreen({
     super.key,
     required this.cameras,
@@ -106,6 +114,7 @@ class TimelineScreen extends StatefulWidget {
     this.export,
     this.preferences,
     this.live,
+    this.reviews,
   });
 
   @override
@@ -126,6 +135,8 @@ class _TimelineScreenState extends State<TimelineScreen>
   bool _takingPhoto = false;
   bool _seekAll = TimelineScreenDefaults.seekAllCameras;
   static const _keySeekAll = 'fm_timeline_seek_all';
+  bool _seekReviews = TimelineScreenDefaults.seekReviews;
+  static const _keySeekTarget = 'fm_timeline_seek_target';
   static const _keySpeed = 'fm_timeline_speed';
   Timer? _settle;
 
@@ -168,6 +179,10 @@ class _TimelineScreenState extends State<TimelineScreen>
   Future<void> _readSeekMode() async {
     final stored = await widget.preferences?.read(_keySeekAll);
     if (stored != null && mounted) setState(() => _seekAll = stored == 'true');
+    final target = await widget.preferences?.read(_keySeekTarget);
+    if (target != null && mounted) {
+      setState(() => _seekReviews = target == 'reviews');
+    }
     final speed = double.tryParse(
       await widget.preferences?.read(_keySpeed) ?? '',
     );
@@ -189,6 +204,14 @@ class _TimelineScreenState extends State<TimelineScreen>
     setState(() => _seekAll = value);
     widget.preferences?.write(_keySeekAll, '$value');
   }
+
+  void _setSeekReviews(bool value) {
+    setState(() => _seekReviews = value);
+    widget.preferences?.write(_keySeekTarget, value ? 'reviews' : 'motion');
+  }
+
+  /// Previous and next go to alerts and detections.
+  bool get _onReviews => _seekReviews && widget.reviews != null;
 
   @override
   void dispose() {
@@ -331,18 +354,34 @@ class _TimelineScreenState extends State<TimelineScreen>
     setState(() => _seeking = true);
     final l = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final passage = await widget.data.seekPassage(
-      _playhead,
-      forward: forward,
-      camera: _seekAll ? null : _camera,
-    );
+    final camera = _seekAll ? null : _camera;
+    final reviews = _onReviews ? widget.reviews : null;
+    MotionPassage? passage;
+    var failed = false;
+    try {
+      passage = reviews != null
+          ? await reviews.seek(_playhead, forward: forward, camera: camera)
+          : await widget.data.seekPassage(
+              _playhead,
+              forward: forward,
+              camera: camera,
+            );
+    } catch (e) {
+      debugPrint('Seek: $e');
+      failed = true;
+    }
     if (!mounted) return;
     setState(() => _seeking = false);
     if (passage == null) {
+      final hours = TimelineDefaults.seekLimit.inHours;
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            l.timelineNoPassage(TimelineDefaults.seekLimit.inHours),
+            failed
+                ? l.reviewLoadFailed
+                : reviews != null
+                ? l.timelineNoReview(hours)
+                : l.timelineNoPassage(hours),
           ),
         ),
       );
@@ -569,7 +608,9 @@ class _TimelineScreenState extends State<TimelineScreen>
                   children: [
                     _Transport(
                       icon: Icons.skip_previous_rounded,
-                      label: l.timelinePreviousPassage,
+                      label: _onReviews
+                          ? l.timelinePreviousReview
+                          : l.timelinePreviousPassage,
                       onPressed: _seeking
                           ? null
                           : () => _seekPassage(forward: false),
@@ -612,7 +653,9 @@ class _TimelineScreenState extends State<TimelineScreen>
                     ),
                     _Transport(
                       icon: Icons.skip_next_rounded,
-                      label: l.timelineNextPassage,
+                      label: _onReviews
+                          ? l.timelineNextReview
+                          : l.timelineNextPassage,
                       onPressed: _seeking
                           ? null
                           : () => _seekPassage(forward: true),
@@ -743,6 +786,15 @@ class _TimelineScreenState extends State<TimelineScreen>
     return Row(
       children: [
         Expanded(child: _cameraMenu(l, labels, text)),
+        // An icon only: the previous and next buttons name the mode.
+        if (widget.reviews != null)
+          IconButton(
+            tooltip: l.timelineSeekReviewsHint,
+            isSelected: _seekReviews,
+            icon: const Icon(Icons.person_search_outlined),
+            selectedIcon: const Icon(Icons.person_search_rounded),
+            onPressed: () => _setSeekReviews(!_seekReviews),
+          ),
         if (widget.cameras.length > 1)
           FilterChip(
             avatar: const Icon(Icons.grid_view_rounded, size: 18),

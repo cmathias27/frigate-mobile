@@ -249,6 +249,17 @@
   "clipSaved": "Extrait enregistré dans l'album {album}",
   "@clipSaved": {"placeholders": {"album": {"type": "String"}}},
   "clipFailed": "L'extrait n'a pas pu être téléchargé.",
+  "timelinePreviousReview": "Détection préc.",
+  "timelineNextReview": "Détection suiv.",
+  "timelineSeekReviewsHint": "Préc. et suiv. vont aux alertes et détections de Frigate, sinon aux passages de mouvement",
+  "timelineNoReview": "Aucune alerte ni détection dans les {hours} h",
+  "@timelineNoReview": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
   "timelineSeekAll": "Toutes",
   "timelineSeekAllHint": "Passage préc. et suiv. sur toutes les caméras, sinon sur la caméra lue",
   "timelineImagePlayback": "Images",
