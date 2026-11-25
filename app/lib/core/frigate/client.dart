@@ -74,7 +74,7 @@ class FrigateClient {
   final CertificateGuard _certificates;
 
   String? _token;
-  String _cookieName = 'frigate_token';
+  String _cookieName = defaultCookieName;
   String _activeBaseUrl;
 
   FrigateClient({
@@ -590,24 +590,41 @@ class FrigateClient {
     return headers;
   }
 
+  /// Name of the session cookie when Frigate keeps its default
+  /// (`auth.cookie_name`).
+  static const defaultCookieName = 'frigate_token';
+
   String? _extractTokenFromHeaders(Map<String, String> headers) {
     // Check Set-Cookie (can be 'set-cookie' in lowercase).
     final rawCookie = headers['set-cookie'] ?? headers['Set-Cookie'];
     if (rawCookie == null) return null;
-
-    // Format: "frigate_token=<jwt>; Path=/; HttpOnly; SameSite=Lax"
-    final cookies = rawCookie.split(',');
-    for (final c in cookies) {
-      final parts = c.split(';').first.trim().split('=');
-      if (parts.length == 2) {
-        final name = parts[0].trim();
-        final value = parts[1].trim();
-        if (name == 'frigate_token' || name.contains('token')) {
-          _cookieName = name;
-          return value;
-        }
-      }
-    }
-    return null;
+    final cookie = sessionCookie(rawCookie);
+    if (cookie == null) return null;
+    _cookieName = cookie.$1;
+    return cookie.$2;
   }
+}
+
+/// The session cookie among those of a Set-Cookie header, as (name, value):
+/// Frigate's default name first; a renamed one (`auth.cookie_name`) only
+/// when its value is a JWT, so that no other cookie (a proxy's, say) is
+/// taken for the session.
+(String, String)? sessionCookie(String header) {
+  final cookies = <(String, String)>[];
+  // Several cookies are joined by commas; an Expires date holds one too,
+  // but its pieces have no "=" before the first ";".
+  for (final c in header.split(',')) {
+    final pair = c.split(';').first.trim();
+    final at = pair.indexOf('=');
+    if (at <= 0) continue;
+    final value = pair.substring(at + 1).trim();
+    if (value.isEmpty) continue;
+    cookies.add((pair.substring(0, at).trim(), value));
+  }
+  for (final c in cookies) {
+    if (c.$1 == FrigateClient.defaultCookieName) return c;
+  }
+  final jwt = RegExp(r'^[\w-]+\.[\w-]+\.[\w-]+$');
+  final tokens = cookies.where((c) => jwt.hasMatch(c.$2)).toList();
+  return tokens.length == 1 ? tokens.single : null;
 }
