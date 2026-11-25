@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'release.dart';
@@ -39,6 +40,10 @@ class UpdateException implements Exception {
 /// What the phone does: its version, the permission to install apps, and
 /// Android's installer.
 abstract class UpdatePlatform {
+  /// The update is downloaded, checked and installed by the app; otherwise
+  /// [openDownload] hands it to the browser.
+  bool get installsInApp => true;
+
   Future<String?> currentVersion();
   Future<Directory> cacheDirectory();
   Future<bool> canInstall();
@@ -47,9 +52,14 @@ abstract class UpdatePlatform {
   /// Opens Android's installer on [apk]; throws [UpdateException] when the
   /// file is not this app, in [version], signed by the same key.
   Future<void> install(File apk, String version);
+
+  /// Opens [release]'s download outside the app; throws [UpdateException]
+  /// when there is none for this system.
+  Future<void> openDownload(AppRelease release) async =>
+      throw const UpdateException('unsupported');
 }
 
-class AndroidUpdatePlatform implements UpdatePlatform {
+class AndroidUpdatePlatform extends UpdatePlatform {
   static const _channel = MethodChannel(
     'io.github.cmathias27.frigate_mobile/update',
   );
@@ -98,6 +108,52 @@ class AndroidUpdatePlatform implements UpdatePlatform {
       throw const UpdateException('install');
     }
     if (result != 'ok') throw UpdateException(result ?? 'install');
+  }
+}
+
+/// The portable Windows version (decision 0005): no installer, the browser
+/// downloads the new archive, unzipped over the old folder by the user.
+class WindowsUpdatePlatform extends UpdatePlatform {
+  @override
+  bool get installsInApp => false;
+
+  @override
+  Future<String?> currentVersion() async {
+    try {
+      // The executable's version, from pubspec.yaml at build time.
+      final version = (await PackageInfo.fromPlatform()).version;
+      return version.isEmpty ? null : version;
+    } on Exception {
+      return null;
+    }
+  }
+
+  @override
+  Future<Directory> cacheDirectory() => getTemporaryDirectory();
+
+  @override
+  Future<bool> canInstall() async => false;
+
+  @override
+  Future<void> openInstallSettings() async {}
+
+  @override
+  Future<void> install(File apk, String version) async =>
+      throw const UpdateException('unsupported');
+
+  @override
+  Future<void> openDownload(AppRelease release) async {
+    final zip = release.windowsZip;
+    // Only GitHub's own download links (parseRelease keeps https ones).
+    if (zip == null || zip.host != 'github.com') {
+      throw const UpdateException('unsupported');
+    }
+    try {
+      // The default browser; explorer.exe exits with 1 even when it worked.
+      await Process.start('explorer.exe', [zip.toString()]);
+    } on ProcessException {
+      throw const UpdateException('install');
+    }
   }
 }
 

@@ -24,6 +24,7 @@ final _apkHash = sha256.convert(_apkBytes).toString();
 Map<String, Object?> _releaseJson({
   String tag = 'v0.2.0',
   bool assets = true,
+  bool windows = false,
 }) => {
   'tag_name': tag,
   'draft': false,
@@ -40,6 +41,13 @@ Map<String, Object?> _releaseJson({
         'name': 'SHA256SUMS',
         'browser_download_url': 'https://example.org/SHA256SUMS',
       },
+      if (windows)
+        {
+          'name': 'frigate-mobile-0.2.0-windows.zip',
+          'browser_download_url':
+              'https://github.com/o/r/releases/download/v0.2.0/'
+              'frigate-mobile-0.2.0-windows.zip',
+        },
     ],
   ],
 };
@@ -71,9 +79,13 @@ class _FakeGitHub {
   });
 }
 
-class _FakePlatform implements UpdatePlatform {
+class _FakePlatform extends UpdatePlatform {
   final Directory cache;
   String? version = '0.1.0';
+
+  /// Windows: the browser downloads the archive.
+  bool windows = false;
+  final opened = <Uri?>[];
   bool allowed = true;
   bool settingsOpened = false;
   final installed = <(String, String)>[];
@@ -98,6 +110,15 @@ class _FakePlatform implements UpdatePlatform {
   @override
   Future<void> install(File apk, String version) async =>
       installed.add((apk.path, version));
+
+  @override
+  bool get installsInApp => !windows;
+
+  @override
+  Future<void> openDownload(AppRelease release) async {
+    if (release.windowsZip == null) throw const UpdateException('unsupported');
+    opened.add(release.windowsZip);
+  }
 }
 
 Widget _app(Widget child) => MaterialApp(
@@ -153,6 +174,11 @@ void main() {
       expect(release.apkName, _apkName);
       expect(release.installable, isTrue);
       expect(release.notes, startsWith('- Calendrier.'));
+      expect(release.windowsZip, isNull);
+      expect(
+        parseRelease(_releaseJson(windows: true))!.windowsZip?.path,
+        endsWith('-windows.zip'),
+      );
       expect(parseRelease(_releaseJson(assets: false))!.installable, isFalse);
       expect(parseRelease({..._releaseJson(), 'prerelease': true}), isNull);
       expect(parseRelease(_releaseJson(tag: 'nightly')), isNull);
@@ -369,6 +395,45 @@ void main() {
 
       await tester.tap(find.text('Plus tard'));
       await tester.pumpAndSettle();
+      expect(find.text('Version 0.2.0 disponible'), findsNothing);
+    });
+
+    testWidgets('Windows: the browser downloads the archive', (tester) async {
+      platform.windows = true;
+      final update = controller();
+      await tester.runAsync(() async {
+        await update.init();
+        await update.check();
+      });
+      await tester.pumpWidget(
+        _app(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showUpdateSheet(context, update),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+
+      // No archive in this release: nothing to download.
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('pas de fichier'), findsOneWidget);
+      final none = find.widgetWithText(FilledButton, 'Télécharger');
+      expect(tester.widget<FilledButton>(none).onPressed, isNull);
+      await tester.tap(find.text('Plus tard'));
+      await tester.pumpAndSettle();
+
+      github.release = _releaseJson(windows: true);
+      await tester.runAsync(update.check);
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('décompressez'), findsOneWidget);
+      expect(find.text('Installer'), findsNothing);
+      await tester.tap(find.text('Télécharger'));
+      await tester.pumpAndSettle();
+      expect(platform.opened.single?.path, endsWith('-windows.zip'));
       expect(find.text('Version 0.2.0 disponible'), findsNothing);
     });
 

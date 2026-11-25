@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:video_player_media_kit/video_player_media_kit.dart';
 
 import 'app/home_shell.dart';
 import 'app/theme.dart';
@@ -12,12 +15,17 @@ import 'l10n/app_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // Recordings on Windows: video_player has no Windows player of its own,
+  // media_kit (libmpv) plays Frigate's HLS there (decision 0005).
+  VideoPlayerMediaKit.ensureInitialized(windows: true);
   final session = SessionController()..init();
   // Back from the background, possibly on another network.
   AppLifecycleListener(onResume: session.resumed);
   final update = UpdateController(
     service: UpdateService(),
-    platform: AndroidUpdatePlatform(),
+    platform: Platform.isWindows
+        ? WindowsUpdatePlatform()
+        : AndroidUpdatePlatform(),
     preferences: Preferences(),
   )..init();
   runApp(FrigateMobileApp(session: session, update: update));

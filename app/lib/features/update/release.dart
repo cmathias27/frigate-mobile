@@ -15,6 +15,9 @@ class AppRelease {
   final Uri? sums;
   final int? apkSize;
 
+  /// The portable Windows archive, downloaded by the browser.
+  final Uri? windowsZip;
+
   const AppRelease({
     required this.version,
     required this.notes,
@@ -22,6 +25,7 @@ class AppRelease {
     this.apk,
     this.sums,
     this.apkSize,
+    this.windowsZip,
   });
 
   /// Only a release with its APK and checksums can be installed.
@@ -41,6 +45,7 @@ AppRelease? parseRelease(Object? json) {
   Uri? apk;
   Uri? sums;
   int? size;
+  Uri? windowsZip;
   final assets = json['assets'];
   if (assets is List) {
     for (final asset in assets) {
@@ -52,6 +57,8 @@ AppRelease? parseRelease(Object? json) {
       if (uri == null || uri.scheme != 'https') continue;
       if (name == 'SHA256SUMS') {
         sums = uri;
+      } else if (name.endsWith('-windows.zip')) {
+        windowsZip = uri;
       } else if (name.endsWith('-android.apk')) {
         apkName = name;
         apk = uri;
@@ -68,6 +75,7 @@ AppRelease? parseRelease(Object? json) {
     apk: apk,
     sums: sums,
     apkSize: size,
+    windowsZip: windowsZip,
   );
 }
 

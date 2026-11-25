@@ -438,6 +438,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get updateInstall => 'Installer';
 
   @override
+  String get updateDownload => 'Télécharger';
+
+  @override
+  String get updateWindowsHint =>
+      'Le navigateur télécharge la nouvelle archive. Fermez Frigate Mobile, puis décompressez-la à la place de l\'ancien dossier : la connexion et les réglages sont conservés.';
+
+  @override
   String get updateLater => 'Plus tard';
 
   @override
@@ -471,7 +478,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get updateErrorUnsupported =>
-      'Cette version ne propose pas d\'APK à installer.';
+      'Cette version ne propose pas de fichier à installer sur cet appareil.';
 
   @override
   String get updateErrorPackage =>
