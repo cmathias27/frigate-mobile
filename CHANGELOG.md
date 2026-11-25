@@ -5,6 +5,23 @@ l'application affiche avant d'installer une mise à jour et dans
 « Nouveautés » après l'installation (décision 0003). Écrire pour
 l'utilisateur : ce qui change pour lui, pas comment c'est codé.
 
+## 0.2.2
+
+Fin de la revue de l'application : heure, démarrage et textes.
+
+- Chronologie : les jours de changement d'heure, les graduations restent
+  sur les heures rondes et « jour précédent / suivant » garde la même
+  heure.
+- Au démarrage, les caméras s'affichent directement dans l'ordre choisi,
+  sans montrer un instant les caméras masquées.
+- « Nouveautés » et la recherche automatique de mise à jour attendent
+  que l'application connaisse sa version.
+- Onglet Plus : la durée de conservation affichée tient compte des
+  alertes et détections (« Enregistrements conservés jusqu'à … »).
+- Textes : vouvoiement partout, espaces insécables (plus de « : » ou de
+  « s » seuls en début de ligne), pluriels corrects, badge DIRECT en
+  français. En anglais, les jours gardent leur majuscule.
+
 ## 0.2.1
 
 Corrections de sécurité et de fiabilité, après une revue complète de
