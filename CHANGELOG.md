@@ -5,6 +5,21 @@ l'application affiche avant d'installer une mise à jour et dans
 « Nouveautés » après l'installation (décision 0003). Écrire pour
 l'utilisateur : ce qui change pour lui, pas comment c'est codé.
 
+## 0.2.3
+
+Deux nouveautés pour le direct et la chronologie.
+
+- Réglages › Direct › « Affichage du direct » : Automatique (comme
+  avant), Vidéo seulement (jamais d'images, un bouton « Réessayer la
+  vidéo » si elle échoue) ou Images seulement (aucune connexion vidéo,
+  moins de données). Vaut pour le plein écran et la chronologie.
+- Chronologie : quand Frigate produit des alertes ou des détections, un
+  bouton à côté du nom de la caméra fait aller « préc. / suiv. » d'une
+  détection à l'autre au lieu des passages de mouvement. Le choix est
+  gardé.
+- Connexion : seul le cookie de session de Frigate est retenu, même
+  quand un proxy devant Frigate (adresse distante) ajoute les siens.
+
 ## 0.2.2
 
 Fin de la revue de l'application : heure, démarrage et textes.
