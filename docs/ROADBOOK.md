@@ -42,7 +42,7 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 - [ ] Relais de notifications (conteneur optionnel) et notifications avec image
 - [ ] Mode maison
 - [ ] Détections (alertes Frigate) comme cible de préc. / suiv. dans la chronologie
-- [ ] Mode de direct forcé (vidéo ou images, sans bascule automatique)
+- [x] Mode de direct forcé : automatique, vidéo seulement (bouton Réessayer, jamais d'images) ou images seulement (aucune connexion vidéo), plein écran et chronologie
 
 ## 0.4 — Son et confort
 

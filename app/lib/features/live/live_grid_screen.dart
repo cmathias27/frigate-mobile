@@ -39,6 +39,7 @@ class LiveGridScreen extends StatefulWidget {
   /// Passed on to the full screen.
   final bool lightStreamFirst;
   final bool tryOtherStreams;
+  final bool videoOnly;
 
   const LiveGridScreen({
     super.key,
@@ -50,6 +51,7 @@ class LiveGridScreen extends StatefulWidget {
     this.minTileWidth = GridFitDefaults.minTileWidth,
     this.lightStreamFirst = false,
     this.tryOtherStreams = LiveVideoDefaults.tryOtherStreams,
+    this.videoOnly = false,
   });
 
   @override
@@ -212,6 +214,7 @@ class _LiveGridScreenState extends State<LiveGridScreen>
           onAuthError: widget.onAuthError,
           lightStreamFirst: widget.lightStreamFirst,
           tryOtherStreams: widget.tryOtherStreams,
+          videoOnly: widget.videoOnly,
         ),
       ),
     );

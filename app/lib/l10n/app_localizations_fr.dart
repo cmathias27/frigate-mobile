@@ -820,6 +820,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsLive => 'Direct';
 
   @override
+  String get settingsLiveMode => 'Affichage du direct';
+
+  @override
+  String get settingsLiveModeAuto => 'Automatique';
+
+  @override
+  String get settingsLiveModeVideo => 'Vidéo seulement';
+
+  @override
+  String get settingsLiveModeImages => 'Images seulement';
+
+  @override
+  String get settingsLiveModeAutoHelp =>
+      'Images tout de suite, vidéo dès qu\'elle arrive, images si elle échoue';
+
+  @override
+  String get settingsLiveModeVideoHelp =>
+      'Jamais d\'images : la vidéo, ou un bouton pour la réessayer';
+
+  @override
+  String get settingsLiveModeImagesHelp =>
+      'Une image chaque seconde, sans vidéo : moins de données';
+
+  @override
   String get settingsQuality => 'Flux ouvert d\'abord';
 
   @override

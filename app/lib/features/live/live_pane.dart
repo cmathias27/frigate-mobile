@@ -21,12 +21,17 @@ class LiveSource {
   /// A failed stream hands over to the camera's next one.
   final bool tryOtherStreams;
 
+  /// No images: the video alone, with a retry button when it fails. Ignored
+  /// for a camera without video.
+  final bool videoOnly;
+
   const LiveSource({
     required this.fetch,
     this.videoFactory,
     this.onAuthError,
     this.lightStreamFirst = LivePaneDefaults.lightStreamFirst,
     this.tryOtherStreams = LiveVideoDefaults.tryOtherStreams,
+    this.videoOnly = false,
   });
 }
 
@@ -65,6 +70,16 @@ class _LivePaneState extends State<LivePane> with WidgetsBindingObserver {
   List<String> get _streams => widget.camera.liveStreams;
   bool get _playing => _video?.status == LiveVideoStatus.playing;
 
+  bool get _videoOnly =>
+      widget.source.videoOnly &&
+      widget.source.videoFactory != null &&
+      _streams.isNotEmpty;
+
+  /// Images refresh while the video does not play, unless video only.
+  void _startImages() {
+    if (!_videoOnly) _feed?.start();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -75,7 +90,12 @@ class _LivePaneState extends State<LivePane> with WidgetsBindingObserver {
   @override
   void didUpdateWidget(LivePane old) {
     super.didUpdateWidget(old);
-    if (old.camera.name != widget.camera.name) _open();
+    final source = widget.source;
+    if (old.camera.name != widget.camera.name ||
+        old.source.videoOnly != source.videoOnly ||
+        (old.source.videoFactory == null) != (source.videoFactory == null)) {
+      _open();
+    }
   }
 
   void _open() {
@@ -89,7 +109,8 @@ class _LivePaneState extends State<LivePane> with WidgetsBindingObserver {
       fetch: widget.source.fetch,
       interval: LiveDefaults.fullScreenInterval,
       onAuthError: widget.source.onAuthError,
-    )..start();
+    );
+    _startImages();
     _openVideo();
   }
 
@@ -135,9 +156,17 @@ class _LivePaneState extends State<LivePane> with WidgetsBindingObserver {
     if (_playing) {
       _feed?.stop();
     } else {
-      _feed?.start();
+      _startImages();
     }
     setState(() {});
+  }
+
+  void _retryVideo() {
+    setState(() {
+      _failed.clear();
+      _closeVideo();
+      _openVideo();
+    });
   }
 
   int? _nextStream() {
@@ -182,7 +211,12 @@ class _LivePaneState extends State<LivePane> with WidgetsBindingObserver {
           if (!_playing)
             ColoredBox(
               color: Colors.black,
-              child: FeedImage(feed: feed, fit: widget.fit),
+              child: _videoOnly
+                  ? VideoWaiting(
+                      failed: video?.status == LiveVideoStatus.failed,
+                      onRetry: _retryVideo,
+                    )
+                  : FeedImage(feed: feed, fit: widget.fit),
             ),
         ],
       ),

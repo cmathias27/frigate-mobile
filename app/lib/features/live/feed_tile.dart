@@ -108,6 +108,48 @@ class FeedImage extends StatelessWidget {
   }
 }
 
+/// Stands where the video will be when images are not wanted: a spinner
+/// while it connects, a retry button once it failed.
+class VideoWaiting extends StatelessWidget {
+  final bool failed;
+  final VoidCallback onRetry;
+
+  const VideoWaiting({super.key, required this.failed, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!failed) {
+      return const Center(
+        child: SizedBox.square(
+          dimension: 22,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+    final l = AppLocalizations.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 4,
+        children: [
+          const Icon(Icons.videocam_off_outlined, color: AppColors.textDim),
+          Text(
+            l.liveVideoUnavailable,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.textDim),
+          ),
+          TextButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded),
+            label: Text(l.liveVideoRetry),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// The live badge with a red dot while frames arrive, a grey "paused" badge when
 /// the picture is frozen.
 class LiveBadge extends StatelessWidget {

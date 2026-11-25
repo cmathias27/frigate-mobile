@@ -31,6 +31,10 @@ class CameraFullScreen extends StatefulWidget {
   /// A failed stream hands over to the camera's next one.
   final bool tryOtherStreams;
 
+  /// No images: the video alone, with a retry button when it fails. Ignored
+  /// for a camera without video.
+  final bool videoOnly;
+
   const CameraFullScreen({
     super.key,
     required this.cameras,
@@ -41,6 +45,7 @@ class CameraFullScreen extends StatefulWidget {
     this.onAuthError,
     this.lightStreamFirst = false,
     this.tryOtherStreams = LiveVideoDefaults.tryOtherStreams,
+    this.videoOnly = false,
   });
 
   @override
@@ -71,6 +76,16 @@ class _CameraFullScreenState extends State<CameraFullScreen>
 
   bool get _videoPlaying => _video?.status == LiveVideoStatus.playing;
 
+  bool get _videoOnly =>
+      widget.videoOnly &&
+      widget.videoFactory != null &&
+      _camera.liveStreams.isNotEmpty;
+
+  /// Images refresh while the video does not play, unless video only.
+  void _startImages() {
+    if (!_videoOnly) _feed?.start();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -90,7 +105,8 @@ class _CameraFullScreenState extends State<CameraFullScreen>
       fetch: widget.fetch,
       interval: LiveDefaults.fullScreenInterval,
       onAuthError: widget.onAuthError,
-    )..start();
+    );
+    _startImages();
     _openVideo();
   }
 
@@ -134,7 +150,7 @@ class _CameraFullScreenState extends State<CameraFullScreen>
     if (_videoPlaying) {
       _feed?.stop();
     } else {
-      _feed?.start();
+      _startImages();
     }
     setState(() {});
   }
@@ -155,7 +171,7 @@ class _CameraFullScreenState extends State<CameraFullScreen>
     setState(() {
       _streamIndex[_camera.name] = index;
       _closeVideo();
-      _feed?.start();
+      _startImages();
       _openVideo();
     });
   }
@@ -242,6 +258,7 @@ class _CameraFullScreenState extends State<CameraFullScreen>
           ? '${l.liveModeVideo}$quality'
           : l.liveVideoConnecting;
     }
+    if (_videoOnly) return l.liveVideoUnavailable;
     final images = l.liveModeSnapshots(
       LiveDefaults.fullScreenInterval.inSeconds,
     );
@@ -344,7 +361,13 @@ class _CameraFullScreenState extends State<CameraFullScreen>
                         if (!_videoPlaying)
                           ColoredBox(
                             color: Colors.black,
-                            child: FeedImage(feed: feed, fit: BoxFit.contain),
+                            child: _videoOnly
+                                ? VideoWaiting(
+                                    failed:
+                                        video?.status == LiveVideoStatus.failed,
+                                    onRetry: _retryVideo,
+                                  )
+                                : FeedImage(feed: feed, fit: BoxFit.contain),
                           ),
                       ],
                     ),

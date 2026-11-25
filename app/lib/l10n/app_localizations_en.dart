@@ -797,6 +797,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLive => 'Live';
 
   @override
+  String get settingsLiveMode => 'Live display';
+
+  @override
+  String get settingsLiveModeAuto => 'Automatic';
+
+  @override
+  String get settingsLiveModeVideo => 'Video only';
+
+  @override
+  String get settingsLiveModeImages => 'Images only';
+
+  @override
+  String get settingsLiveModeAutoHelp =>
+      'Images at once, video as soon as it comes, images if it fails';
+
+  @override
+  String get settingsLiveModeVideoHelp =>
+      'Never images: the video, or a button to retry it';
+
+  @override
+  String get settingsLiveModeImagesHelp =>
+      'One image every second, no video: less data';
+
+  @override
   String get settingsQuality => 'Stream opened first';
 
   @override

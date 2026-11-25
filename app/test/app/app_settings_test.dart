@@ -62,6 +62,7 @@ void main() {
       final settings = AppSettings(Preferences.inMemory());
       await settings.load();
       expect(settings.quality, LiveQuality.auto);
+      expect(settings.liveMode, LiveMode.auto);
       expect(settings.fullScreenLightFirst, isFalse);
       expect(settings.timelineLightFirst, isTrue);
       expect(settings.tryOtherStreams, isTrue);
@@ -79,6 +80,7 @@ void main() {
       final preferences = Preferences.inMemory();
       final settings = AppSettings(preferences)
         ..quality = LiveQuality.light
+        ..liveMode = LiveMode.video
         ..tryOtherStreams = false
         ..imageFallback = false
         ..tileSize = TileSize.large
@@ -93,6 +95,7 @@ void main() {
       await read.load();
       expect(read.quality, LiveQuality.light);
       expect(read.fullScreenLightFirst, isTrue);
+      expect(read.liveMode, LiveMode.video);
       expect(read.tryOtherStreams, isFalse);
       expect(read.imageFallback, isFalse);
       expect(read.tileSize, TileSize.large);
@@ -195,6 +198,26 @@ void main() {
         _app(SettingsScreen(settings: settings, cameras: _cameras)),
       );
       expect(find.text('3 affichées sur 3'), findsOneWidget);
+
+      // Images only: the stream choices go away.
+      await tester.tap(find.text('Automatique').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Images seulement').last);
+      await tester.pumpAndSettle();
+      expect(settings.liveMode, LiveMode.images);
+      expect(find.text('Flux ouvert d\'abord'), findsNothing);
+      expect(find.text('Essayer les autres flux'), findsNothing);
+      await tester.tap(find.text('Images seulement'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Vidéo seulement').last);
+      await tester.pumpAndSettle();
+      expect(settings.liveMode, LiveMode.video);
+      expect(
+        find.text(
+          'Jamais d\'images\u00a0: la vidéo, ou un bouton pour la réessayer',
+        ),
+        findsOneWidget,
+      );
 
       await tester.tap(find.text('Automatique'));
       await tester.pumpAndSettle();

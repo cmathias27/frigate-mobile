@@ -19,6 +19,19 @@ enum LiveQuality {
   light,
 }
 
+/// How a camera shows live in full screen and in the timeline.
+enum LiveMode {
+  /// Images at once, the video over them from its first frame, images again
+  /// when the video fails.
+  auto,
+
+  /// Video only: no images, a retry button when the video fails.
+  video,
+
+  /// Images only: no video connection, less data.
+  images,
+}
+
 /// Smallest width of a tile in the automatic live grid: wider tiles mean
 /// fewer cameras per page.
 enum TileSize {
@@ -51,6 +64,7 @@ class CameraGroup {
 /// Values used while nothing was chosen (decision 0002).
 abstract final class SettingsDefaults {
   static const quality = LiveQuality.auto;
+  static const liveMode = LiveMode.auto;
   static const tryOtherStreams = true;
   static const imageFallback = true;
   static const tileSize = TileSize.medium;
@@ -85,6 +99,7 @@ class AppSettings extends ChangeNotifier {
   Map<String, int> _thresholds = const {};
   List<CameraGroup> _groups = const [];
   LiveQuality _quality = SettingsDefaults.quality;
+  LiveMode _liveMode = SettingsDefaults.liveMode;
   bool _tryOtherStreams = SettingsDefaults.tryOtherStreams;
   bool _imageFallback = SettingsDefaults.imageFallback;
   TileSize _tileSize = SettingsDefaults.tileSize;
@@ -130,6 +145,7 @@ class AppSettings extends ChangeNotifier {
           CameraGroup(name, [...c.whereType<String>()]),
     ];
     _quality = named(LiveQuality.values, 'quality') ?? _quality;
+    _liveMode = named(LiveMode.values, 'liveMode') ?? _liveMode;
     _tileSize = named(TileSize.values, 'tileSize') ?? _tileSize;
     _tryOtherStreams = pick<bool>('tryOtherStreams') ?? _tryOtherStreams;
     _imageFallback = pick<bool>('imageFallback') ?? _imageFallback;
@@ -145,6 +161,7 @@ class AppSettings extends ChangeNotifier {
   }
 
   LiveQuality get quality => _quality;
+  LiveMode get liveMode => _liveMode;
   bool get tryOtherStreams => _tryOtherStreams;
   bool get imageFallback => _imageFallback;
   TileSize get tileSize => _tileSize;
@@ -152,6 +169,7 @@ class AppSettings extends ChangeNotifier {
   Duration get mergeGap => _mergeGap;
 
   set quality(LiveQuality value) => _change(() => _quality = value);
+  set liveMode(LiveMode value) => _change(() => _liveMode = value);
   set tryOtherStreams(bool value) => _change(() => _tryOtherStreams = value);
   set imageFallback(bool value) => _change(() => _imageFallback = value);
   set tileSize(TileSize value) => _change(() => _tileSize = value);
@@ -245,6 +263,7 @@ class AppSettings extends ChangeNotifier {
       for (final g in _groups) {'name': g.name, 'cameras': g.cameras},
     ],
     'quality': _quality.name,
+    'liveMode': _liveMode.name,
     'tryOtherStreams': _tryOtherStreams,
     'imageFallback': _imageFallback,
     'tileSize': _tileSize.name,

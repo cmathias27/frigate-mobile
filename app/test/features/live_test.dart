@@ -10,6 +10,7 @@ import 'package:frigate_mobile/features/live/camera_feed.dart';
 import 'package:frigate_mobile/features/live/camera_full_screen.dart';
 import 'package:frigate_mobile/features/live/feed_tile.dart';
 import 'package:frigate_mobile/features/live/live_grid_screen.dart';
+import 'package:frigate_mobile/features/live/live_pane.dart';
 import 'package:frigate_mobile/features/live/live_video.dart';
 import 'package:frigate_mobile/features/live/photo.dart';
 import 'package:frigate_mobile/l10n/app_localizations.dart';
@@ -383,6 +384,7 @@ void main() {
       List<CameraCapabilities> cams, {
       bool lightStreamFirst = false,
       bool tryOtherStreams = true,
+      bool videoOnly = false,
     }) => tester.pumpWidget(
       _app(
         CameraFullScreen(
@@ -393,6 +395,7 @@ void main() {
           photoActions: photos,
           lightStreamFirst: lightStreamFirst,
           tryOtherStreams: tryOtherStreams,
+          videoOnly: videoOnly,
         ),
       ),
     );
@@ -473,6 +476,51 @@ void main() {
       expect(videos.first.disposed, isTrue);
       expect(videos.last.started, isTrue);
 
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('video only: no image, a retry button when it fails', (
+      tester,
+    ) async {
+      await open(tester, cameras, videoOnly: true);
+      await tester.pump(const Duration(seconds: 3));
+      expect(server.calls, isEmpty);
+      expect(find.byType(FeedImage), findsNothing);
+      expect(find.byType(VideoWaiting), findsOneWidget);
+
+      videos.single.play();
+      await tester.pump();
+      expect(find.byType(VideoWaiting), findsNothing);
+
+      videos.single.fail();
+      await tester.pump(const Duration(seconds: 3));
+      expect(server.calls, isEmpty);
+      expect(find.byType(FeedImage), findsNothing);
+      expect(find.text('Vidéo indisponible'), findsNWidgets(2));
+
+      await tester.tap(find.widgetWithText(TextButton, 'Réessayer la vidéo'));
+      await tester.pump();
+      expect(videos, hasLength(2));
+      expect(videos.last.started, isTrue);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('video only falls back to images without a video', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          CameraFullScreen(
+            cameras: cameras,
+            initialCamera: cameras.first.name,
+            fetch: server.fetch,
+            videoOnly: true,
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.byType(FeedImage), findsOneWidget);
+      expect(server.calls, isNotEmpty);
       await tester.pumpWidget(const SizedBox());
     });
 
@@ -625,6 +673,41 @@ void main() {
       await tester.pump();
       await tester.pump();
       expect(find.text("Impossible d'enregistrer la photo"), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('LivePane', () {
+    testWidgets('video only: no image, retry after a failure', (tester) async {
+      final server = _FakeServer();
+      final videos = <_FakeVideo>[];
+      await tester.pumpWidget(
+        _app(
+          LivePane(
+            camera: _camera('cam_g', streams: ['cam_g_1']),
+            source: LiveSource(
+              fetch: server.fetch,
+              videoFactory: (stream) {
+                final video = _FakeVideo(stream);
+                videos.add(video);
+                return video;
+              },
+              videoOnly: true,
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 2));
+      expect(server.calls, isEmpty);
+      expect(find.byType(VideoWaiting), findsOneWidget);
+
+      videos.single.fail();
+      await tester.pump(const Duration(seconds: 2));
+      expect(server.calls, isEmpty);
+      await tester.tap(find.text('Réessayer la vidéo'));
+      await tester.pump();
+      expect(videos, hasLength(2));
+      expect(videos.first.disposed, isTrue);
       await tester.pumpWidget(const SizedBox());
     });
   });
