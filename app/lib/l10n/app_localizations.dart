@@ -1022,6 +1022,30 @@ abstract class AppLocalizations {
   /// **'L\'extrait n\'a pas pu être téléchargé.'**
   String get clipFailed;
 
+  /// No description provided for @timelinePreviousReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détection préc.'**
+  String get timelinePreviousReview;
+
+  /// No description provided for @timelineNextReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détection suiv.'**
+  String get timelineNextReview;
+
+  /// No description provided for @timelineSeekReviewsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préc. et suiv. vont aux alertes et détections de Frigate, sinon aux passages de mouvement'**
+  String get timelineSeekReviewsHint;
+
+  /// No description provided for @timelineNoReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune alerte ni détection dans les {hours} h'**
+  String timelineNoReview(int hours);
+
   /// No description provided for @timelineSeekAll.
   ///
   /// In fr, this message translates to:

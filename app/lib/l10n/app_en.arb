@@ -203,6 +203,17 @@
   "clipSaved": "Clip saved in the {album} album",
   "@clipSaved": {"placeholders": {"album": {"type": "String"}}},
   "clipFailed": "The clip could not be downloaded.",
+  "timelinePreviousReview": "Prev. detection",
+  "timelineNextReview": "Next detection",
+  "timelineSeekReviewsHint": "Previous and next go to Frigate's alerts and detections, otherwise to motion passages",
+  "timelineNoReview": "No alert or detection within {hours} h",
+  "@timelineNoReview": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
   "timelineSeekAll": "All",
   "timelineSeekAllHint": "Previous and next passage on every camera, otherwise on the camera played",
   "timelineImagePlayback": "Images",

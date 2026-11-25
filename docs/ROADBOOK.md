@@ -41,7 +41,7 @@ Une version par étape. Chaque étape se termine par une étiquette `vX.Y.Z` et 
 - [ ] Accès distant par proxy HTTPS (Caddy), bascule automatique local / distant
 - [ ] Relais de notifications (conteneur optionnel) et notifications avec image
 - [ ] Mode maison
-- [ ] Détections (alertes Frigate) comme cible de préc. / suiv. dans la chronologie
+- [x] Alertes et détections de Frigate comme cible de préc. / suiv. dans la chronologie (bouton à côté de la caméra, choix gardé ; seulement quand Frigate en produit)
 - [x] Mode de direct forcé : automatique, vidéo seulement (bouton Réessayer, jamais d'images) ou images seulement (aucune connexion vidéo), plein écran et chronologie
 
 ## 0.4 — Son et confort

@@ -8,6 +8,7 @@ import 'package:frigate_mobile/app/theme.dart';
 import 'package:frigate_mobile/core/frigate/capabilities.dart';
 import 'package:frigate_mobile/core/frigate/client.dart';
 import 'package:frigate_mobile/core/frigate/recordings.dart';
+import 'package:frigate_mobile/core/frigate/reviews.dart';
 import 'package:frigate_mobile/core/storage/preferences.dart';
 import 'package:frigate_mobile/features/live/photo.dart';
 import 'package:frigate_mobile/features/live/live_pane.dart';
@@ -15,6 +16,7 @@ import 'package:frigate_mobile/features/timeline/clip_sheet.dart';
 import 'package:frigate_mobile/features/timeline/motion_passages.dart';
 import 'package:frigate_mobile/features/timeline/recording_history.dart';
 import 'package:frigate_mobile/features/timeline/recording_player.dart';
+import 'package:frigate_mobile/features/timeline/review_seek.dart';
 import 'package:frigate_mobile/features/timeline/timeline_bands.dart';
 import 'package:frigate_mobile/features/timeline/timeline_data.dart';
 import 'package:frigate_mobile/features/timeline/timeline_screen.dart';
@@ -609,6 +611,7 @@ void main() {
       RecordingExport? export,
       Preferences? preferences,
       LiveSource? live,
+      ReviewSeeker? reviews,
       Size size = const Size(1080, 2340),
     }) async {
       // Phone-sized screen, so every control is laid out.
@@ -627,6 +630,7 @@ void main() {
             export: export,
             preferences: preferences,
             live: live,
+            reviews: reviews,
           ),
         ),
       );
@@ -825,6 +829,90 @@ void main() {
       expect(player.speed, 0.5);
       expect(find.text('×0,5'), findsOneWidget);
       expect(preferences.read('fm_timeline_speed'), completion('0.5'));
+    });
+
+    testWidgets('no detection chip without reviews', (tester) async {
+      await pumpScreen(tester);
+      expect(find.byIcon(Icons.person_search_outlined), findsNothing);
+    });
+
+    testWidgets('previous and next on detections, mode kept', (tester) async {
+      final preferences = Preferences.inMemory();
+      final item = ReviewItem(
+        id: 'r1',
+        camera: 'cam_b',
+        start: _now.subtract(const Duration(minutes: 30)),
+        end: _now.subtract(const Duration(minutes: 29)),
+        severity: ReviewSeverity.detection,
+        reviewed: false,
+      );
+      var failing = false;
+      final reviews = ReviewSeeker(
+        ({
+          required after,
+          required before,
+          severity,
+          cameras,
+          limit,
+        }) async {
+          if (failing) throw const FrigateNetworkException('down');
+          return [item];
+        },
+        cameras: ['cam_a', 'cam_b'],
+        clock: () => _now,
+      );
+      await pumpScreen(tester, preferences: preferences, reviews: reviews);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Passage préc.'), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.person_search_outlined));
+      await tester.pump();
+      expect(
+        preferences.read('fm_timeline_seek_target'),
+        completion('reviews'),
+      );
+      expect(find.text('Détection préc.'), findsOneWidget);
+
+      // Only the camera played by default: none.
+      await tester.tap(find.text('Détection préc.'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Aucune alerte ni détection dans les 24\u00a0h'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.widgetWithText(FilterChip, 'Toutes'));
+      await tester.pump();
+      await tester.tap(find.text('Détection préc.'));
+      await tester.pumpAndSettle();
+      final (camera, start, _) = player.opened.last;
+      expect(camera, 'cam_b');
+      expect(start, item.start.subtract(ReviewSeekDefaults.preRoll));
+
+      failing = true;
+      ScaffoldMessenger.of(
+        tester.element(find.byType(TimelineScreen)),
+      ).clearSnackBars();
+      await tester.tap(find.text('Détection suiv.'));
+      await tester.pumpAndSettle();
+      expect(find.text('Les alertes n\'ont pas pu être lues.'), findsOneWidget);
+    });
+
+    testWidgets('the detection mode is kept', (tester) async {
+      await pumpScreen(
+        tester,
+        preferences: Preferences.inMemory({
+          'fm_timeline_seek_target': 'reviews',
+        }),
+        reviews: ReviewSeeker(
+          ({required after, required before, severity, cameras, limit}) async =>
+              const [],
+          cameras: ['cam_a'],
+          clock: () => _now,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Détection suiv.'), findsOneWidget);
     });
 
     testWidgets('no passage shows a message', (tester) async {

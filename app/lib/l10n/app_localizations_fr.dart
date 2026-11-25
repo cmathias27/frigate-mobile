@@ -596,6 +596,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get clipFailed => 'L\'extrait n\'a pas pu être téléchargé.';
 
   @override
+  String get timelinePreviousReview => 'Détection préc.';
+
+  @override
+  String get timelineNextReview => 'Détection suiv.';
+
+  @override
+  String get timelineSeekReviewsHint =>
+      'Préc. et suiv. vont aux alertes et détections de Frigate, sinon aux passages de mouvement';
+
+  @override
+  String timelineNoReview(int hours) {
+    return 'Aucune alerte ni détection dans les $hours h';
+  }
+
+  @override
   String get timelineSeekAll => 'Toutes';
 
   @override

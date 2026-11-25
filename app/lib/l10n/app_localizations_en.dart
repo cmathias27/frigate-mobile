@@ -586,6 +586,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clipFailed => 'The clip could not be downloaded.';
 
   @override
+  String get timelinePreviousReview => 'Prev. detection';
+
+  @override
+  String get timelineNextReview => 'Next detection';
+
+  @override
+  String get timelineSeekReviewsHint =>
+      'Previous and next go to Frigate\'s alerts and detections, otherwise to motion passages';
+
+  @override
+  String timelineNoReview(int hours) {
+    return 'No alert or detection within $hours h';
+  }
+
+  @override
   String get timelineSeekAll => 'All';
 
   @override
